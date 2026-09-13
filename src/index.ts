@@ -75,20 +75,8 @@ app.use("*", async (c, next) => {
 
 app.route("/api", api);
 
-// SPA fallback: serve static assets, rewriting non-file paths to /index.html
 app.all("*", async (c) => {
-  const url = new URL(c.req.url);
-  const pathname = url.pathname;
-
-  if (pathname.includes(".") && !pathname.endsWith(".html")) {
-    return c.env.ASSETS.fetch(c.req.raw);
-  }
-
-  const assetReq = new Request(
-    new URL("/index.html", c.req.url).toString(),
-    c.req.raw
-  );
-  return c.env.ASSETS.fetch(assetReq);
+  return c.env.ASSETS.fetch(c.req.raw);
 });
 
 type CfExecutionContext = {

@@ -10,6 +10,9 @@ enabled = true
 [assets]
 directory = "./dist"
 binding = "ASSETS"
+run_worker_first = true
+html_handling = "none"
+not_found_handling = "single-page-application"
 
 # Cron trigger for weekly Cloudinary garbage collection
 # Runs every Monday at 3:00 AM UTC
