@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import { useCms } from "../store/cmsContext";
-import { useToast } from "../components/toastContext";
+import { useToast } from "../store/toastContext";
 import { Button, Label, Textarea } from "../components/ui";
 
 function deriveSlug(label: string) {

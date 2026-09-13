@@ -3,40 +3,7 @@ import { X } from "lucide-react";
 import type { ProductTypeInfo } from "../store/types";
 import { Button, Input, Label, Modal } from "./ui";
 import { UploadButton } from "./UploadButton";
-
-function slugify(value: string): string {
-  return value
-    .trim()
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/(^-|-$)+/g, "");
-}
-
-type FormState = {
-  slug: string;
-  label: string;
-  route: string;
-  tagline: string;
-  heroImage: string;
-};
-
-const emptyForm: FormState = {
-  slug: "",
-  label: "",
-  route: "",
-  tagline: "",
-  heroImage: "",
-};
-
-function toForm(t: ProductTypeInfo): FormState {
-  return {
-    slug: t.slug,
-    label: t.label,
-    route: t.route,
-    tagline: t.tagline ?? "",
-    heroImage: t.heroImage,
-  };
-}
+import { slugify, type FormState } from "../lib/formHelpers";
 
 function TypeFormModal({
   open,
@@ -160,5 +127,4 @@ function TypeFormModal({
   );
 }
 
-export { TypeFormModal, slugify, emptyForm, toForm };
-export type { FormState };
+export { TypeFormModal };

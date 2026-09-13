@@ -4,7 +4,7 @@ import { useCms } from "../store/cmsContext";
 import type { AboutPageConfig } from "../store/types";
 import { ABOUT_KEY } from "../store/defaults";
 import { Button, Container, Input, Label } from "../components/ui";
-import { useToast } from "../components/toastContext";
+import { useToast } from "../store/toastContext";
 import { UploadButton } from "../components/UploadButton";
 import { SortableList, DragHandle } from "../components/SortableList";
 import { SectionEditor } from "../components/AboutSectionEditor";

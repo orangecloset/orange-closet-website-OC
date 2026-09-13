@@ -7,7 +7,7 @@ import { queryClient } from "./lib/queries";
 import { CmsProvider } from "./store/cmsStore";
 import { useCms } from "./store/cmsContext";
 import { ToastProvider } from "./components/ui";
-import { useToast } from "./components/toastContext";
+import { useToast } from "./store/toastContext";
 import { cn } from "./lib/utils";
 import LoginPage from "./pages/LoginPage";
 import DashboardPage from "./pages/DashboardPage";
@@ -193,7 +193,7 @@ function AdminShell({ onLogout }: { onLogout: () => void }) {
 
   useEffect(() => {
     document.title = `${currentTitle} · ${settings.storeName || "Store"} CMS`;
-  }, [currentTitle]);
+  }, [currentTitle, settings.storeName]);
 
   return (
     <ToastProvider>

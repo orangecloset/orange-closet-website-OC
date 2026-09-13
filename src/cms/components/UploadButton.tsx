@@ -1,7 +1,7 @@
 import { useRef, useState } from "react";
 import { Loader2, Upload } from "lucide-react";
 import { uploadImage, type UploadPreset } from "../lib/cloudinary";
-import { useToast } from "../components/toastContext";
+import { useToast } from "../store/toastContext";
 import { Button } from "./ui";
 
 export function UploadButton({

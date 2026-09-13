@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { ChevronLeft, ChevronRight, Search, ShoppingBag, ArrowLeft, ListFilter, Loader2 } from "lucide-react";
-import { useToast } from "../components/toastContext";
+import { useToast } from "../store/toastContext";
 import { useCms } from "../store/cmsContext";
 import type { CmsProduct } from "../store/types";
 import { randomString } from "../lib/utils";

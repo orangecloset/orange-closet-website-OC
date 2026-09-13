@@ -3,7 +3,7 @@ import { Plus } from "lucide-react";
 import { useCms } from "../store/cmsContext";
 import { HOMEPAGE_KEY } from "../store/defaults";
 import { Badge, Button, Container, Header, Switch } from "../components/ui";
-import { useToast } from "../components/toastContext";
+import { useToast } from "../store/toastContext";
 import { HeroCard } from "../components/HeroCard";
 import { BrandList } from "../components/BrandList";
 import { ProductSection } from "../components/ProductSection";

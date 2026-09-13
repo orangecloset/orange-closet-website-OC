@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { ChevronLeft, ChevronRight, Plus, Trash2, Search, Pencil, SwatchBook, ShoppingBag, Loader2 } from "lucide-react";
-import { useToast } from "../components/toastContext";
+import { useToast } from "../store/toastContext";
 import { useCms } from "../store/cmsContext";
 import { invalidateProducts, usePagedProducts, useProductSuggestions } from "../lib/queries";
 import { isNewProduct, type CmsProduct, type ProductStatus } from "../store/types";
