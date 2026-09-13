@@ -1,7 +1,7 @@
 import { useMemo, useState, type FormEvent } from "react";
 import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { GripVertical, Plus, X } from "lucide-react";
-import { useToast } from "./toastContext";
+import { useToast } from "../store/toastContext";
 import { useCms } from "../store/cmsContext";
 import type { CmsProduct, ProductStatus } from "../store/types";
 import { colorSwatchCss } from "../../data/products";
@@ -408,7 +408,6 @@ export function ProductFormInner({ editing }: { editing?: CmsProduct }) {
             <div className="flex flex-col gap-3 px-6 py-4">
               <DndContainer
                 onDragEnd={(activeId, overId) => {
-                  // Color reorder: IDs are "color-{index}"
                   if (activeId.startsWith("color-") && overId.startsWith("color-")) {
                     const oldIndex = parseInt(activeId.split("-")[1], 10);
                     const newIndex = parseInt(overId.split("-")[1], 10);
@@ -421,12 +420,11 @@ export function ProductFormInner({ editing }: { editing?: CmsProduct }) {
                       return next;
                     });
                   }
-                  // Image reorder: IDs are "img-{colorIndex}-{imageIndex}"
                   if (activeId.startsWith("img-") && overId.startsWith("img-")) {
                     const [, aColorIdx, aImgIdx] = activeId.split("-").map(Number);
                     const [, oColorIdx, oImgIdx] = overId.split("-").map(Number);
                     if (isNaN(aColorIdx) || isNaN(aImgIdx) || isNaN(oColorIdx) || isNaN(oImgIdx)) return;
-                    if (aColorIdx !== oColorIdx) return; // can't drag across colors
+                    if (aColorIdx !== oColorIdx) return;
                     setColors((prev) => prev.map((col, ci) => {
                       if (ci !== aColorIdx) return col;
                       const nextImages = [...col.images];

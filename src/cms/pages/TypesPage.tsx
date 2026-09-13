@@ -1,16 +1,16 @@
 import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { Plus, Pencil, Trash2 } from "lucide-react";
-import { useToast } from "../components/toastContext";
+import { useToast } from "../store/toastContext";
 import { useCms } from "../store/cmsContext";
 import { api } from "../lib/api";
 import type { ProductTypeInfo, TypeCategory } from "../store/types";
 import { Button, ConfirmDialog, Container, Header } from "../components/ui";
 import { DndContainer, SortableItems, DragHandle } from "../components/SortableList";
 import { arrayMove } from "@dnd-kit/sortable";
-import { TypeFormModal, slugify, emptyForm, toForm } from "../components/TypeFormModal";
-import type { FormState } from "../components/TypeFormModal";
-import { SubCategoryFormModal, emptySubCategory } from "../components/SubCategoryFormModal";
-import type { SubCategoryForm } from "../components/SubCategoryFormModal";
+import { TypeFormModal } from "../components/TypeFormModal";
+import { slugify, emptyForm, toForm, type FormState } from "../lib/formHelpers";
+import { SubCategoryFormModal } from "../components/SubCategoryFormModal";
+import { emptySubCategory, type SubCategoryForm } from "../lib/formHelpers";
 
 export default function TypesPage() {
   const { types, addType, updateType, reorderTypes, deleteType, flushSaves } = useCms();

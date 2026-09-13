@@ -4,21 +4,7 @@ import type { ProductTypeInfo, TypeCategory } from "../store/types";
 import { Button, Input, Label, Modal } from "./ui";
 import { UploadButton } from "./UploadButton";
 import { SortableList, DragHandle } from "./SortableList";
-import { slugify } from "./TypeFormModal";
-
-type SubCategoryForm = {
-  label: string;
-  slug: string;
-  tagline: string;
-  heroImage: string;
-};
-
-const emptySubCategory: SubCategoryForm = {
-  label: "",
-  slug: "",
-  tagline: "",
-  heroImage: "",
-};
+import { slugify, type SubCategoryForm } from "../lib/formHelpers";
 
 function SubCategoryFormModal({
   open,
@@ -201,5 +187,4 @@ function SubCategoryFormModal({
   );
 }
 
-export { SubCategoryFormModal, emptySubCategory };
-export type { SubCategoryForm };
+export { SubCategoryFormModal };
