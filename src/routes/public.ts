@@ -11,8 +11,9 @@ app.get("/store-name", async (c) => {
     const [row] = await db
       .select({ value: schema.settings.value })
       .from(schema.settings)
-      .where(eq(schema.settings.key, "storeName"));
-    const name = (row?.value as string) ?? "";
+      .where(eq(schema.settings.key, "orange-cms-settings"));
+    const settings = row?.value as Record<string, unknown> | undefined;
+    const name = (settings?.storeName as string) ?? "";
     return c.json({ storeName: name });
   } catch {
     return c.json({ storeName: "" });

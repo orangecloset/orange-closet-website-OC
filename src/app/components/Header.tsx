@@ -347,7 +347,7 @@ export default function Header({ onShare, showShare = true }: HeaderProps) {
             }`}
           >
             <div
-              className={`w-full max-w-md flex items-center gap-2 bg-gray-100 border border-gray-200 focus-within:border-black focus-within:border-1 rounded-none pl-3.5 pr-3 h-10 transition-all duration-300 ease-out ${
+              className={`w-full max-w-md flex items-center gap-2 bg-gray-100 border-[1.5px] border-gray-200 focus-within:border-black rounded-none pl-3.5 pr-3 h-10 transition-all duration-300 ease-out ${
                 searchOpen ? "scale-x-100" : "scale-x-90"
               }`}
             >

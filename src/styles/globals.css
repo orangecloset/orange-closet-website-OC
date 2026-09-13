@@ -70,6 +70,8 @@ src: url('https://storage.googleapis.com/download/storage/v1/b/prd-storytodesign
   scrollbar-width: none;
 }
 
+img { -webkit-user-drag: none; user-select: none; }
+
 .legal-markdown h1 { font-size: 1.875rem; font-weight: 600; margin: 1.5rem 0 1rem; }
 .legal-markdown h2 { font-size: 1.5rem; font-weight: 600; margin: 1.25rem 0 0.75rem; }
 .legal-markdown h3 { font-size: 1.25rem; font-weight: 600; margin: 1rem 0 0.5rem; }

@@ -38,7 +38,7 @@ export default function LegalPage() {
   }
 
   return (
-    <section className="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+    <section className="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-16">
       <Link
         to="#"
         onClick={(e) => {
