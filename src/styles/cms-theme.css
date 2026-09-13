@@ -1,0 +1,101 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
+
+.cms-admin {
+  font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto,
+    'Helvetica Neue', Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  font-size: 0.875rem;
+}
+
+/* CMS admin light theme design tokens */
+.cms-admin {
+  /* Backgrounds */
+  --bg-base: #ffffff;
+  --bg-subtle: #fafafa;
+  --bg-base-hover: #f4f4f5;
+  --bg-subtle-hover: #f4f4f5;
+  --bg-base-pressed: #e4e4e7;
+  --bg-subtle-pressed: #e4e4e7;
+  --bg-disabled: #f4f4f5;
+  --bg-field: #fafafa;
+  --bg-field-hover: #f4f4f5;
+  --bg-component: #ffffff;
+  --bg-component-hover: #f4f4f5;
+  --bg-interactive: #3b82f6;
+  --bg-switch-off: #e4e4e7;
+  --bg-switch-off-hover: #d4d4d8;
+  --bg-overlay: rgba(24, 24, 27, 0.4);
+
+  /* Foregrounds */
+  --fg-base: #18181b;
+  --fg-subtle: #52525b;
+  --fg-muted: #71717a;
+  --fg-disabled: #a1a1aa;
+  --fg-interactive: #3b82f6;
+  --fg-on-color: #ffffff;
+  --fg-error: #e11d48;
+  --contrast-fg-primary: rgba(255, 255, 255, 0.88);
+
+  /* Borders */
+  --border-base: #e4e4e7;
+  --border-subtle: #f0f0f0;
+  --border-strong: #d4d4d8;
+  --border-interactive: #60a5fa;
+  --border-error: #e11d48;
+
+  /* Buttons */
+  --button-inverted: #18181b;
+  --button-inverted-hover: #3f3f46;
+  --button-inverted-pressed: #52525b;
+  --button-neutral: #ffffff;
+  --button-neutral-hover: #f4f4f5;
+  --button-neutral-pressed: #e4e4e7;
+  --button-danger: #e11d48;
+  --button-danger-hover: #be123c;
+  --button-danger-pressed: #9f1239;
+  --button-transparent: rgba(255, 255, 255, 0);
+  --button-transparent-hover: #f4f4f5;
+
+  /* Tag colors */
+  --tag-green-bg: #d1fae5;
+  --tag-green-text: #065f46;
+  --tag-green-border: #a7f3d0;
+  --tag-red-bg: #ffe4e6;
+  --tag-red-text: #9f1239;
+  --tag-red-border: #fecdd3;
+  --tag-blue-bg: #dbeafe;
+  --tag-blue-text: #1e40af;
+  --tag-blue-border: #bfdbfe;
+  --tag-orange-bg: #ffedd5;
+  --tag-orange-text: #9a3412;
+  --tag-orange-border: #fed7aa;
+  --tag-neutral-bg: #f4f4f5;
+  --tag-neutral-text: #52525b;
+  --tag-neutral-border: #e4e4e7;
+
+  /* Elevation */
+  --elevation-card-rest: 0 0 0 1px rgba(0, 0, 0, 0.08), 0 1px 2px -1px rgba(0, 0, 0, 0.08),
+    0 2px 4px 0 rgba(0, 0, 0, 0.04);
+  --elevation-card-hover: 0 0 0 1px rgba(0, 0, 0, 0.08), 0 2px 4px -1px rgba(0, 0, 0, 0.08),
+    0 4px 8px 0 rgba(0, 0, 0, 0.04);
+  --elevation-modal: 0 2px 4px -2px rgba(0, 0, 0, 0.08), 0 4px 8px -4px rgba(0, 0, 0, 0.12),
+    0 0 0 1px rgba(0, 0, 0, 0.08), 0 16px 32px 0 rgba(0, 0, 0, 0.12);
+  --elevation-flyout: 0 1px 2px 0 rgba(0, 0, 0, 0.12), 0 0 0 1px rgba(0, 0, 0, 0.08),
+    0 4px 8px 0 rgba(0, 0, 0, 0.12);
+
+  /* Button shadows */
+  --buttons-neutral: 0 1px 2px 0 rgba(0, 0, 0, 0.12), 0 0 0 1px rgba(0, 0, 0, 0.08);
+  --buttons-inverted: 0 1px 2px 0 rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(0, 0, 0, 0.16);
+  --buttons-danger: 0 1px 2px 0 rgba(190, 18, 60, 0.4), 0 0 0 1px rgba(190, 18, 60, 1);
+
+  /* Borders (focus / base) */
+  --borders-base: 0 1px 2px 0 rgba(0, 0, 0, 0.12), 0 0 0 1px rgba(0, 0, 0, 0.08);
+  --borders-focus: 0 0 0 1px rgba(255, 255, 255, 1), 0 0 0 3px rgba(59, 130, 246, 0.6);
+  --borders-interactive: 0 0 0 1px rgba(96, 165, 250, 1);
+  --borders-interactive-with-active: 0 0 0 1px rgba(96, 165, 250, 1), 0 0 0 4px rgba(59, 130, 246, 0.25);
+  --borders-error: 0 0 0 1px rgba(225, 29, 72, 1), 0 0 0 3px rgba(225, 29, 72, 0.15);
+
+  /* Switch handle */
+  --details-switch-handle: 0 0 0 0.5px rgba(0, 0, 0, 0.02), 0 5px 4px 0 rgba(0, 0, 0, 0.02),
+    0 3px 3px 0 rgba(0, 0, 0, 0.04), 0 1px 2px 0 rgba(0, 0, 0, 0.12), 0 0 1px 0 rgba(0, 0, 0, 0.08);
+}
