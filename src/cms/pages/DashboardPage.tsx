@@ -111,7 +111,7 @@ export default function DashboardPage() {
                 actions={
                   <button
                     type="button"
-                    onClick={() => navigate("/admin/sales-history")}
+                    onClick={() => navigate("/cms-admin/sales-history")}
                     className="inline-flex shrink-0 items-center gap-1 rounded-md px-2 py-1 text-[13px] font-medium text-[var(--fg-muted)] transition-colors hover:bg-[var(--bg-subtle-hover)] hover:text-[var(--fg-base)]"
                   >
                     View All
@@ -162,7 +162,7 @@ export default function DashboardPage() {
               <button
                 key={p.id}
                 type="button"
-                onClick={() => navigate("/admin/products")}
+                onClick={() => navigate("/cms-admin/products")}
                 className="flex items-center gap-3 px-6 py-3 text-left transition-colors hover:bg-[var(--bg-subtle-hover)]"
               >
                 <span

@@ -44,7 +44,7 @@ export default function ProductFormPage() {
     return (
       <div className="flex min-h-[50vh] flex-col items-center justify-center gap-3">
         <p className="text-sm text-[var(--fg-muted)]">Product not found. It may have been deleted.</p>
-        <Link to="/admin/products"><Button variant="secondary" size="small">Back to products</Button></Link>
+        <Link to="/cms-admin/products"><Button variant="secondary" size="small">Back to products</Button></Link>
       </div>
     );
   }

@@ -18,7 +18,7 @@ function CatalogManifest() {
   const { pathname, search } = useLocation();
   const hasShareToken = search.includes("t=");
   const isStaffCatalog = pathname.startsWith("/catalog/") && !hasShareToken;
-  const isAdmin = pathname.startsWith("/admin");
+  const isAdmin = pathname.startsWith("/cms-admin");
   const shouldInject = isStaffCatalog || isAdmin;
 
   useEffect(() => {
@@ -46,7 +46,7 @@ createRoot(document.getElementById("root")!).render(
           }
         >
           <Routes>
-            <Route path="/admin/*" element={<AdminApp />} />
+            <Route path="/cms-admin/*" element={<AdminApp />} />
             <Route path="/catalog/:uid" element={<CatalogAccessPage />} />
             <Route
               path="/*"

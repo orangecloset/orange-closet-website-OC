@@ -34,7 +34,7 @@ app.get("/status", async (c) => {
         : fallback;
     const faviconUrl = str("faviconUrl", "/favicon.png");
     const branding = {
-      storeName: str("storeName", "Orange Closet"),
+      storeName: str("storeName", "Store"),
       tagline: str("tagline"),
       conciergeHeading: str("conciergeHeading"),
       conciergeText: str("conciergeText"),

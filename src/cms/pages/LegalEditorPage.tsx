@@ -35,7 +35,7 @@ export default function LegalEditorPage() {
     return (
       <div className="flex min-h-[50vh] flex-col items-center justify-center gap-3">
         <p className="text-sm text-[var(--fg-muted)]">Legal page not found.</p>
-        <Button variant="secondary" size="small" onClick={() => navigate("/admin/settings")}>
+        <Button variant="secondary" size="small" onClick={() => navigate("/cms-admin/settings")}>
           Back to Settings
         </Button>
       </div>
@@ -62,7 +62,7 @@ export default function LegalEditorPage() {
       <div className="flex items-center justify-between pb-3">
         <button
           type="button"
-          onClick={() => navigate("/admin/settings")}
+          onClick={() => navigate("/cms-admin/settings")}
           className="inline-flex items-center gap-1.5 text-sm text-[var(--fg-muted)] hover:text-[var(--fg-base)] transition-colors"
         >
           <ArrowLeft className="h-4 w-4" />

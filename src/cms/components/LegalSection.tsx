@@ -51,7 +51,7 @@ export function LegalSection({
                   className="flex-1 rounded border border-[var(--border-subtle)] bg-[var(--bg-base)] px-2 py-1 text-sm"
                 />
                 {slug && (
-                  <Link to={`/admin/legal/${slug}/edit`}>
+                  <Link to={`/cms-admin/legal/${slug}/edit`}>
                     <Button variant="ghost" size="small" type="button">
                       <Pencil className="h-3.5 w-3.5" />
                       Edit

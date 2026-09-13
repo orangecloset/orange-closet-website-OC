@@ -27,35 +27,35 @@ const NAV_SECTIONS = [
   {
     label: "Main",
     items: [
-      { label: "Dashboard", to: "/admin", icon: LayoutDashboard, end: true },
-      { label: "Sell", to: "/admin/sell", icon: ShoppingBag, end: false },
-      { label: "Products", to: "/admin/products", icon: Package, end: false },
-      { label: "Categories", to: "/admin/categories", icon: Tags, end: false },
+      { label: "Dashboard", to: "/cms-admin", icon: LayoutDashboard, end: true },
+      { label: "Sell", to: "/cms-admin/sell", icon: ShoppingBag, end: false },
+      { label: "Products", to: "/cms-admin/products", icon: Package, end: false },
+      { label: "Categories", to: "/cms-admin/categories", icon: Tags, end: false },
     ],
   },
   {
     label: "Content",
     items: [
-      { label: "Homepage", to: "/admin/homepage", icon: Home, end: false },
-      { label: "About", to: "/admin/about", icon: Info, end: false },
+      { label: "Homepage", to: "/cms-admin/homepage", icon: Home, end: false },
+      { label: "About", to: "/cms-admin/about", icon: Info, end: false },
     ],
   },
 ];
 
-const SETTINGS_ITEM = { label: "Settings", to: "/admin/settings", icon: Settings, end: false };
-const ACCOUNTS_ITEM = { label: "Accounts", to: "/admin/accounts", icon: Users, end: false };
+const SETTINGS_ITEM = { label: "Settings", to: "/cms-admin/settings", icon: Settings, end: false };
+const ACCOUNTS_ITEM = { label: "Accounts", to: "/cms-admin/accounts", icon: Users, end: false };
 
 const NAV_TITLES: Record<string, string> = {
-  "/admin": "Dashboard",
-  "/admin/sell": "Sell",
-  "/admin/sales-history": "Sales History",
-  "/admin/products": "Products",
-  "/admin/products/new": "Add Product",
-  "/admin/homepage": "Homepage",
-  "/admin/about": "About Page",
-  "/admin/categories": "Categories",
-  "/admin/settings": "Settings",
-  "/admin/accounts": "Accounts",
+  "/cms-admin": "Dashboard",
+  "/cms-admin/sell": "Sell",
+  "/cms-admin/sales-history": "Sales History",
+  "/cms-admin/products": "Products",
+  "/cms-admin/products/new": "Add Product",
+  "/cms-admin/homepage": "Homepage",
+  "/cms-admin/about": "About Page",
+  "/cms-admin/categories": "Categories",
+  "/cms-admin/settings": "Settings",
+  "/cms-admin/accounts": "Accounts",
 };
 
 function SidebarSectionTitle({ label, collapsed, divider = true }: { label: string; collapsed: boolean; divider?: boolean }) {
@@ -186,13 +186,13 @@ function AdminShell({ onLogout }: { onLogout: () => void }) {
   const handleLogout = () => {
     logout();
     onLogout();
-    navigate("/admin", { replace: true });
+    navigate("/cms-admin", { replace: true });
   };
 
   const currentTitle = NAV_TITLES[location.pathname] ?? "Products";
 
   useEffect(() => {
-    document.title = `${currentTitle} · Orange Closet CMS`;
+    document.title = `${currentTitle} · ${settings.storeName || "Store"} CMS`;
   }, [currentTitle]);
 
   return (
@@ -226,11 +226,22 @@ function AdminShell({ onLogout }: { onLogout: () => void }) {
             )}
             <div className="flex flex-col whitespace-nowrap">
               <span className="text-[13px] font-medium text-[var(--fg-base)]">
-                Orange Closet
+                {settings.storeName || "Store"}
               </span>
               <span className="text-[11px] text-[var(--fg-muted)]">CMS Admin</span>
             </div>
           </div>
+          {collapsed && (
+            <div className="flex sm:hidden h-7 w-7 shrink-0 items-center justify-center mr-1.5">
+              {settings.faviconUrl?.trim() ? (
+                <img src={settings.faviconUrl} alt="" className="h-5 w-5 object-contain" />
+              ) : (
+                <div className="flex h-5 w-5 items-center justify-center rounded bg-[var(--button-inverted)]">
+                  <span className="text-[10px] font-bold text-[var(--contrast-fg-primary)]">O</span>
+                </div>
+              )}
+            </div>
+          )}
           <button
             type="button"
             onClick={() => setCollapsed(!collapsed)}
@@ -281,7 +292,7 @@ function AdminShell({ onLogout }: { onLogout: () => void }) {
       <div className="flex flex-1 flex-col overflow-hidden transition-all duration-200">
         <div className="flex h-14 shrink-0 items-center border-b border-[var(--border-base)] bg-[var(--bg-base)] px-4">
           <nav className="flex items-center gap-1 text-[13px]">
-            <span className="text-[var(--fg-muted)]">Orange Closet</span>
+            <span className="text-[var(--fg-muted)]">{settings.storeName || "Store"}</span>
             <span className="text-[var(--fg-muted)]">/</span>
             <span className="font-medium text-[var(--fg-base)]">{currentTitle}</span>
           </nav>

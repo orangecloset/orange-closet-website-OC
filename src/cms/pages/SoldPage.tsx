@@ -154,7 +154,7 @@ export default function SoldPage() {
       if (AUTO_DOWNLOAD_PDF) {
         try {
           await downloadReceiptPdf({
-            storeName: settings.storeName || "Orange Closet",
+            storeName: settings.storeName || "Store",
             logoUrl: settings.faviconUrl || undefined,
             sale,
             productContent: {

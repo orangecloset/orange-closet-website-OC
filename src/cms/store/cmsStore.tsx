@@ -187,7 +187,7 @@ export function CmsProvider({ children }: { children: ReactNode }) {
     const product: CmsProduct = {
       id: randomString(8),
       name: input.name,
-      brand: input.brand ?? "Orange Closet",
+      brand: input.brand ?? "Store",
       type: input.type,
       category: input.category,
       categoryLabel: input.categoryLabel,

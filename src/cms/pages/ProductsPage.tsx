@@ -181,7 +181,7 @@ export default function ProductsPage() {
         subtitle={loading ? "Loading products…" : `${totalItems} product(s)`}
         actions={
           <div className="flex items-center gap-2">
-            <Link to="/admin/products/new">
+            <Link to="/cms-admin/products/new">
               <button
                 type="button"
                 className="inline-flex h-[30px] w-36 shrink-0 items-center justify-center gap-x-1.5 rounded-md bg-[var(--button-inverted)] px-3 text-[13px] font-medium text-[var(--contrast-fg-primary)] shadow-[var(--buttons-inverted)] outline-none transition-colors hover:bg-[var(--button-inverted-hover)] active:bg-[var(--button-inverted-pressed)]"
@@ -234,7 +234,7 @@ export default function ProductsPage() {
                         type="button"
                         onClick={() => {
                           setQuery("");
-                          navigate(`/admin/products/${p.id}/edit`);
+                          navigate(`/cms-admin/products/${p.id}/edit`);
                         }}
                         className="flex w-full items-center gap-3 border-b border-[var(--border-subtle)] px-3 py-2 text-left transition-colors last:border-b-0 hover:bg-[var(--bg-subtle-hover)]"
                       >
@@ -322,8 +322,8 @@ export default function ProductsPage() {
                       <div className="flex items-center gap-3">
                         <img src={p.colors[0]?.images[0]} alt="" className="h-10 w-10 shrink-0 rounded object-cover bg-[var(--bg-subtle)]" />
                         <div className="min-w-0">
-                          <Link to={`/admin/products/${p.id}/edit`} className="block max-w-[260px] truncate text-sm text-[var(--fg-base)] hover:underline">{p.name}</Link>
-                          <p className="truncate text-xs whitespace-nowrap text-[var(--fg-muted)]">{p.brand ?? "Orange Closet"}</p>
+                          <Link to={`/cms-admin/products/${p.id}/edit`} className="block max-w-[260px] truncate text-sm text-[var(--fg-base)] hover:underline">{p.name}</Link>
+                          <p className="truncate text-xs whitespace-nowrap text-[var(--fg-muted)]">{p.brand ?? "Store"}</p>
                         </div>
                       </div>
                     </td>
@@ -347,7 +347,7 @@ export default function ProductsPage() {
                     <td className="whitespace-nowrap px-6 py-3 text-sm text-[var(--fg-muted)]">{formatDate(p.updatedAt)}</td>
                     <td className="px-6 py-3 text-right">
                       <ActionMenu items={[
-                        { label: "Edit", icon: <Pencil className="h-4 w-4" />, to: `/admin/products/${p.id}/edit` },
+                        { label: "Edit", icon: <Pencil className="h-4 w-4" />, to: `/cms-admin/products/${p.id}/edit` },
                         { label: "Delete", icon: <Trash2 className="h-4 w-4" />, danger: true, onClick: () => setDeleteTarget(p.id) },
                       ]} />
                     </td>

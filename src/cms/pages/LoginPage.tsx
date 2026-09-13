@@ -7,6 +7,7 @@ import "../../styles/cms-theme.css";
 export default function LoginPage({ onSuccess }: { onSuccess: () => void }) {
   const [statusKnown, setStatusKnown] = useState(!neonAuthEnabled);
   const [isFirstAccount, setIsFirstAccount] = useState(false);
+  const [storeName, setStoreName] = useState("");
   const [faviconUrl, setFaviconUrl] = useState(
     () =>
       document.querySelector('link[rel="icon"]')?.getAttribute("href") ||
@@ -18,6 +19,15 @@ export default function LoginPage({ onSuccess }: { onSuccess: () => void }) {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
+
+  useEffect(() => {
+    fetch("/api/public/store-name")
+      .then((r) => (r.ok ? r.json() : { storeName: "" }))
+      .then(({ storeName }: { storeName: string }) => {
+        if (storeName) setStoreName(storeName);
+      })
+      .catch(() => {});
+  }, []);
 
   useEffect(() => {
     if (!neonAuthEnabled) return;
@@ -77,9 +87,8 @@ export default function LoginPage({ onSuccess }: { onSuccess: () => void }) {
             />
           )}
           <h1 className="mt-2 text-lg font-medium text-[var(--fg-base)]">
-            Orange Closet CMS
+            {storeName || "Store"}
           </h1>
-          <p className="text-sm text-[var(--fg-subtle)]">Sign in to manage your catalog</p>
         </div>
 
         {!neonAuthEnabled ? (

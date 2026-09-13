@@ -8,6 +8,7 @@ import settingsRoutes from "./routes/settings.js";
 import uploadRoutes from "./routes/upload.js";
 import catalogLinksRoutes from "./routes/catalog-links.js";
 import accountRoutes from "./routes/account.js";
+import publicRoutes from "./routes/public.js";
 import { runCloudinaryGC } from "./routes/cron.js";
 
 const api = new Hono<{ Bindings: Env }>();
@@ -29,6 +30,7 @@ api.route("/settings", settingsRoutes);
 api.route("/upload", uploadRoutes);
 api.route("/catalog-links", catalogLinksRoutes);
 api.route("/account", accountRoutes);
+api.route("/public", publicRoutes);
 
 // Cloudinary GC: exposed both as /api/cron/cloudinary-gc and via scheduled handler
 api.all("/cron/cloudinary-gc", async (c) => {

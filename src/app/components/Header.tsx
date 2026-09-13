@@ -1,4 +1,4 @@
-﻿import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+﻿import { useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Menu, X, Search, Share2, ChevronDown, ShoppingBag } from "lucide-react";
 import { TYPE_LABELS, primaryColor } from "../../data/products";
@@ -7,6 +7,29 @@ import { splitNavItems } from "../lib/site-config";
 
 function formatLabel(text: string): string {
   return text.toLowerCase().replace(/\b\w/g, (c) => c.toUpperCase());
+}
+
+function MobileDropdown({ open, children }: { open: boolean; children: ReactNode }) {
+  const contentRef = useRef<HTMLDivElement>(null);
+  const [maxHeight, setMaxHeight] = useState(open ? "1000px" : "0px");
+
+  useEffect(() => {
+    if (open && contentRef.current) {
+      setMaxHeight(`${contentRef.current.scrollHeight + 50}px`);
+    } else {
+      setMaxHeight("0px");
+    }
+  }, [open]);
+
+  return (
+    <div
+      ref={contentRef}
+      style={{ maxHeight, transition: "max-height 0.3s ease-in-out" }}
+      className="overflow-hidden"
+    >
+      {children}
+    </div>
+  );
 }
 
 type HeaderProps = {
@@ -566,7 +589,7 @@ export default function Header({ onShare, showShare = true }: HeaderProps) {
                         </button>
                       )}
                     </div>
-                    {hasDropdown && isExpanded && (
+                    <MobileDropdown open={hasDropdown && isExpanded}>
                       <div className="bg-white pb-4">
                         {cats.map((cat) => (
                           <Link
@@ -579,7 +602,7 @@ export default function Header({ onShare, showShare = true }: HeaderProps) {
                           </Link>
                         ))}
                       </div>
-                    )}
+                    </MobileDropdown>
                   </div>
                 );
               })}
@@ -619,7 +642,7 @@ export default function Header({ onShare, showShare = true }: HeaderProps) {
                         </button>
                       )}
                     </div>
-                    {hasDropdown && isExpanded && (
+                    <MobileDropdown open={hasDropdown && isExpanded}>
                       <div className="bg-white pb-4">
                         {cats.map((cat) => (
                           <Link
@@ -632,7 +655,7 @@ export default function Header({ onShare, showShare = true }: HeaderProps) {
                           </Link>
                         ))}
                       </div>
-                    )}
+                    </MobileDropdown>
                   </div>
                 );
               })}

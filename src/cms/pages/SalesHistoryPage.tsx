@@ -58,7 +58,7 @@ export default function SalesHistoryPage() {
       }
     }
     return {
-      storeName: settings.storeName || "Orange Closet",
+      storeName: settings.storeName || "Store",
       logoUrl: settings.faviconUrl || undefined,
       sale,
       productContent: product
@@ -85,7 +85,7 @@ export default function SalesHistoryPage() {
         title="Sales History"
         subtitle={`${totalItems} sale${totalItems === 1 ? "" : "s"} recorded`}
         actions={
-          <Button variant="secondary" size="small" onClick={() => navigate("/admin")}>
+          <Button variant="secondary" size="small" onClick={() => navigate("/cms-admin")}>
             Back to Dashboard
           </Button>
         }

@@ -13,7 +13,7 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
   if (!res.ok) {
     if (res.status === 401) {
       logout();
-      window.location.replace("/admin");
+      window.location.replace("/cms-admin");
       throw new Error("Your session has ended. Please sign in again.");
     }
     const body = await res.text().catch(() => "");

@@ -225,7 +225,7 @@ export function ProductFormInner({ editing }: { editing?: CmsProduct }) {
     save
       .then(() => {
         showToast(isEditing ? "Product updated." : "Product created.");
-        navigate("/admin/products");
+        navigate("/cms-admin/products");
       })
       .catch(() => showToast("Couldn't save the product. Please try again."))
       .finally(() => setSaving(false));
@@ -249,7 +249,7 @@ export function ProductFormInner({ editing }: { editing?: CmsProduct }) {
         subtitle={isEditing ? editing?.id : "Create a new product"}
         actions={
           <>
-            <Link to="/admin/products"><Button variant="secondary" size="small">Cancel</Button></Link>
+            <Link to="/cms-admin/products"><Button variant="secondary" size="small">Cancel</Button></Link>
             <Button variant="primary" size="small" form="product-form" type="submit" disabled={saving}>
               {saving ? "Saving…" : "Save"}
             </Button>
