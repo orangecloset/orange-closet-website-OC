@@ -3,6 +3,9 @@ main = "src/index.ts"
 compatibility_date = "2026-09-13"
 compatibility_flags = ["nodejs_compat"]
 
+[observability]
+enabled = true
+
 # Static assets served from the Vite build output directory
 [assets]
 directory = "./dist"

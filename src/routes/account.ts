@@ -47,7 +47,8 @@ app.get("/status", async (c) => {
     return c.json({ initialized: count > 0, faviconUrl, branding });
   } catch (err) {
     console.error("[api/account/status]", err);
-    return c.json({ error: "Internal server error" }, 500);
+    const message = err instanceof Error ? err.message : String(err);
+    return c.json({ error: "Internal server error", detail: message }, 500);
   }
 });
 
