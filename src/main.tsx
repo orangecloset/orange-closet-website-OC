@@ -3,7 +3,6 @@ import { lazy, Suspense, useEffect } from "react";
 import { createRoot } from "react-dom/client";
 import { BrowserRouter, Route, Routes, useLocation } from "react-router-dom";
 import App from "./app/App.tsx";
-import { Analytics } from "@vercel/analytics/react";
 import { StoreProvider } from "./app/hooks/useStore.tsx";
 import { CatalogProvider } from "./app/data/CatalogContext.tsx";
 import { applyBranding } from "./cms/store/defaults";
@@ -34,12 +33,6 @@ function CatalogManifest() {
   return null;
 }
 
-function VercelAnalytics() {
-  const location = useLocation();
-  if (location.pathname.startsWith("/admin")) return null;
-  return <Analytics />;
-}
-
 createRoot(document.getElementById("root")!).render(
   <StoreProvider>
     <ErrorBoundary>
@@ -64,7 +57,6 @@ createRoot(document.getElementById("root")!).render(
               }
             />
           </Routes>
-          <VercelAnalytics />
         </Suspense>
       </BrowserRouter>
     </ErrorBoundary>

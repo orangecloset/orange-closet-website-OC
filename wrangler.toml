@@ -1,0 +1,19 @@
+name = "orange-closet"
+main = "src/index.ts"
+compatibility_date = "2026-09-13"
+compatibility_flags = ["nodejs_compat"]
+
+# Static assets served from the Vite build output directory
+[assets]
+directory = "./dist"
+binding = "ASSETS"
+
+# Cron trigger for weekly Cloudinary garbage collection
+# Runs every Monday at 3:00 AM UTC
+[triggers]
+crons = ["0 3 * * 1"]
+
+# Environment variable bindings (secrets set via `wrangler secret put`)
+# [vars]
+# VITE_CLOUDINARY_CLOUD_NAME = "wowxgv27"
+# VITE_NEON_AUTH_URL = "..."
