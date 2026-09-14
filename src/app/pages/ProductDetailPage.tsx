@@ -57,16 +57,6 @@ function Accordion({
   defaultOpen?: boolean;
 }) {
   const [open, setOpen] = useState(defaultOpen);
-  const contentRef = useRef<HTMLDivElement>(null);
-  const [maxHeight, setMaxHeight] = useState(defaultOpen ? "1000px" : "0px");
-
-  useEffect(() => {
-    if (open && contentRef.current) {
-      setMaxHeight(`${contentRef.current.scrollHeight + 50}px`);
-    } else {
-      setMaxHeight("0px");
-    }
-  }, [open]);
 
   return (
     <div className="border-b border-gray-200">
@@ -75,19 +65,19 @@ function Accordion({
         className="w-full flex items-center gap-3 py-4 text-left text-sm font-medium text-gray-900"
       >
         <ChevronRight
-          className={`w-4 h-4 text-gray-500 shrink-0 transition-transform duration-300 ${
+          className={`w-4 h-4 text-gray-500 shrink-0 transition-transform duration-200 ${
             open ? "rotate-90" : ""
           }`}
         />
         {title}
       </button>
       <div
-        ref={contentRef}
-        style={{ maxHeight, transition: "max-height 0.3s ease-in-out" }}
-        className="overflow-hidden"
+        style={{ display: "grid", gridTemplateRows: open ? "1fr" : "0fr", transition: "grid-template-rows 0.25s ease-out" }}
       >
-        <div className="pb-5 pl-7 text-sm text-gray-600 space-y-2">
-          {children}
+        <div className="overflow-hidden">
+          <div className="pb-5 pl-7 text-sm text-gray-600 space-y-2">
+            {children}
+          </div>
         </div>
       </div>
     </div>

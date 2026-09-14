@@ -10,24 +10,13 @@ function formatLabel(text: string): string {
 }
 
 function MobileDropdown({ open, children }: { open: boolean; children: ReactNode }) {
-  const contentRef = useRef<HTMLDivElement>(null);
-  const [maxHeight, setMaxHeight] = useState(open ? "1000px" : "0px");
-
-  useEffect(() => {
-    if (open && contentRef.current) {
-      setMaxHeight(`${contentRef.current.scrollHeight + 50}px`);
-    } else {
-      setMaxHeight("0px");
-    }
-  }, [open]);
-
   return (
     <div
-      ref={contentRef}
-      style={{ maxHeight, transition: "max-height 0.3s ease-in-out" }}
-      className="overflow-hidden"
+      style={{ display: "grid", gridTemplateRows: open ? "1fr" : "0fr", transition: "grid-template-rows 0.25s ease-out" }}
     >
-      {children}
+      <div className="overflow-hidden">
+        {children}
+      </div>
     </div>
   );
 }
@@ -581,10 +570,10 @@ export default function Header({ onShare, showShare = true }: HeaderProps) {
                           aria-label={isExpanded ? `Collapse ${item.label}` : `Expand ${item.label}`}
                           aria-expanded={isExpanded}
                           onClick={() => toggleMobileExpand(slug)}
-                          className="p-2 -m-2 shrink-0 text-gray-400 hover:text-black transition-colors"
+                          className="p-2 mr-1 shrink-0 text-gray-400 hover:text-black transition-colors"
                         >
                           <ChevronDown
-                            className={`w-4 h-4 transition-transform duration-200 ${isExpanded ? "" : "-rotate-90"}`}
+                            className={`w-5 h-5 transition-transform duration-200 ${isExpanded ? "" : "-rotate-90"}`}
                           />
                         </button>
                       )}
@@ -634,10 +623,10 @@ export default function Header({ onShare, showShare = true }: HeaderProps) {
                           aria-label={isExpanded ? `Collapse ${item.label}` : `Expand ${item.label}`}
                           aria-expanded={isExpanded}
                           onClick={() => toggleMobileExpand(slug)}
-                          className="p-2 -m-2 shrink-0 text-gray-400 hover:text-black transition-colors"
+                          className="p-2 mr-1 shrink-0 text-gray-400 hover:text-black transition-colors"
                         >
                           <ChevronDown
-                            className={`w-4 h-4 transition-transform duration-200 ${isExpanded ? "" : "-rotate-90"}`}
+                            className={`w-5 h-5 transition-transform duration-200 ${isExpanded ? "" : "-rotate-90"}`}
                           />
                         </button>
                       )}
