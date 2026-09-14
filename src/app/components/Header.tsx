@@ -570,10 +570,10 @@ export default function Header({ onShare, showShare = true }: HeaderProps) {
                           aria-label={isExpanded ? `Collapse ${item.label}` : `Expand ${item.label}`}
                           aria-expanded={isExpanded}
                           onClick={() => toggleMobileExpand(slug)}
-                          className="p-2 mr-1 shrink-0 text-gray-400 hover:text-black transition-colors"
+                          className="p-2 mr-1 shrink-0 text-gray-500 hover:text-black transition-colors"
                         >
                           <ChevronDown
-                            className={`w-5 h-5 transition-transform duration-200 ${isExpanded ? "" : "-rotate-90"}`}
+                            className={`w-4 h-4 transition-transform duration-200 ${isExpanded ? "" : "-rotate-90"}`}
                           />
                         </button>
                       )}
@@ -623,10 +623,10 @@ export default function Header({ onShare, showShare = true }: HeaderProps) {
                           aria-label={isExpanded ? `Collapse ${item.label}` : `Expand ${item.label}`}
                           aria-expanded={isExpanded}
                           onClick={() => toggleMobileExpand(slug)}
-                          className="p-2 mr-1 shrink-0 text-gray-400 hover:text-black transition-colors"
+                          className="p-2 mr-1 shrink-0 text-gray-500 hover:text-black transition-colors"
                         >
                           <ChevronDown
-                            className={`w-5 h-5 transition-transform duration-200 ${isExpanded ? "" : "-rotate-90"}`}
+                            className={`w-4 h-4 transition-transform duration-200 ${isExpanded ? "" : "-rotate-90"}`}
                           />
                         </button>
                       )}
