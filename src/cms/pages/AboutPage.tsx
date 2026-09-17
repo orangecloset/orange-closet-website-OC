@@ -83,7 +83,7 @@ export default function AboutPage() {
           disabled={saving || !isDirty}
           className="shrink-0"
         >
-          {saving ? "Saving…" : isDirty ? "Save changes" : "Save"}
+          {saving ? "Saving…" : "Save"}
         </Button>
       </div>
 

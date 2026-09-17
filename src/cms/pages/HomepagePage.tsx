@@ -51,7 +51,7 @@ export default function HomepagePage() {
             onClick={handleSave}
             disabled={saving || !isDirty}
           >
-            {saving ? "Saving…" : isDirty ? "Save changes" : "Save"}
+            {saving ? "Saving…" : "Save"}
           </Button>
         }
       />

@@ -180,7 +180,7 @@ export default function SettingsPage() {
               form="settings-form"
               disabled={saving || !configDirty.includes("orange-cms-settings")}
             >
-              {saving ? "Saving…" : configDirty.includes("orange-cms-settings") ? "Save changes" : "Save"}
+              {saving ? "Saving…" : "Save"}
             </Button>
           }
         />

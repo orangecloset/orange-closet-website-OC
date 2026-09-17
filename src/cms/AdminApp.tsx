@@ -157,6 +157,12 @@ function OfflineNotice() {
   return null;
 }
 
+const ROUTE_DIRTY_KEY_MAP: Record<string, string> = {
+  "/cms-admin/homepage": "orange-cms-homepage",
+  "/cms-admin/about": "orange-cms-about",
+  "/cms-admin/settings": "orange-cms-settings",
+};
+
 function UnsavedChangesNotice() {
   const { configDirty } = useCms();
   const { showToast, dismissAll } = useToast();
@@ -164,26 +170,27 @@ function UnsavedChangesNotice() {
   const prevDirtyRef = useRef<Set<string>>(new Set());
   const prevPathRef = useRef(location.pathname);
 
-  const showDirtyToast = () => showToast("Changes detected. Click Save to apply them.", true, "warning");
-
   useEffect(() => {
     const pathChanged = prevPathRef.current !== location.pathname;
     prevPathRef.current = location.pathname;
 
-    const hadDirty = prevDirtyRef.current.size > 0;
-    const added = configDirty.filter((key) => !prevDirtyRef.current.has(key));
-    prevDirtyRef.current = new Set(configDirty);
+    const activeKey = ROUTE_DIRTY_KEY_MAP[location.pathname];
 
     if (pathChanged) {
       dismissAll();
-      if (configDirty.length > 0) {
-        requestAnimationFrame(showDirtyToast);
+      if (activeKey && configDirty.includes(activeKey)) {
+        requestAnimationFrame(() => showToast("Unsaved changes. Click Save to apply them.", true, "warning"));
       }
-    } else if (added.length > 0) {
-      showDirtyToast();
-    } else if (hadDirty && configDirty.length === 0) {
-      dismissAll();
+    } else if (activeKey) {
+      const added = configDirty.filter((key) => !prevDirtyRef.current.has(key));
+      if (added.includes(activeKey)) {
+        showToast("Unsaved changes. Click Save to apply them.", true, "warning");
+      } else if (prevDirtyRef.current.has(activeKey) && !configDirty.includes(activeKey)) {
+        dismissAll();
+      }
     }
+
+    prevDirtyRef.current = new Set(configDirty);
   }, [configDirty, location.pathname, showToast, dismissAll]);
 
   return null;
