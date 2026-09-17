@@ -21,11 +21,7 @@ const CONTENT_WIDTH_PT = A4_WIDTH_PT - MARGIN_PT * 2;
 const CONTENT_WIDTH_PX = Math.round(CONTENT_WIDTH_PT / PX_TO_PT);
 
 export function flexibleImageUrl(url?: string | null): string {
-  const u = url ?? "";
-  if (/res\.cloudinary\.com\/[^/]+\/image\/upload\//.test(u) && !/\/image\/upload\/(f_|q_|w_)/.test(u)) {
-    return u.replace(/(\/image\/upload\/)/, "$1f_auto,q_auto,w_600/");
-  }
-  return u;
+  return url ?? "";
 }
 
 export function parsePrice(price: string): number {

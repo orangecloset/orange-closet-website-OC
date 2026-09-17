@@ -80,7 +80,7 @@ export default function AboutPage() {
           size="small"
           type="button"
           onClick={handleSave}
-          disabled={saving}
+          disabled={saving || !isDirty}
           className="shrink-0"
         >
           {saving ? "Saving…" : isDirty ? "Save changes" : "Save"}

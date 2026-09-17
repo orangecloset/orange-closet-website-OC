@@ -29,6 +29,7 @@ export default function SalesHistoryPage() {
   const [totalPages, setTotalPages] = useState(1);
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(true);
+  const [downloadingId, setDownloadingId] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -72,10 +73,13 @@ export default function SalesHistoryPage() {
   };
 
   const handleDownload = async (sale: RecentSale) => {
+    setDownloadingId(sale.id);
     try {
       await downloadReceiptPdf(await buildReceiptData(sale));
     } catch (err) {
       console.error("[cms] failed to generate receipt pdf", err);
+    } finally {
+      setDownloadingId(null);
     }
   };
 
@@ -167,11 +171,16 @@ export default function SalesHistoryPage() {
                           <button
                             type="button"
                             onClick={() => void handleDownload(s)}
+                            disabled={downloadingId === s.id}
                             title="Download PDF receipt"
                             aria-label={`Download PDF receipt ${s.receiptNo || s.id}`}
-                            className="flex h-7 w-7 items-center justify-center rounded-md text-[var(--fg-subtle)] transition-colors hover:bg-[var(--bg-subtle-hover)] hover:text-[var(--fg-base)]"
+                            className="flex h-7 w-7 items-center justify-center rounded-md text-[var(--fg-subtle)] transition-colors hover:bg-[var(--bg-subtle-hover)] hover:text-[var(--fg-base)] disabled:opacity-50"
                           >
-                            <Download className="h-4 w-4" />
+                            {downloadingId === s.id ? (
+                              <Loader2 className="h-4 w-4 animate-spin" />
+                            ) : (
+                              <Download className="h-4 w-4" />
+                            )}
                           </button>
                         </div>
                       </td>

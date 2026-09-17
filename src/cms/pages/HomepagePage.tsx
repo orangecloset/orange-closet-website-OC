@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Plus } from "lucide-react";
 import { useCms } from "../store/cmsContext";
 import { HOMEPAGE_KEY } from "../store/defaults";
-import { Badge, Button, Container, Header, Switch } from "../components/ui";
+import { Button, Container, Header, Switch } from "../components/ui";
 import { useToast } from "../store/toastContext";
 import { HeroCard } from "../components/HeroCard";
 import { BrandList } from "../components/BrandList";
@@ -49,7 +49,7 @@ export default function HomepagePage() {
             size="small"
             type="button"
             onClick={handleSave}
-            disabled={saving}
+            disabled={saving || !isDirty}
           >
             {saving ? "Saving…" : isDirty ? "Save changes" : "Save"}
           </Button>
@@ -58,12 +58,7 @@ export default function HomepagePage() {
 
       <Container>
         <div className="flex items-center justify-between px-6 py-4">
-          <div className="flex items-center gap-2">
-            <span className="text-sm text-[var(--fg-muted)]">Hero image clickable</span>
-            <Badge color={homepage.heroImageClickable ? "blue" : "grey"}>
-              {homepage.heroImageClickable ? "Enabled" : "Disabled"}
-            </Badge>
-          </div>
+          <span className="text-sm text-[var(--fg-muted)]">Hero image clickable</span>
           <Switch
             checked={homepage.heroImageClickable}
             onCheckedChange={(heroImageClickable) => updateHomepage({ heroImageClickable })}
@@ -73,12 +68,7 @@ export default function HomepagePage() {
 
       <Container>
         <div className="flex items-center justify-between px-6 py-4">
-          <div className="flex items-center gap-2">
-            <span className="text-sm text-[var(--fg-muted)]">Show On Sale section</span>
-            <Badge color={homepage.showOnSale ? "blue" : "grey"}>
-              {homepage.showOnSale ? "Enabled" : "Disabled"}
-            </Badge>
-          </div>
+          <span className="text-sm text-[var(--fg-muted)]">Show On Sale section</span>
           <Switch
             checked={homepage.showOnSale}
             onCheckedChange={(showOnSale) => updateHomepage({ showOnSale })}
@@ -88,12 +78,7 @@ export default function HomepagePage() {
 
       <Container>
         <div className="flex items-center justify-between px-6 py-4">
-          <div className="flex items-center gap-2">
-            <span className="text-sm text-[var(--fg-muted)]">Show New Arrivals section</span>
-            <Badge color={homepage.showNewArrivals ? "blue" : "grey"}>
-              {homepage.showNewArrivals ? "Enabled" : "Disabled"}
-            </Badge>
-          </div>
+          <span className="text-sm text-[var(--fg-muted)]">Show New Arrivals section</span>
           <Switch
             checked={homepage.showNewArrivals}
             onCheckedChange={(showNewArrivals) => updateHomepage({ showNewArrivals })}

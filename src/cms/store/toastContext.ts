@@ -4,6 +4,7 @@ export type ToastType = "success" | "error" | "warning";
 
 export type ToastContextValue = {
   showToast: (message: string, sticky?: boolean, type?: ToastType) => void;
+  dismissAll: () => void;
 };
 
 export const ToastContext = createContext<ToastContextValue | null>(null);
