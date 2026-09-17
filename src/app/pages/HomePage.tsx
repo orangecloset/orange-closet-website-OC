@@ -414,7 +414,7 @@ export default function HomePage() {
       </section>
       )}
 
-      {visibleNewArrivals.length > 0 && (
+      {homepage.showNewArrivals && visibleNewArrivals.length > 0 && (
       <section className={`mt-10 px-2.5 sm:px-3.5 lg:px-10 ${visibleBestSellers.length === 0 ? "mb-16" : ""}`}>
         <h2 className="text-lg sm:text-xl lg:text-2xl font-bold mb-4 px-2 sm:px-4 lg:px-6">New Arrivals</h2>
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-1.5">

@@ -85,6 +85,12 @@ export function CmsProvider({ children }: { children: ReactNode }) {
         if (storedAbout && typeof storedAbout === "object") {
           setAbout({ ...seedAbout(), ...(storedAbout as AboutPageConfig) });
         }
+        savedSnapshotRef.current = {
+          [SETTINGS_KEY]: storedSettings && typeof storedSettings === "object" ? { ...seedSettings(), ...(storedSettings as SettingsConfig) } : undefined,
+          [HOMEPAGE_KEY]: storedHomepage && typeof storedHomepage === "object" ? { ...seedHomepage(), ...(storedHomepage as HomepageConfig) } : undefined,
+          [TYPES_KEY]: Array.isArray(storedTypes) ? storedTypes : undefined,
+          [ABOUT_KEY]: storedAbout && typeof storedAbout === "object" ? { ...seedAbout(), ...(storedAbout as AboutPageConfig) } : undefined,
+        };
       })
       .catch((err) => console.error("[cms] failed to load settings", err));
     return () => {
@@ -103,6 +109,7 @@ export function CmsProvider({ children }: { children: ReactNode }) {
   const latestValuesRef = useRef<Record<string, unknown>>({});
   const dirtyKeysRef = useRef<Set<string>>(new Set());
   const [configDirty, setConfigDirty] = useState<string[]>([]);
+  const savedSnapshotRef = useRef<Record<string, unknown>>({});
 
   const markDirty = useCallback((key: string) => {
     if (dirtyKeysRef.current.has(key)) return;
@@ -129,6 +136,21 @@ export function CmsProvider({ children }: { children: ReactNode }) {
     latestValuesRef.current[ABOUT_KEY] = about;
   }, [about]);
 
+  useEffect(() => {
+    const keys: [string, unknown][] = [
+      [SETTINGS_KEY, settings],
+      [HOMEPAGE_KEY, homepage],
+      [TYPES_KEY, types],
+      [ABOUT_KEY, about],
+    ];
+    for (const [key, current] of keys) {
+      const saved = savedSnapshotRef.current[key];
+      if (saved !== undefined && JSON.stringify(current) === JSON.stringify(saved)) {
+        clearDirty(key);
+      }
+    }
+  }, [settings, homepage, types, about, clearDirty]);
+
   const flushSaves = useCallback(async () => {
     const targets = [...dirtyKeysRef.current];
     await Promise.all(
@@ -140,6 +162,7 @@ export function CmsProvider({ children }: { children: ReactNode }) {
         }
         try {
           await api.saveSetting(key, value);
+          savedSnapshotRef.current[key] = value;
           clearDirty(key);
         } catch (err) {
           console.error(`[cms] failed to save ${key}`, err);

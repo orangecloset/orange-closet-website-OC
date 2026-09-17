@@ -74,7 +74,7 @@ export function migrateProducts(products: CmsProduct[]): CmsProduct[] {
 }
 
 export function seedHomepage(): HomepageConfig {
-  return { heroes: [], brands: [], featuredIds: [], bestSellerIds: [], heroImageClickable: false, showOnSale: true };
+  return { heroes: [], brands: [], featuredIds: [], bestSellerIds: [], heroImageClickable: false, showOnSale: true, showNewArrivals: true };
 }
 
 const DEFAULT_TYPE_SLUGS = ["bags", "jeweleries", "watches", "shoes"] as const;
