@@ -57,11 +57,26 @@ function Accordion({
   defaultOpen?: boolean;
 }) {
   const [open, setOpen] = useState(defaultOpen);
+  const [height, setHeight] = useState<number | "auto">(defaultOpen ? "auto" : 0);
+  const contentRef = useRef<HTMLDivElement>(null);
+
+  const toggle = () => {
+    const el = contentRef.current;
+    if (!el) return;
+    if (!open) {
+      setHeight(el.scrollHeight);
+      setOpen(true);
+    } else {
+      setHeight(el.scrollHeight);
+      requestAnimationFrame(() => requestAnimationFrame(() => setHeight(0)));
+      setOpen(false);
+    }
+  };
 
   return (
     <div className="border-b border-gray-200">
       <button
-        onClick={() => setOpen((prev) => !prev)}
+        onClick={toggle}
         className="w-full flex items-center gap-3 py-4 text-left text-sm font-medium text-gray-900"
       >
         <ChevronRight
@@ -72,12 +87,12 @@ function Accordion({
         {title}
       </button>
       <div
-        style={{ display: "grid", gridTemplateRows: open ? "1fr" : "0fr", transition: "grid-template-rows 0.25s ease-out" }}
+        style={{ height, overflow: "hidden" }}
+        className="transition-[height] duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] will-change-[height]"
+        onTransitionEnd={() => { if (open) setHeight("auto"); }}
       >
-        <div className="overflow-hidden">
-          <div className="pb-5 pl-7 text-sm text-gray-600 space-y-2">
-            {children}
-          </div>
+        <div ref={contentRef} className="pb-5 pl-7 text-sm text-gray-600 space-y-2">
+          {children}
         </div>
       </div>
     </div>

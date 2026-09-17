@@ -10,13 +10,29 @@ function formatLabel(text: string): string {
 }
 
 function MobileDropdown({ open, children }: { open: boolean; children: ReactNode }) {
+  const contentRef = useRef<HTMLDivElement>(null);
+  const [height, setHeight] = useState<number | "auto">(open ? "auto" : 0);
+  const mounted = useRef(false);
+
+  useEffect(() => {
+    const el = contentRef.current;
+    if (!el) return;
+    if (!mounted.current) { mounted.current = true; return; }
+    if (open) {
+      setHeight(el.scrollHeight);
+    } else {
+      setHeight(el.scrollHeight);
+      requestAnimationFrame(() => requestAnimationFrame(() => setHeight(0)));
+    }
+  }, [open]);
+
   return (
     <div
-      style={{ display: "grid", gridTemplateRows: open ? "1fr" : "0fr", transition: "grid-template-rows 0.25s ease-out" }}
+      style={{ height, overflow: "hidden" }}
+      className="transition-[height] duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] will-change-[height]"
+      onTransitionEnd={() => { if (open) setHeight("auto"); }}
     >
-      <div className="overflow-hidden">
-        {children}
-      </div>
+      <div ref={contentRef}>{children}</div>
     </div>
   );
 }
@@ -502,7 +518,7 @@ export default function Header({ onShare, showShare = true }: HeaderProps) {
       {mobileMenuOpen && (
         <div className="lg:hidden fixed inset-0 z-50">
           <div
-            className={`absolute inset-0 bg-black/40 transition-opacity duration-300 ${mobileMenuClosing ? "opacity-0" : "opacity-100"}`}
+            className={`absolute inset-0 bg-black/40 transition-opacity ${mobileMenuClosing ? "duration-[280ms] opacity-0" : "duration-300 opacity-100"}`}
             onClick={closeMobileMenu}
           />
           <div className={`absolute top-0 left-0 h-full w-full md:w-96 bg-white shadow-2xl flex flex-col ${mobileMenuClosing ? "animate-slide-out-left" : "animate-slide-in-left"}`}>
