@@ -87,6 +87,7 @@ export type HomepageConfig = {
   bestSellerIds: string[];
   heroImageClickable: boolean;
   showOnSale: boolean;
+  showNewArrivals: boolean;
 };
 
 export type TypeCategory = {

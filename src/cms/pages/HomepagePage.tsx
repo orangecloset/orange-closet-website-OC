@@ -87,6 +87,21 @@ export default function HomepagePage() {
       </Container>
 
       <Container>
+        <div className="flex items-center justify-between px-6 py-4">
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-[var(--fg-muted)]">Show New Arrivals section</span>
+            <Badge color={homepage.showNewArrivals ? "blue" : "grey"}>
+              {homepage.showNewArrivals ? "Enabled" : "Disabled"}
+            </Badge>
+          </div>
+          <Switch
+            checked={homepage.showNewArrivals}
+            onCheckedChange={(showNewArrivals) => updateHomepage({ showNewArrivals })}
+          />
+        </div>
+      </Container>
+
+      <Container>
         <Header
           title="Hero Banners"
           subtitle="Hero images with text and navigation."

@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect, useRef, useCallback } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, useLocation, Link } from "react-router-dom";
 import { ChevronDown, ChevronLeft, SlidersHorizontal } from "lucide-react";
 import type { Product, ProductColor, ProductType } from "../../data/products";
 import { productColorCss } from "../../data/products";
@@ -35,6 +35,7 @@ function sortByPrice(items: Product[], direction: 1 | -1) {
 
 export default function CategoryPage() {
   const { type, category } = useParams<{ type?: string; category?: string }>();
+  const location = useLocation();
   const { productsByType, types, loading } = useCatalog();
   const [sortBy, setSortBy] = useState("newest");
   const [sortOpen, setSortOpen] = useState(false);
@@ -173,12 +174,28 @@ export default function CategoryPage() {
 
   const viewport = useViewport();
   const cols = viewport === "desktop" ? 4 : viewport === "tablet" ? 3 : 2;
-  const defaultRows = viewport === "desktop" ? 7 : viewport === "tablet" ? 8 : 12;
-  const [loadedRows, setLoadedRows] = useState(defaultRows);
+  const defaultRows = viewport === "desktop" ? 8 : viewport === "tablet" ? 10 : 14;
+  const storageKey = `cat-loaded-rows-${location.pathname}`;
+  const [loadedRows, setLoadedRows] = useState(() => {
+    try {
+      const saved = sessionStorage.getItem(storageKey);
+      return saved ? Number(saved) : defaultRows;
+    } catch { return defaultRows; }
+  });
+  const isInitialMount = useRef(true);
 
   useEffect(() => {
-    setLoadedRows(viewport === "desktop" ? 7 : viewport === "tablet" ? 8 : 12);
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+      return;
+    }
+    setLoadedRows(defaultRows);
+    try { sessionStorage.removeItem(storageKey); } catch {}
   }, [type, category, sortBy, brand, selectedColor, availability, viewport]);
+
+  useEffect(() => {
+    try { sessionStorage.setItem(storageKey, String(loadedRows)); } catch {}
+  }, [storageKey, loadedRows]);
 
   const visibleProducts = useMemo(
     () => filtered.slice(0, loadedRows * cols),

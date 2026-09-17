@@ -39,27 +39,28 @@ export function ToastProvider({ children }: { children: ReactNode }) {
       <div className="pointer-events-none fixed bottom-4 right-4 z-[200] flex flex-col gap-2">
         {toasts.map((t) => {
           const isError = t.type === "error";
+          const isWarning = t.type === "warning";
           return (
             <div
               key={t.id}
-              className={`pointer-events-auto flex items-center gap-2.5 rounded-md border bg-white px-4 py-2.5 shadow-[var(--elevation-flyout)] ${
+              className={`pointer-events-auto flex items-center gap-2.5 rounded-md border px-4 py-2.5 shadow-[var(--elevation-flyout)] ${
                 isError
-                  ? "border-[var(--tag-red-border)]"
-                  : t.type === "warning"
-                  ? "border-[var(--tag-orange-border)]"
-                  : "border-[var(--tag-green-border)]"
+                  ? "border-red-300 bg-red-50"
+                  : isWarning
+                  ? "border-orange-300 bg-orange-50"
+                  : "border-green-300 bg-green-50"
               }`}
             >
               <CheckCircle2
                 className={`h-4 w-4 shrink-0 ${
                   isError
-                    ? "text-[var(--tag-red-text)]"
-                    : t.type === "warning"
-                    ? "text-[var(--tag-orange-text)]"
-                    : "text-[var(--tag-green-text)]"
+                    ? "text-red-600"
+                    : isWarning
+                    ? "text-orange-600"
+                    : "text-green-600"
                 }`}
               />
-              <span className="text-sm text-[var(--fg-base)]">{t.message}</span>
+              <span className="text-sm text-gray-900">{t.message}</span>
             </div>
           );
         })}
