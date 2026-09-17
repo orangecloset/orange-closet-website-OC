@@ -322,14 +322,14 @@ export default function HomePage() {
   }, []);
 
   return (
-    <>
+    <div className="pb-16">
 
       <HeroBlocks heroes={homepage.heroes} imageClickable={homepage.heroImageClickable} />
 
       <BrandMarquee brands={homepage.brands} />
 
       {hasFeatured && (
-      <section className={`mt-10 ${(visibleNewArrivals.length === 0 && visibleBestSellers.length === 0) ? "mb-16" : "lg:mb-2"}`}>
+      <section className="mt-10">
         <div className="flex items-center justify-between mb-4 px-[18px] sm:px-[30px] lg:px-16">
           <h2 className="text-lg sm:text-xl lg:text-2xl font-bold">Featured</h2>
           <div className="flex items-center gap-2">
@@ -415,7 +415,7 @@ export default function HomePage() {
       )}
 
       {homepage.showNewArrivals && visibleNewArrivals.length > 0 && (
-      <section className={`mt-10 px-2.5 sm:px-3.5 lg:px-10 ${visibleBestSellers.length === 0 ? "mb-16" : ""}`}>
+      <section className="mt-10 px-2.5 sm:px-3.5 lg:px-10">
         <h2 className="text-lg sm:text-xl lg:text-2xl font-bold mb-4 px-2 sm:px-4 lg:px-6">New Arrivals</h2>
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-1.5">
           {visibleNewArrivals.map((product) => (
@@ -434,7 +434,7 @@ export default function HomePage() {
       )}
 
       {visibleBestSellers.length > 0 && (
-      <section className="mt-10 mb-16 px-2.5 sm:px-3.5 lg:px-10">
+      <section className="mt-10 px-2.5 sm:px-3.5 lg:px-10">
         <h2 className="text-lg sm:text-xl lg:text-2xl font-bold mb-4 px-2 sm:px-4 lg:px-6">Best Seller</h2>
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-1.5">
           {visibleBestSellers.map((product) => (
@@ -451,6 +451,6 @@ export default function HomePage() {
         </div>
       </section>
       )}
-    </>
+    </div>
   );
 }
