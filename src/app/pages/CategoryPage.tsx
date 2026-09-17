@@ -206,7 +206,7 @@ export default function CategoryPage() {
     ...(cmsType?.categories ?? []),
   ];
   const heroImage = category
-    ? (cmsType?.categories.find((c) => c.slug === category)?.heroImage ?? "")
+    ? (cmsType?.categories.find((c) => c.slug === category)?.heroImage ?? cmsType?.heroImage ?? "")
     : (cmsType?.heroImage ?? "");
   const title = category
     ? cmsType?.categories.find((c) => c.slug === category)?.label || category
@@ -219,7 +219,7 @@ export default function CategoryPage() {
     <>
       <section className="relative w-full">
         <div className="block">
-          <div className="relative w-full h-[350px] sm:h-auto sm:aspect-[1920/900] bg-gray-200 overflow-hidden">
+          <div className="relative w-full h-[350px] sm:h-auto sm:aspect-[16/9] lg:aspect-[1920/900] bg-gray-200 overflow-hidden">
             {heroImage && (
               <ImageWithFallback
                 src={heroImage}
@@ -239,7 +239,7 @@ export default function CategoryPage() {
                   <ChevronLeft className="w-3.5 h-3.5" />
                   Home
                 </Link>
-                <h1 className="text-2xl sm:text-4xl font-semibold tracking-wide mb-2">{title}</h1>
+                <h1 className="text-2xl sm:text-3xl lg:text-4xl font-normal tracking-wide mb-2" style={{ textShadow: "0 0 5px rgba(0,0,0,0.3)" }}>{title}</h1>
                 {tagline && (
                   <p
                     className="text-white text-[10px] uppercase tracking-widest"
