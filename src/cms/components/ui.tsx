@@ -33,8 +33,12 @@ export function ToastProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
+  const dismissAll = useCallback(() => {
+    setToasts([]);
+  }, []);
+
   return (
-    <ToastContext.Provider value={{ showToast }}>
+    <ToastContext.Provider value={{ showToast, dismissAll }}>
       {children}
       <div className="pointer-events-none fixed bottom-4 right-4 z-[200] flex flex-col gap-2">
         {toasts.map((t) => {

@@ -159,16 +159,32 @@ function OfflineNotice() {
 
 function UnsavedChangesNotice() {
   const { configDirty } = useCms();
-  const { showToast } = useToast();
-  const prevRef = useRef<Set<string>>(new Set());
+  const { showToast, dismissAll } = useToast();
+  const location = useLocation();
+  const prevDirtyRef = useRef<Set<string>>(new Set());
+  const prevPathRef = useRef(location.pathname);
+
+  const showDirtyToast = () => showToast("Changes detected. Click Save to apply them.", true, "warning");
 
   useEffect(() => {
-    const added = configDirty.filter((key) => !prevRef.current.has(key));
-    prevRef.current = new Set(configDirty);
-    if (added.length > 0) {
-      showToast("Changes detected. Click Save to apply them.", true, "warning");
+    const pathChanged = prevPathRef.current !== location.pathname;
+    prevPathRef.current = location.pathname;
+
+    const hadDirty = prevDirtyRef.current.size > 0;
+    const added = configDirty.filter((key) => !prevDirtyRef.current.has(key));
+    prevDirtyRef.current = new Set(configDirty);
+
+    if (pathChanged) {
+      dismissAll();
+      if (configDirty.length > 0) {
+        requestAnimationFrame(showDirtyToast);
+      }
+    } else if (added.length > 0) {
+      showDirtyToast();
+    } else if (hadDirty && configDirty.length === 0) {
+      dismissAll();
     }
-  }, [configDirty, showToast]);
+  }, [configDirty, location.pathname, showToast, dismissAll]);
 
   return null;
 }
