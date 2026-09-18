@@ -235,7 +235,7 @@ export default function AboutPage() {
                 </p>
               )}
               {about.heroHeading && (
-                <h1 className="text-2xl sm:text-4xl font-normal tracking-wide">
+                <h1 className="text-2xl sm:text-4xl font-normal tracking-wide" style={{ textShadow: "0 0 10px rgba(0,0,0,0.6), 0 2px 6px rgba(0,0,0,0.4)" }}>
                   {about.heroHeading}
                 </h1>
               )}
