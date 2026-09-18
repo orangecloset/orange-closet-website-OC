@@ -257,7 +257,7 @@ export default function CategoryPage() {
                   <ChevronLeft className="w-3.5 h-3.5" />
                   Home
                 </Link>
-                <h1 className="text-2xl sm:text-3xl lg:text-4xl font-normal tracking-wide mb-2" style={{ textShadow: "0 0 5px rgba(0,0,0,0.3)" }}>{title}</h1>
+                <h1 className="text-2xl sm:text-3xl lg:text-4xl font-normal tracking-wide mb-2" style={{ textShadow: "0 0 10px rgba(0,0,0,0.6), 0 2px 6px rgba(0,0,0,0.4)" }}>{title}</h1>
                 {tagline && (
                   <p
                     className="text-white text-[10px] uppercase tracking-widest"
