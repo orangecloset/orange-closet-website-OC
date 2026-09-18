@@ -190,11 +190,11 @@ export default function CategoryPage() {
       return;
     }
     setLoadedRows(defaultRows);
-    try { sessionStorage.removeItem(storageKey); } catch {}
-  }, [type, category, sortBy, brand, selectedColor, availability, viewport]);
+    try { sessionStorage.removeItem(storageKey); } catch { /* ignore */ }
+  }, [type, category, sortBy, brand, selectedColor, availability, viewport, defaultRows, storageKey]);
 
   useEffect(() => {
-    try { sessionStorage.setItem(storageKey, String(loadedRows)); } catch {}
+    try { sessionStorage.setItem(storageKey, String(loadedRows)); } catch { /* ignore */ }
   }, [storageKey, loadedRows]);
 
   const visibleProducts = useMemo(
@@ -239,6 +239,7 @@ export default function CategoryPage() {
           <div className="relative w-full h-[350px] sm:h-auto sm:aspect-[16/9] lg:aspect-[1920/900] bg-gray-200 overflow-hidden">
             {heroImage && (
               <ImageWithFallback
+                key={heroImage}
                 src={heroImage}
                 alt={`${typeLabel} Collection`}
                 className="absolute inset-0 w-full h-full object-cover object-center"
@@ -393,40 +394,42 @@ export default function CategoryPage() {
                   {availableColors.length > 0 && (
                     <>
                       <p className="text-[10px] uppercase tracking-widest text-gray-400 mb-3">Color</p>
-                      <div className="grid grid-cols-3 gap-x-2 gap-y-3 mb-4">
-                        {availableColors.map((c) => {
-                          const isActive = selectedColor === c.name;
-                          return (
-                            <button
-                              key={c.name}
-                              onClick={() => setSelectedColor(isActive ? "" : c.name)}
-                              className="flex flex-col items-center gap-1 min-w-0"
-                            >
-                              <span
-                                className={`w-8 h-8 rounded-full border-2 transition-all ${
-                                  isActive
-                                    ? "border-black scale-110"
-                                    : "border-gray-200 hover:border-gray-400"
-                                }`}
-                                style={{ background: productColorCss(c) }}
-                              />
-                              <span
-                                className={`max-w-full truncate text-[9px] leading-none transition-colors ${
-                                  isActive ? "text-black font-medium" : "text-gray-500"
-                                }`}
+                      <div className="max-h-[200px] overflow-y-auto pr-1">
+                        <div className="grid grid-cols-3 gap-x-2 gap-y-3">
+                          {availableColors.map((c) => {
+                            const isActive = selectedColor === c.name;
+                            return (
+                              <button
+                                key={c.name}
+                                onClick={() => setSelectedColor(isActive ? "" : c.name)}
+                                className="flex flex-col items-center gap-1 min-w-0"
                               >
-                                {c.name}
-                              </span>
-                            </button>
-                          );
-                        })}
+                                <span
+                                  className={`w-8 h-8 rounded-full border-2 transition-all ${
+                                    isActive
+                                      ? "border-black scale-110"
+                                      : "border-gray-200 hover:border-gray-400"
+                                  }`}
+                                  style={{ background: productColorCss(c) }}
+                                />
+                                <span
+                                  className={`max-w-full truncate text-[9px] leading-none transition-colors ${
+                                    isActive ? "text-black font-medium" : "text-gray-500"
+                                  }`}
+                                >
+                                  {c.name}
+                                </span>
+                              </button>
+                            );
+                          })}
+                        </div>
                       </div>
                     </>
                   )}
                   {(selectedColor || availability !== "all") && (
                     <button
                       onClick={() => { setSelectedColor(""); setAvailability("all"); }}
-                      className="text-[10px] uppercase tracking-widest text-gray-400 hover:text-black transition-colors"
+                      className="text-[10px] uppercase tracking-widest text-gray-400 hover:text-black transition-colors mt-1"
                     >
                       Clear
                     </button>

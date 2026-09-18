@@ -6,37 +6,26 @@ export type CatalogAccessStore = {
   uid: string;
 };
 
-export function getCatalogToken(): string | null {
+function getCatalogAccess(): CatalogAccessStore | null {
   try {
     const raw = localStorage.getItem(ACCESS_KEY);
     if (!raw) return null;
-    const parsed = JSON.parse(raw) as Partial<CatalogAccessStore>;
-    return parsed.token ?? null;
+    return JSON.parse(raw) as Partial<CatalogAccessStore> as CatalogAccessStore;
   } catch {
     return null;
   }
+}
+
+export function getCatalogToken(): string | null {
+  return getCatalogAccess()?.token ?? null;
 }
 
 export function getCatalogMode(): "grant" | "share" | null {
-  try {
-    const raw = localStorage.getItem(ACCESS_KEY);
-    if (!raw) return null;
-    const parsed = JSON.parse(raw) as Partial<CatalogAccessStore>;
-    return parsed.mode ?? null;
-  } catch {
-    return null;
-  }
+  return getCatalogAccess()?.mode ?? null;
 }
 
 export function getCatalogUid(): string | null {
-  try {
-    const raw = localStorage.getItem(ACCESS_KEY);
-    if (!raw) return null;
-    const parsed = JSON.parse(raw) as Partial<CatalogAccessStore>;
-    return parsed.uid ?? null;
-  } catch {
-    return null;
-  }
+  return getCatalogAccess()?.uid ?? null;
 }
 
 export function setCatalogAccess(access: CatalogAccessStore): void {

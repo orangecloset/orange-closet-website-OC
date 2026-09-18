@@ -10,11 +10,22 @@ export function useViewport(): Viewport {
   const [viewport, setViewport] = useState<Viewport>(getViewport);
 
   useEffect(() => {
-    const handleResize = () => {
-      setViewport(getViewport());
+    const mobileMq = window.matchMedia("(max-width: 639px)");
+    const tabletMq = window.matchMedia("(min-width: 640px) and (max-width: 1023px)");
+
+    const update = () => {
+      if (mobileMq.matches) setViewport("mobile");
+      else if (tabletMq.matches) setViewport("tablet");
+      else setViewport("desktop");
     };
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
+
+    update();
+    mobileMq.addEventListener("change", update);
+    tabletMq.addEventListener("change", update);
+    return () => {
+      mobileMq.removeEventListener("change", update);
+      tabletMq.removeEventListener("change", update);
+    };
   }, []);
 
   return viewport;

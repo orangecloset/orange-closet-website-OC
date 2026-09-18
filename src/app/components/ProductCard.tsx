@@ -26,7 +26,26 @@ function CardMedia({ product, variant }: { product: Product; variant: ProductCar
   );
 
   if (variant === "compact") {
-    return <div className="relative aspect-[3/4] bg-gray-100 overflow-hidden">{image}</div>;
+    return (
+      <div className="relative aspect-[3/4] bg-gray-100 overflow-hidden">
+        {image}
+        {soldOut ? (
+          <span className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
+            <span className="bg-red-800/90 text-white text-[8px] uppercase tracking-widest font-semibold px-2 py-[3px] whitespace-nowrap border border-red-800/90 leading-none">
+              Sold Out
+            </span>
+          </span>
+        ) : saleInfo.onSale ? (
+          <span className="absolute top-2 left-2 text-[8px] uppercase tracking-widest font-semibold bg-black text-white px-2 py-[3px] pointer-events-none whitespace-nowrap z-10 border border-black leading-none">
+            {saleInfo.label}
+          </span>
+        ) : product.isNew ? (
+          <span className="absolute top-2 left-2 text-[8px] uppercase tracking-widest font-semibold bg-white border border-black text-black px-2 py-[3px] pointer-events-none whitespace-nowrap z-10 leading-none">
+            New
+          </span>
+        ) : null}
+      </div>
+    );
   }
 
   return (
@@ -72,52 +91,15 @@ function CardBody({ product, variant }: { product: Product; variant: ProductCard
     </>
   );
 
-  if (variant === "full") {
-    return (
-      <div className="mt-2 mb-2 text-center text-sm leading-snug pl-3 pr-1">
-        {cardText}
-        <div className="flex items-center justify-center gap-1.5 mt-1">
-          <span className="text-gray-900 font-medium">{product.price}</span>
-          {product.compareAtPrice && (
-            <span className="text-gray-400 line-through text-xs">{product.compareAtPrice}</span>
-          )}
-        </div>
-      </div>
-    );
-  }
-
-  if (variant === "simple") {
-    return (
-      <div className="mt-2 mb-2 text-center text-sm leading-snug pl-3 pr-1">
-        {cardText}
-        <div className="flex items-center justify-center gap-1.5 mt-1">
-          <span className="text-gray-900 font-medium">{product.price}</span>
-          {product.compareAtPrice && (
-            <span className="text-gray-400 line-through text-xs">{product.compareAtPrice}</span>
-          )}
-        </div>
-      </div>
-    );
-  }
-
-  if (variant === "sale") {
-    return (
-      <div className="mt-2 mb-2 text-center text-sm leading-snug pl-3 pr-1">
-        {cardText}
-        <div className="flex items-center justify-center gap-1.5 mt-1">
-          <span className="text-gray-900 font-medium">{product.price}</span>
-          {product.compareAtPrice && (
-            <span className="text-gray-400 line-through text-xs">{product.compareAtPrice}</span>
-          )}
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="mt-2 mb-2 text-center text-sm leading-snug pl-3 pr-1">
       {cardText}
-      <span className="text-gray-900 font-medium block mt-1">{product.price}</span>
+      <div className="flex items-center justify-center gap-1.5 mt-1">
+        <span className="text-gray-900 font-medium">{product.price}</span>
+        {product.compareAtPrice && (
+          <span className="text-gray-400 line-through text-xs">{product.compareAtPrice}</span>
+        )}
+      </div>
     </div>
   );
 }

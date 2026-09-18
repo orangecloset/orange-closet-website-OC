@@ -10,7 +10,7 @@ The Website is a digital product catalog. No purchases are completed online — 
 
 **On your device:** The Website stores catalog access and cache data in your browser (local storage) so it works properly. This data stays on your device and is not uploaded to us. You can clear it anytime.
 
-**Automatically:** Our hosting provider (Cloudflare) receives standard technical information (device type, browser, IP address, pages viewed) to keep the Website working and secure. We do not use advertising cookies or track you across other websites.
+**Automatically:** Our hosting provider (Cloudflare) receives standard technical information (device type, browser, IP address, pages viewed) to keep the Website working and secure. Cloudflare retains standard access logs for up to 72 hours. We do not use advertising cookies or track you across other websites.
 
 ## 3. How We Use Your Information
 
@@ -24,7 +24,7 @@ The Website may link to external services (e.g., Facebook, Messenger). We are no
 
 ## 5. Your Rights
 
-Under the Data Privacy Act of 2012 (Republic Act No. 10173), you have the right to access, correct, object to, or request deletion of your personal data. To exercise these rights, contact us at orangeclosetwebsite@gmail.com.
+Under the Data Privacy Act of 2012 (Republic Act No. 10173), you have the right to access, correct, object to, or request deletion of your personal data. Our designated Data Protection Officer handles all privacy-related requests. To exercise these rights, contact us at orangeclosetwebsite@gmail.com.
 
 ## 6. Data Breach Notification
 

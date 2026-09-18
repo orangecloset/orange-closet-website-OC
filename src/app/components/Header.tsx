@@ -559,17 +559,18 @@ export default function Header({ onShare, showShare = true }: HeaderProps) {
               </div>
             </div>
             <nav className="flex-1 overflow-y-auto py-1">
-              {mainNavItems.map((item, idx) => {
+              {[...mainNavItems, ...moreNavItems].map((item, idx) => {
                 const isActive = location.pathname.startsWith(item.href);
+                const showDivider = idx === 0 ? null : <div className="border-t border-gray-100 mx-6" />;
                 const slug = item.href.slice(1);
                 const cats = getCATEGORIES[slug] ?? [];
                 const hasDropdown = cats.length > 0;
                 const isExpanded = mobileExpandedType === slug;
                 return (
                   <div key={item.label}>
-                    {idx === 0 ? null : <div className="border-t border-gray-100 mx-6" />}
+                    {showDivider}
                     <div
-                      className={`flex items-center justify-between px-6 py-4 text-base uppercase tracking-wide transition-colors ${
+                      className={`flex items-center justify-between px-6 py-3 text-sm capitalize tracking-wide transition-colors ${
                         isActive ? "text-black font-medium" : "text-gray-500 hover:text-black hover:bg-gray-50"
                       }`}
                     >
@@ -586,75 +587,22 @@ export default function Header({ onShare, showShare = true }: HeaderProps) {
                           aria-label={isExpanded ? `Collapse ${item.label}` : `Expand ${item.label}`}
                           aria-expanded={isExpanded}
                           onClick={() => toggleMobileExpand(slug)}
-                           className="p-2 mr-1 shrink-0 text-gray-500 hover:text-black transition-colors"
+                          className="p-1.5 mr-1 shrink-0 text-gray-400 hover:text-black transition-colors"
                         >
                           <ChevronDown
-                            className={`w-5 h-5 text-gray-700 transition-transform duration-200 ${isExpanded ? "" : "-rotate-90"}`}
+                            className={`w-4 h-4 transition-transform duration-200 ${isExpanded ? "" : "-rotate-90"}`}
                           />
                         </button>
                       )}
                     </div>
                     <MobileDropdown open={hasDropdown && isExpanded}>
-                      <div className="bg-white pb-4">
+                      <div className="bg-white pb-2">
                         {cats.map((cat) => (
                           <Link
                             key={cat.slug}
                             to={cat.slug ? `/${slug}/${cat.slug}` : `/${slug}`}
                             onClick={() => { window.scrollTo(0, 0); navigateAndCloseMobileMenu(); }}
-                            className={`block pl-10 pr-6 py-[9px] text-sm transition-colors ${isCategoryActive(slug, cat.slug) ? 'text-black font-medium' : 'text-gray-500 hover:text-black'}`}
-                          >
-                            {renderCatLabel(cat)}
-                          </Link>
-                        ))}
-                      </div>
-                    </MobileDropdown>
-                  </div>
-                );
-              })}
-              {moreNavItems.map((item, idx) => {
-                const isActive = location.pathname.startsWith(item.href);
-                const isFirstMore = idx === 0 && mainNavItems.length === 0;
-                const slug = item.href.slice(1);
-                const cats = getCATEGORIES[slug] ?? [];
-                const hasDropdown = cats.length > 0;
-                const isExpanded = mobileExpandedType === slug;
-                return (
-                  <div key={item.label}>
-                    {isFirstMore ? null : <div className="border-t border-gray-100 mx-6" />}
-                    <div
-                      className={`flex items-center justify-between px-6 py-4 text-base uppercase tracking-wide transition-colors ${
-                        isActive ? "text-black font-medium" : "text-gray-500 hover:text-black hover:bg-gray-50"
-                      }`}
-                    >
-                      <Link
-                        to={item.href}
-                        className="flex-1"
-                        onClick={() => { window.scrollTo(0, 0); navigateAndCloseMobileMenu(); }}
-                      >
-                        {item.label}
-                      </Link>
-                      {hasDropdown && (
-                        <button
-                          type="button"
-                          aria-label={isExpanded ? `Collapse ${item.label}` : `Expand ${item.label}`}
-                          aria-expanded={isExpanded}
-                          onClick={() => toggleMobileExpand(slug)}
-                          className="p-2 mr-1 shrink-0 text-gray-500 hover:text-black transition-colors"
-                        >
-                          <ChevronDown
-                            className={`w-5 h-5 text-gray-700 transition-transform duration-200 ${isExpanded ? "" : "-rotate-90"}`}
-                          />
-                        </button>
-                      )}
-                    </div>
-                    <MobileDropdown open={hasDropdown && isExpanded}>
-                      <div className="bg-white pb-4">
-                        {cats.map((cat) => (
-                          <Link
-                            key={cat.slug}
-                            to={cat.slug ? `/${slug}/${cat.slug}` : `/${slug}`}
-                            onClick={() => { window.scrollTo(0, 0); navigateAndCloseMobileMenu(); }}
-                            className={`block pl-10 pr-6 py-[9px] text-sm transition-colors ${isCategoryActive(slug, cat.slug) ? 'text-black font-medium' : 'text-gray-500 hover:text-black'}`}
+                            className={`block pl-10 pr-6 py-2 text-sm capitalize transition-colors ${isCategoryActive(slug, cat.slug) ? 'text-black font-medium' : 'text-gray-500 hover:text-black'}`}
                           >
                             {renderCatLabel(cat)}
                           </Link>

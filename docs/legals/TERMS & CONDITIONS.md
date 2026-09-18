@@ -28,7 +28,7 @@ The Website may link to external services. We are not responsible for their cont
 
 ## 7. Limitation of Liability
 
-The Website is provided "as is" without warranties. Because no transactions are completed online, our total liability is zero.
+The Website is provided "as is" without warranties of any kind. To the fullest extent permitted by law, ORANGE CLOSET shall not be liable for any damages arising from your use of the Website, including but not limited to direct, indirect, incidental, or consequential damages.
 
 ## 8. Governing Law
 
