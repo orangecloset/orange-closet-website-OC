@@ -570,7 +570,7 @@ export default function Header({ onShare, showShare = true }: HeaderProps) {
                   <div key={item.label}>
                     {showDivider}
                     <div
-                      className={`flex items-center justify-between px-6 py-3 text-sm capitalize tracking-wide transition-colors ${
+                      className={`flex items-center justify-between px-6 py-3.5 text-base capitalize tracking-wide transition-colors ${
                         isActive ? "text-black font-medium" : "text-gray-500 hover:text-black hover:bg-gray-50"
                       }`}
                     >
@@ -587,10 +587,10 @@ export default function Header({ onShare, showShare = true }: HeaderProps) {
                           aria-label={isExpanded ? `Collapse ${item.label}` : `Expand ${item.label}`}
                           aria-expanded={isExpanded}
                           onClick={() => toggleMobileExpand(slug)}
-                          className="p-1.5 mr-1 shrink-0 text-gray-400 hover:text-black transition-colors"
+                          className="p-1.5 mr-1 shrink-0 text-gray-700 hover:text-black transition-colors"
                         >
                           <ChevronDown
-                            className={`w-4 h-4 transition-transform duration-200 ${isExpanded ? "" : "-rotate-90"}`}
+                            className={`w-5 h-5 transition-transform duration-200 ${isExpanded ? "" : "-rotate-90"}`}
                           />
                         </button>
                       )}
