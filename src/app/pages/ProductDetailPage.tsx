@@ -108,6 +108,7 @@ export default function ProductDetailPage() {
   const [colorIndex, setColorIndex] = useState(0);
   const [imageIndex, setImageIndex] = useState(0);
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
+  const lightboxCloseRef = useRef<HTMLButtonElement>(null);
   const [lightboxFade, setLightboxFade] = useState<string | null>(null);
   const lightboxFadeKeyRef = useRef(0);
   const [, setAdded] = useState(false);
@@ -418,10 +419,26 @@ export default function ProductDetailPage() {
     document.body.style.overflow = "hidden";
     if (scrollbarWidth > 0) document.body.style.paddingRight = `${scrollbarWidth}px`;
 
+    lightboxCloseRef.current?.focus();
+
+    const lightbox = document.querySelector("[data-lightbox]") as HTMLElement | null;
+    const getFocusable = () => lightbox ? Array.from(lightbox.querySelectorAll<HTMLElement>("button, [href], [tabindex]:not([tabindex='-1'])")) : [];
+
     const handleKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setLightboxIndex(null);
-      if (e.key === "ArrowRight") navigateLightboxRef.current(1);
-      if (e.key === "ArrowLeft") navigateLightboxRef.current(-1);
+      if (e.key === "Escape") { setLightboxIndex(null); return; }
+      if (e.key === "ArrowRight") { navigateLightboxRef.current(1); return; }
+      if (e.key === "ArrowLeft") { navigateLightboxRef.current(-1); return; }
+      if (e.key === "Tab") {
+        const focusable = getFocusable();
+        if (focusable.length === 0) return;
+        const first = focusable[0];
+        const last = focusable[focusable.length - 1];
+        if (e.shiftKey) {
+          if (document.activeElement === first) { e.preventDefault(); last.focus(); }
+        } else {
+          if (document.activeElement === last) { e.preventDefault(); first.focus(); }
+        }
+      }
     };
     window.addEventListener("keydown", handleKey);
     return () => {
@@ -722,10 +739,12 @@ export default function ProductDetailPage() {
 
       {lightboxIndex !== null && activeImages[lightboxIndex] && (
         <div
+          data-lightbox
           className="fixed inset-0 z-[100] flex items-center justify-center bg-black/90"
           onClick={(e) => { if (e.target === e.currentTarget) setLightboxIndex(null); }}
         >
           <button
+            ref={lightboxCloseRef}
             onClick={() => setLightboxIndex(null)}
             className="absolute top-4 right-4 text-white/80 hover:text-white transition-colors z-10"
             aria-label="Close"

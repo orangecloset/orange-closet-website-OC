@@ -20,9 +20,8 @@ export default function CollectionPage({ title, products, variant = "full" }: Co
       <section className="border-b border-gray-100">
         <div className="px-2.5 sm:px-3.5 lg:pl-16 lg:pr-10 py-5 sm:py-6">
           <button
-            onClick={() => navigate(-1)}
+            onClick={() => window.history.length > 1 ? navigate(-1) : navigate("/")}
             className="flex items-center gap-1 text-xs uppercase tracking-widest text-gray-500 hover:text-black transition-colors mb-2"
-           
           >
             <ChevronLeft className="w-3.5 h-3.5" />
             Back

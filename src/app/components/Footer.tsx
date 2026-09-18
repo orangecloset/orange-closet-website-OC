@@ -98,7 +98,13 @@ export default function Footer() {
               <h3 className="font-bold text-xs uppercase tracking-widest mb-4">Branches</h3>
               <ul className="space-y-2 text-sm text-gray-600">
                 {settings.branchLinks.map(({ label, url }) => (
-                  <li key={label}><a href={url || "#"} className="hover:text-black transition-colors">{label}</a></li>
+                  <li key={label}>
+                    {url ? (
+                      <a href={url} className="hover:text-black transition-colors">{label}</a>
+                    ) : (
+                      <span>{label}</span>
+                    )}
+                  </li>
                 ))}
               </ul>
             </div>
