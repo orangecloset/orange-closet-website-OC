@@ -311,7 +311,7 @@ export default function CategoryPage() {
               <ChevronDown className={`w-3 h-3 shrink-0 transition-transform duration-200 ${brandOpen ? "rotate-180" : ""}`} />
             </button>
             {brandOpen && (
-              <div className="absolute left-0 top-full mt-1 bg-white border border-gray-200 shadow-md z-50 min-w-[200px] max-h-60 overflow-y-auto">
+              <div className="absolute left-0 top-full mt-1 bg-white border border-gray-200 shadow-md z-[60] min-w-[200px] max-h-60 overflow-y-auto">
                 <button
                   onClick={() => { setBrand(""); setBrandOpen(false); }}
                   className={`block w-full text-left px-4 py-2 text-xs uppercase tracking-widest hover:bg-gray-50 transition-colors ${brand === "" ? "text-black" : "text-gray-500"}`}
@@ -346,7 +346,7 @@ export default function CategoryPage() {
                 <ChevronDown className="w-3 h-3" />
               </button>
               {sortOpen && (
-                <div className="absolute right-0 top-full mt-1 bg-white border border-gray-200 shadow-md z-50 min-w-[180px]">
+                <div className="absolute right-0 top-full mt-1 bg-white border border-gray-200 shadow-md z-[60] min-w-[180px]">
                   {SORT_OPTIONS.map((option) => (
                     <button
                       key={option.value}
@@ -374,7 +374,7 @@ export default function CategoryPage() {
                 )}
               </button>
               {filterOpen && (
-                <div className="absolute right-0 top-full mt-1 bg-white border border-gray-200 shadow-md z-50 w-[265px] p-4">
+                <div className="absolute right-0 top-full mt-1 bg-white border border-gray-200 shadow-md z-[60] w-[265px] p-4">
                   <p className="text-[10px] uppercase tracking-widest text-gray-400 mb-3">Availability</p>
                   <div className="flex gap-2 mb-5">
                     {(["all", "available", "sold"] as const).map((opt) => (
