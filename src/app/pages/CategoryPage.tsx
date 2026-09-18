@@ -394,7 +394,7 @@ export default function CategoryPage() {
                   {availableColors.length > 0 && (
                     <>
                       <p className="text-[10px] uppercase tracking-widest text-gray-400 mb-3">Color</p>
-                      <div className="max-h-[200px] overflow-y-auto pr-1">
+                      <div className="max-h-[200px] overflow-y-auto no-scrollbar pr-1">
                         <div className="grid grid-cols-3 gap-x-2 gap-y-3">
                           {availableColors.map((c) => {
                             const isActive = selectedColor === c.name;
