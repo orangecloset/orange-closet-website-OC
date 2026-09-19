@@ -365,7 +365,7 @@ export default function CategoryPage() {
                     <button
                       key={option.value}
                       onClick={() => { setSortBy(option.value); setSortOpen(false); }}
-                      className={`block w-full text-left px-4 py-2.5 text-xs uppercase tracking-widest hover:bg-gray-50 transition-colors ${sortBy === option.value ? "text-black" : "text-gray-500"}`}
+                      className={`block w-full text-left px-4 py-2.5 text-xs hover:bg-gray-50 transition-colors ${sortBy === option.value ? "text-black" : "text-gray-500"}`}
                     >
                       {option.label}
                     </button>
@@ -467,7 +467,7 @@ export default function CategoryPage() {
               <button
                 type="button"
                 onClick={() => setLoadedRows((n) => n + 8)}
-                className="border border-gray-300 bg-white px-8 py-2.5 text-xs uppercase tracking-widest font-medium text-gray-900 transition-colors hover:border-black hover:bg-black hover:text-white"
+                className="border border-black bg-white px-8 py-2.5 text-xs uppercase tracking-widest font-medium text-gray-900 transition-colors hover:bg-black hover:text-white"
               >
                 View more
               </button>

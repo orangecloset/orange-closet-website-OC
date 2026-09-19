@@ -375,7 +375,7 @@ export default function Header({ onShare, showShare = true }: HeaderProps) {
             </div>
 
             {searchQuery.trim() && (
-              <div className="absolute top-full left-0 right-0 mx-auto w-full max-w-md bg-white border border-gray-200 shadow-md max-h-80 overflow-y-auto z-50">
+              <div className="absolute top-full left-0 right-0 mx-auto w-full max-w-md bg-white border border-gray-200 shadow-md max-h-80 overflow-y-auto thin-scrollbar z-50">
                 {searchResults.length > 0 ? (
                   <ul>
                     {searchResults.map((p) => {

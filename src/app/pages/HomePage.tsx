@@ -109,7 +109,7 @@ function HeroBlocks({ heroes, imageClickable }: { heroes: HomepageHero[]; imageC
                       <div className="absolute inset-0 bg-black/8" />
                       <div className="absolute bottom-4 left-5 sm:top-4 sm:bottom-auto">
                         {item.label && (
-                          <h2 className="text-white text-2xl lg:text-[2.5rem] font-normal mb-1" style={{ textShadow: "0 0 5px rgba(0,0,0,0.3)" }}>
+                          <h2 className="text-white text-2xl lg:text-3xl font-normal mb-1" style={{ textShadow: "0 0 5px rgba(0,0,0,0.3)" }}>
                             {item.label}
                           </h2>
                         )}
@@ -133,7 +133,7 @@ function HeroBlocks({ heroes, imageClickable }: { heroes: HomepageHero[]; imageC
                       <div className="absolute inset-0 bg-black/8" />
                       <div className="absolute bottom-4 left-5 sm:top-4 sm:bottom-auto">
                         {item.label && (
-                          <h2 className="text-white text-2xl lg:text-[2.5rem] font-normal mb-1" style={{ textShadow: "0 0 5px rgba(0,0,0,0.3)" }}>
+                          <h2 className="text-white text-2xl lg:text-3xl font-normal mb-1" style={{ textShadow: "0 0 5px rgba(0,0,0,0.3)" }}>
                             {item.label}
                           </h2>
                         )}
