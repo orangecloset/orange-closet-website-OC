@@ -53,7 +53,7 @@ export default function LegalPage() {
 
       <h1 className="text-2xl sm:text-3xl font-semibold mb-8">{page.label}</h1>
 
-      <div className="legal-markdown max-w-none text-sm leading-relaxed text-gray-700">
+      <div className="legal-markdown max-w-none text-sm leading-relaxed text-gray-900">
         <Markdown>{page.body}</Markdown>
       </div>
     </section>
