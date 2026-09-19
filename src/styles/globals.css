@@ -55,12 +55,12 @@ src: url('https://storage.googleapis.com/download/storage/v1/b/prd-storytodesign
 }
 
 .panel.anim-in {
-  animation: menu-in 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  animation: menu-in 0.34s cubic-bezier(0.4, 0, 0.2, 1);
   will-change: transform, opacity;
 }
 
 .panel.anim-out {
-  animation: menu-out 0.35s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  animation: menu-out 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
   will-change: transform, opacity;
 }
 
@@ -84,6 +84,21 @@ src: url('https://storage.googleapis.com/download/storage/v1/b/prd-storytodesign
 .no-scrollbar {
   -ms-overflow-style: none;
   scrollbar-width: none;
+}
+
+.thin-scrollbar::-webkit-scrollbar {
+  width: 4px;
+}
+.thin-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.thin-scrollbar::-webkit-scrollbar-thumb {
+  background: #c4c4c4;
+  border-radius: 2px;
+}
+.thin-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: #c4c4c4 transparent;
 }
 
 .hero-title-shadow {

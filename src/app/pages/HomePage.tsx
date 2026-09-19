@@ -51,7 +51,7 @@ function HeroBlocks({ heroes, imageClickable }: { heroes: HomepageHero[]; imageC
                     <div className={`absolute inset-0 flex ${wideMobile ? "items-end justify-center pb-9" : "items-center justify-center"} sm:items-center sm:justify-start sm:pb-0 sm:pl-16`}>
                       <div className="text-white text-center sm:text-left">
                         {block.hero.label && (
-                          <h2 className={`${wideMobile ? "text-3xl" : "text-2xl"} sm:text-3xl lg:text-4xl font-normal tracking-wide mb-2 hero-title-shadow`}>
+                          <h2 className={`${wideMobile ? "text-3xl" : "text-2xl"} sm:text-3xl lg:text-[2.5rem] font-normal tracking-wide mb-2`} style={{ textShadow: "0 0 5px rgba(0,0,0,0.3)" }}>
                             {block.hero.label}
                           </h2>
                         )}
@@ -77,7 +77,7 @@ function HeroBlocks({ heroes, imageClickable }: { heroes: HomepageHero[]; imageC
                     <div className={`absolute inset-0 flex ${wideMobile ? "items-end justify-center pb-9" : "items-center justify-center"} sm:items-center sm:justify-start sm:pb-0 sm:pl-16`}>
                       <div className="text-white text-center sm:text-left">
                         {block.hero.label && (
-                          <h2 className={`${wideMobile ? "text-3xl" : "text-2xl"} sm:text-3xl lg:text-4xl font-normal tracking-wide mb-2 hero-title-shadow`}>
+                          <h2 className={`${wideMobile ? "text-3xl" : "text-2xl"} sm:text-3xl lg:text-[2.5rem] font-normal tracking-wide mb-2`} style={{ textShadow: "0 0 5px rgba(0,0,0,0.3)" }}>
                             {block.hero.label}
                           </h2>
                         )}
@@ -109,7 +109,7 @@ function HeroBlocks({ heroes, imageClickable }: { heroes: HomepageHero[]; imageC
                       <div className="absolute inset-0 bg-black/8" />
                       <div className="absolute bottom-4 left-5 sm:top-4 sm:bottom-auto">
                         {item.label && (
-                          <h2 className="text-white text-2xl lg:text-3xl font-normal mb-1 hero-title-shadow">
+                          <h2 className="text-white text-2xl lg:text-[2.5rem] font-normal mb-1" style={{ textShadow: "0 0 5px rgba(0,0,0,0.3)" }}>
                             {item.label}
                           </h2>
                         )}
@@ -133,7 +133,7 @@ function HeroBlocks({ heroes, imageClickable }: { heroes: HomepageHero[]; imageC
                       <div className="absolute inset-0 bg-black/8" />
                       <div className="absolute bottom-4 left-5 sm:top-4 sm:bottom-auto">
                         {item.label && (
-                          <h2 className="text-white text-2xl lg:text-3xl font-normal mb-1 hero-title-shadow">
+                          <h2 className="text-white text-2xl lg:text-[2.5rem] font-normal mb-1" style={{ textShadow: "0 0 5px rgba(0,0,0,0.3)" }}>
                             {item.label}
                           </h2>
                         )}

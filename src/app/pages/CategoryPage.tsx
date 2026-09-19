@@ -271,7 +271,7 @@ export default function CategoryPage() {
                   <ChevronLeft className="w-3.5 h-3.5" />
                   Home
                 </Link>
-                <h1 className="text-2xl sm:text-3xl lg:text-4xl font-normal tracking-wide mb-2 hero-title-shadow">{title}</h1>
+                <h1 className="text-2xl sm:text-3xl lg:text-[2.5rem] font-normal tracking-wide mb-2 hero-title-shadow">{title}</h1>
                 {tagline && (
                   <p
                     className="text-white text-[10px] uppercase tracking-widest"
@@ -325,7 +325,7 @@ export default function CategoryPage() {
               <ChevronDown className={`w-3 h-3 shrink-0 transition-transform duration-200 ${brandOpen ? "rotate-180" : ""}`} />
             </button>
             {brandOpen && (
-              <div className="absolute left-0 top-full mt-1 bg-white border border-gray-200 shadow-md z-40 min-w-[200px] max-h-60 overflow-y-auto">
+              <div className="absolute left-0 top-full mt-1 bg-white border border-gray-200 shadow-md z-40 min-w-[200px] max-h-60 overflow-y-auto thin-scrollbar">
                 <button
                   onClick={() => { setBrand(""); setBrandOpen(false); }}
                   className={`block w-full text-left px-4 py-2.5 text-xs uppercase tracking-widest hover:bg-gray-50 transition-colors ${brand === "" ? "text-black" : "text-gray-500"}`}
@@ -408,7 +408,7 @@ export default function CategoryPage() {
                   {availableColors.length > 0 && (
                     <>
                       <p className="text-[10px] uppercase tracking-widest text-gray-400 mb-3">Color</p>
-                      <div className="max-h-[200px] overflow-y-auto no-scrollbar pr-1">
+                      <div className="max-h-[200px] overflow-y-auto thin-scrollbar pr-1">
                         <div className="grid grid-cols-3 gap-x-2 gap-y-3">
                           {availableColors.map((c) => {
                             const isActive = selectedColor === c.name;
