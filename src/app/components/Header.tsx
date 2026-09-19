@@ -288,7 +288,7 @@ export default function Header({ onShare, showShare = true }: HeaderProps) {
                     <Link
                       to={item.href}
                       onClick={() => window.scrollTo(0, 0)}
-                      className={`relative inline-block whitespace-nowrap py-2 transition-opacity ${isActive || isMega ? 'opacity-100' : 'opacity-70 hover:opacity-100'}`}
+                      className={`relative inline-block whitespace-nowrap py-2 font-semibold transition-colors ${isActive || isMega ? 'text-black' : 'text-gray-500 hover:text-black'}`}
                     >
                       {item.label}
                     </Link>
