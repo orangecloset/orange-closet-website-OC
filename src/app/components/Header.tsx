@@ -127,7 +127,7 @@ export default function Header({ onShare, showShare = true }: HeaderProps) {
   const closeMobileMenu = () => {
     setMobileMenuClosing(true);
     setMobileExpandedType(null);
-    setTimeout(() => { setMobileMenuOpen(false); setMobileMenuClosing(false); }, 250);
+    setTimeout(() => { setMobileMenuOpen(false); setMobileMenuClosing(false); }, 350);
   };
 
   const navigateAndCloseMobileMenu = () => {
@@ -337,7 +337,7 @@ export default function Header({ onShare, showShare = true }: HeaderProps) {
                 <button
                   aria-label="Share"
                   onClick={onShare}
-                  className="text-gray-500 hover:text-black transition-colors"
+                  className="hidden sm:flex text-gray-500 hover:text-black transition-colors"
                 >
                   <Share2 className="w-5 h-5" />
                 </button>
@@ -518,10 +518,10 @@ export default function Header({ onShare, showShare = true }: HeaderProps) {
       {mobileMenuOpen && (
         <div className="lg:hidden fixed inset-0 z-50">
           <div
-            className={`absolute inset-0 bg-black/50 transition-opacity ${mobileMenuClosing ? "duration-[280ms] opacity-0" : "duration-300 opacity-100"}`}
+            className={`absolute inset-0 bg-black/50 ${mobileMenuClosing ? "overlay closing" : "overlay anim-in"}`}
             onClick={closeMobileMenu}
           />
-          <div className={`absolute top-0 left-0 h-full w-full md:w-96 bg-white shadow-2xl flex flex-col ${mobileMenuClosing ? "animate-slide-out-left" : "animate-slide-in-left"}`}>
+          <div className={`panel absolute top-0 left-0 h-full w-full md:w-96 bg-white shadow-2xl flex flex-col ${mobileMenuClosing ? "anim-out" : "anim-in"}`}>
             <div className="flex items-center justify-between px-6 h-14 border-b border-gray-100 shadow-sm">
               <Link
                 to="/"

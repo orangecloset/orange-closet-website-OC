@@ -44,24 +44,38 @@ src: url('https://storage.googleapis.com/download/storage/v1/b/prd-storytodesign
   50% { transform: translateY(5px); }
 }
 
-@keyframes slide-in-left {
-  from { transform: translateX(-100%); opacity: 0.6; }
-  to   { transform: translateX(0);      opacity: 1; }
+@keyframes menu-in {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(0); }
 }
 
-@keyframes slide-out-left {
-  from { transform: translateX(0);      opacity: 1; }
-  to   { transform: translateX(-100%);  opacity: 0.6; }
+@keyframes menu-out {
+  from { transform: translateX(0); }
+  to { transform: translateX(-100%); }
 }
 
-.animate-slide-in-left {
-  animation: slide-in-left 0.32s cubic-bezier(0.22, 1, 0.36, 1);
+.panel.anim-in {
+  animation: menu-in 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   will-change: transform, opacity;
 }
 
-.animate-slide-out-left {
-  animation: slide-out-left 0.28s cubic-bezier(0.64, 0, 0.78, 0) forwards;
+.panel.anim-out {
+  animation: menu-out 0.35s cubic-bezier(0.4, 0, 0.2, 1) forwards;
   will-change: transform, opacity;
+}
+
+@keyframes overlay-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.overlay.anim-in {
+  animation: overlay-in 300ms ease-out;
+}
+
+.overlay.closing {
+  transition-duration: 300ms;
+  opacity: 0;
 }
 
 .no-scrollbar::-webkit-scrollbar {
@@ -77,7 +91,7 @@ src: url('https://storage.googleapis.com/download/storage/v1/b/prd-storytodesign
 }
 @media (max-width: 639px) {
   .hero-title-shadow {
-    text-shadow: 0 0 10px rgba(0, 0, 0, 0.6), 0 2px 6px rgba(0, 0, 0, 0.4);
+    text-shadow: 0 0 15px rgba(0, 0, 0, 0.9), 0 2px 8px rgba(0, 0, 0, 0.6);
   }
 }
 
