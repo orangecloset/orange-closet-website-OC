@@ -256,7 +256,7 @@ export default function AboutPage() {
                 </p>
               )}
               {about.heroHeading && (
-                <h1 className="text-2xl sm:text-3xl lg:text-6xl font-normal tracking-wide hero-title-shadow">
+                <h1 className="text-2xl sm:text-3xl lg:text-4xl font-normal tracking-wide hero-title-shadow">
                   {about.heroHeading}
                 </h1>
               )}

@@ -271,7 +271,7 @@ export default function CategoryPage() {
                   <ChevronLeft className="w-3.5 h-3.5" />
                   Home
                 </Link>
-                <h1 className="text-2xl sm:text-3xl lg:text-6xl font-normal tracking-wide mb-2 hero-title-shadow">{title}</h1>
+                <h1 className="text-2xl sm:text-3xl lg:text-4xl font-normal tracking-wide mb-2 hero-title-shadow">{title}</h1>
                 {tagline && (
                   <p
                     className="text-white text-[10px] uppercase tracking-widest"
