@@ -51,9 +51,9 @@ export default function LegalPage() {
         Back
       </Link>
 
-      <h1 className="text-2xl sm:text-3xl font-semibold mb-8">{page.label}</h1>
+      <h1 className="text-2xl sm:text-3xl font-semibold mb-8 text-gray-700">{page.label}</h1>
 
-      <div className="legal-markdown max-w-none text-sm leading-relaxed text-gray-900">
+      <div className="legal-markdown max-w-none text-sm leading-relaxed text-gray-700">
         <Markdown>{page.body}</Markdown>
       </div>
     </section>
