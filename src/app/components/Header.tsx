@@ -127,7 +127,7 @@ export default function Header({ onShare, showShare = true }: HeaderProps) {
   const closeMobileMenu = () => {
     setMobileMenuClosing(true);
     setMobileExpandedType(null);
-    setTimeout(() => { setMobileMenuOpen(false); setMobileMenuClosing(false); }, 350);
+    setTimeout(() => { setMobileMenuOpen(false); setMobileMenuClosing(false); }, 300);
   };
 
   const navigateAndCloseMobileMenu = () => {
