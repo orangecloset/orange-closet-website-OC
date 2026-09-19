@@ -18,6 +18,14 @@ const SORT_OPTIONS = [
   { label: "Name: Z to A", value: "name-desc" },
 ];
 
+const SORT_DISPLAY: Record<string, string> = {
+  newest: "Newest",
+  "price-asc": "Low to High",
+  "price-desc": "High to Low",
+  "name-asc": "A to Z",
+  "name-desc": "Z to A",
+};
+
 function parsePrice(price: string): number {
   return parseFloat(price.replace(/[^0-9.]/g, "")) || 0;
 }
@@ -75,6 +83,12 @@ export default function CategoryPage() {
     setSelectedColor("");
     setAvailability("all");
   }, [type, category]);
+
+  useEffect(() => {
+    const close = () => { setSortOpen(false); setBrandOpen(false); setFilterOpen(false); };
+    window.addEventListener("scroll", close, { passive: true });
+    return () => window.removeEventListener("scroll", close);
+  }, []);
 
   useEffect(() => {
     if (!brandOpen) return;
@@ -257,7 +271,7 @@ export default function CategoryPage() {
                   <ChevronLeft className="w-3.5 h-3.5" />
                   Home
                 </Link>
-                <h1 className="text-2xl sm:text-3xl lg:text-4xl font-normal tracking-wide mb-2 hero-title-shadow">{title}</h1>
+                <h1 className="text-2xl sm:text-3xl lg:text-6xl font-normal tracking-wide mb-2 hero-title-shadow">{title}</h1>
                 {tagline && (
                   <p
                     className="text-white text-[10px] uppercase tracking-widest"
@@ -311,10 +325,10 @@ export default function CategoryPage() {
               <ChevronDown className={`w-3 h-3 shrink-0 transition-transform duration-200 ${brandOpen ? "rotate-180" : ""}`} />
             </button>
             {brandOpen && (
-              <div className="absolute left-0 top-full mt-1 bg-white border border-gray-200 shadow-md z-[60] min-w-[200px] max-h-60 overflow-y-auto">
+              <div className="absolute left-0 top-full mt-1 bg-white border border-gray-200 shadow-md z-40 min-w-[200px] max-h-60 overflow-y-auto">
                 <button
                   onClick={() => { setBrand(""); setBrandOpen(false); }}
-                  className={`block w-full text-left px-4 py-2 text-xs uppercase tracking-widest hover:bg-gray-50 transition-colors ${brand === "" ? "text-black" : "text-gray-500"}`}
+                  className={`block w-full text-left px-4 py-2.5 text-xs uppercase tracking-widest hover:bg-gray-50 transition-colors ${brand === "" ? "text-black" : "text-gray-500"}`}
                 >
                   All Brands
                 </button>
@@ -322,7 +336,7 @@ export default function CategoryPage() {
                   <button
                     key={b}
                     onClick={() => { setBrand(b); setBrandOpen(false); }}
-                    className={`block w-full text-left px-4 py-2 text-xs uppercase tracking-widest hover:bg-gray-50 transition-colors ${brand === b ? "text-black" : "text-gray-500"}`}
+                    className={`block w-full text-left px-4 py-2.5 text-xs uppercase tracking-widest hover:bg-gray-50 transition-colors ${brand === b ? "text-black" : "text-gray-500"}`}
                   >
                     {b}
                   </button>
@@ -342,16 +356,16 @@ export default function CategoryPage() {
                 onClick={() => { setSortOpen(!sortOpen); setFilterOpen(false); }}
                 className="text-xs uppercase tracking-widest font-medium flex items-center gap-1"
               >
-                Sort by: {SORT_OPTIONS.find((o) => o.value === sortBy)?.label}
+                Sort by: {SORT_DISPLAY[sortBy]}
                 <ChevronDown className="w-3 h-3" />
               </button>
               {sortOpen && (
-                <div className="absolute right-0 top-full mt-1 bg-white border border-gray-200 shadow-md z-[60] min-w-[180px]">
+                <div className="absolute right-0 top-full mt-1 bg-white border border-gray-200 shadow-md z-40 min-w-[180px]">
                   {SORT_OPTIONS.map((option) => (
                     <button
                       key={option.value}
                       onClick={() => { setSortBy(option.value); setSortOpen(false); }}
-                      className={`block w-full text-left px-4 py-2.5 text-xs hover:bg-gray-50 transition-colors ${sortBy === option.value ? "font-semibold" : ""}`}
+                      className={`block w-full text-left px-4 py-2.5 text-xs uppercase tracking-widest hover:bg-gray-50 transition-colors ${sortBy === option.value ? "text-black" : "text-gray-500"}`}
                     >
                       {option.label}
                     </button>
@@ -374,7 +388,7 @@ export default function CategoryPage() {
                 )}
               </button>
               {filterOpen && (
-                <div className="absolute right-0 top-full mt-1 bg-white border border-gray-200 shadow-md z-[60] w-[265px] p-4">
+                <div className="absolute right-0 top-full mt-1 bg-white border border-gray-200 shadow-md z-40 w-[265px] p-4">
                   <p className="text-[10px] uppercase tracking-widest text-gray-400 mb-3">Availability</p>
                   <div className="flex gap-2 mb-5">
                     {(["all", "available", "sold"] as const).map((opt) => (

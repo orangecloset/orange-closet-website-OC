@@ -1,4 +1,4 @@
-import { useEffect, type MouseEvent } from "react";
+import { useCallback, useEffect, useRef, useState, type MouseEvent } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import type { AboutPageConfig } from "../../cms/store/types";
 import { useCatalog } from "../data/CatalogContext";
@@ -206,6 +206,27 @@ export default function AboutPage() {
         s.images.some((i) => i.trim()))
   );
 
+  const sectionScrollRef = useRef<HTMLDivElement>(null);
+  const [sectionHasMore, setSectionHasMore] = useState(false);
+
+  const checkSectionScroll = useCallback(() => {
+    const el = sectionScrollRef.current;
+    if (!el) return;
+    setSectionHasMore(el.scrollLeft + el.clientWidth < el.scrollWidth - 4);
+  }, []);
+
+  useEffect(() => {
+    checkSectionScroll();
+    const el = sectionScrollRef.current;
+    if (!el) return;
+    el.addEventListener("scroll", checkSectionScroll, { passive: true });
+    window.addEventListener("resize", checkSectionScroll);
+    return () => {
+      el.removeEventListener("scroll", checkSectionScroll);
+      window.removeEventListener("resize", checkSectionScroll);
+    };
+  }, [checkSectionScroll, enabledSections]);
+
   const useMobileHero = viewport === "mobile" && !!about.mobileHeroImage;
   const heroSrc = useMobileHero ? about.mobileHeroImage : about.heroImage;
 
@@ -235,7 +256,7 @@ export default function AboutPage() {
                 </p>
               )}
               {about.heroHeading && (
-                <h1 className="text-2xl sm:text-3xl lg:text-4xl font-normal tracking-wide hero-title-shadow">
+                <h1 className="text-2xl sm:text-3xl lg:text-6xl font-normal tracking-wide hero-title-shadow">
                   {about.heroHeading}
                 </h1>
               )}
@@ -246,17 +267,22 @@ export default function AboutPage() {
 
       {enabledSections.length > 0 && (
         <section className="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 mt-4 sm:mt-6">
-          <div className="flex items-center gap-4 overflow-x-auto no-scrollbar pb-2">
-            {enabledSections.map((s) => (
-              <a
-                key={s.id}
-                href={`/about#${s.id}`}
-                onClick={(e) => handleSectionNav(e, s.id)}
-                className="text-xs uppercase tracking-widest font-medium whitespace-nowrap px-4 py-2 border border-gray-300 hover:bg-black hover:text-white hover:border-black transition-colors"
-              >
-                {s.label || s.heading}
-              </a>
-            ))}
+          <div className="relative">
+            <div ref={sectionScrollRef} className="flex items-center gap-4 overflow-x-auto no-scrollbar pb-2 pr-8">
+              {enabledSections.map((s) => (
+                <a
+                  key={s.id}
+                  href={`/about#${s.id}`}
+                  onClick={(e) => handleSectionNav(e, s.id)}
+                  className="text-xs uppercase tracking-widest font-medium whitespace-nowrap px-4 py-2 border border-gray-300 hover:bg-black hover:text-white hover:border-black transition-colors"
+                >
+                  {s.label || s.heading}
+                </a>
+              ))}
+            </div>
+            {sectionHasMore && (
+              <div className="absolute right-0 top-0 bottom-2 w-12 bg-gradient-to-l from-white to-transparent pointer-events-none" />
+            )}
           </div>
         </section>
       )}
