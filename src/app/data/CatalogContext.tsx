@@ -9,6 +9,7 @@ import {
   type ReactNode,
 } from "react";
 import type { Product, ProductType } from "../../data/products";
+import { getSaleInfo } from "../../data/types";
 import { seedHomepage, seedSettings, seedAbout, TYPES_KEY } from "../../cms/store/defaults";
 import { getCatalogToken, clearCatalogToken } from "../lib/access";
 import type {
@@ -215,7 +216,7 @@ export function CatalogProvider({ children }: { children: ReactNode }) {
   const onSaleProducts = useMemo(
     () =>
       products
-        .filter((p) => p.compareAtPrice && /\d/.test(p.compareAtPrice))
+        .filter((p) => getSaleInfo(p.price, p.compareAtPrice).onSale)
         .slice(0, 8),
     [products]
   );

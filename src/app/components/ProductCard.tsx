@@ -75,7 +75,7 @@ function CardBody({ product, variant }: { product: Product; variant: ProductCard
 
   if (variant === "home") {
     return (
-      <div className="mt-2 text-center text-sm leading-snug pl-3 pr-1">
+      <div className="mt-2 text-center text-xs sm:text-sm leading-snug pl-3 pr-1">
         <p className="text-gray-800 whitespace-nowrap overflow-hidden text-ellipsis">
           {product.name} <span className="text-gray-500 capitalize">{color.name}</span>
         </p>
@@ -85,19 +85,19 @@ function CardBody({ product, variant }: { product: Product; variant: ProductCard
 
   const cardText = (
     <>
-      <p className="text-gray-900 text-xs">{product.brand}</p>
-      <p className="text-gray-800 text-sm truncate">{product.name}</p>
-      <p className="text-gray-500 text-sm capitalize">{color.name}</p>
+      <p className="text-gray-900 text-[10px] sm:text-xs">{product.brand}</p>
+      <p className="text-gray-800 text-xs sm:text-sm truncate">{product.name}</p>
+      <p className="text-gray-500 text-xs sm:text-sm capitalize">{color.name}</p>
     </>
   );
 
   return (
-    <div className="mt-2 mb-2 text-center text-sm leading-snug pl-3 pr-1">
+    <div className="mt-2 mb-2 text-center text-xs sm:text-sm leading-snug pl-3 pr-1">
       {cardText}
       <div className="flex items-center justify-center gap-1.5 mt-1">
-        <span className="text-gray-900 font-medium">{product.price}</span>
+        <span className="text-gray-900 font-medium text-xs sm:text-sm">{product.price}</span>
         {product.compareAtPrice && (
-          <span className="text-gray-400 line-through text-xs">{product.compareAtPrice}</span>
+          <span className="text-gray-400 line-through text-[10px] sm:text-xs">{product.compareAtPrice}</span>
         )}
       </div>
     </div>
