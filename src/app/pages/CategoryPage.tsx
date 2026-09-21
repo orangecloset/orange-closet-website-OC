@@ -1,8 +1,9 @@
 import { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import { useParams, useLocation, Link } from "react-router-dom";
-import { ChevronDown, ChevronLeft, SlidersHorizontal } from "lucide-react";
+import { Check, ChevronDown, ChevronLeft, SlidersHorizontal } from "lucide-react";
 import type { Product, ProductColor, ProductType } from "../../data/products";
 import { productColorCss } from "../../data/products";
+import { getSaleInfo } from "../../data/types";
 import { useCatalog } from "../data/CatalogContext";
 import { useViewport } from "../hooks/useViewport";
 import NotFoundPage from "./NotFoundPage";
@@ -41,6 +42,10 @@ function sortByPrice(items: Product[], direction: 1 | -1) {
   return [...withNumeric, ...withoutNumeric];
 }
 
+function isOnSale(product: Product): boolean {
+  return getSaleInfo(product.price, product.compareAtPrice).onSale;
+}
+
 export default function CategoryPage() {
   const { type, category } = useParams<{ type?: string; category?: string }>();
   const location = useLocation();
@@ -52,6 +57,7 @@ export default function CategoryPage() {
   const [filterOpen, setFilterOpen] = useState(false);
   const [selectedColor, setSelectedColor] = useState<string>("");
   const [availability, setAvailability] = useState<"all" | "available" | "sold">("all");
+  const [onSaleOnly, setOnSaleOnly] = useState(false);
   const brandRef = useRef<HTMLDivElement>(null);
   const filterRef = useRef<HTMLDivElement>(null);
   const catScrollRef = useRef<HTMLDivElement>(null);
@@ -82,6 +88,7 @@ export default function CategoryPage() {
     setBrand("");
     setSelectedColor("");
     setAvailability("all");
+    setOnSaleOnly(false);
   }, [type, category]);
 
   useEffect(() => {
@@ -132,11 +139,17 @@ export default function CategoryPage() {
     return Array.from(new Set(base.map((p) => p.brand))).sort();
   }, [productType, productsByType]);
 
-  const filtered = useMemo(() => {
+  const baseProducts = useMemo(() => {
     if (!productType) return [];
-    let items = category
+    return category
       ? productsByType(productType).filter((p) => p.category === category)
       : [...productsByType(productType)];
+  }, [productType, category, productsByType]);
+
+  const hasSaleItems = useMemo(() => baseProducts.some(isOnSale), [baseProducts]);
+
+  const filtered = useMemo(() => {
+    let items = [...baseProducts];
     if (brand) items = items.filter((p) => p.brand === brand);
     if (selectedColor) {
       items = items.filter((p) =>
@@ -147,6 +160,9 @@ export default function CategoryPage() {
       items = items.filter((p) => p.inStock !== false);
     } else if (availability === "sold") {
       items = items.filter((p) => p.inStock === false);
+    }
+    if (onSaleOnly) {
+      items = items.filter(isOnSale);
     }
 
     const sorted = (() => {
@@ -170,21 +186,17 @@ export default function CategoryPage() {
       return [...inStock, ...soldOut];
     }
     return sorted;
-  }, [category, sortBy, productType, brand, selectedColor, availability, productsByType]);
+  }, [baseProducts, sortBy, brand, selectedColor, availability, onSaleOnly]);
 
   const availableColors = useMemo(() => {
-    if (!productType) return [];
-    const base = category
-      ? productsByType(productType).filter((p) => p.category === category)
-      : productsByType(productType);
     const colorMap = new Map<string, ProductColor>();
-    for (const p of base) {
+    for (const p of baseProducts) {
       for (const c of p.colors) {
         if (!colorMap.has(c.name)) colorMap.set(c.name, c);
       }
     }
     return Array.from(colorMap.values());
-  }, [productType, category, productsByType]);
+  }, [baseProducts]);
 
   const viewport = useViewport();
   const cols = viewport === "desktop" ? 4 : viewport === "tablet" ? 3 : 2;
@@ -205,7 +217,7 @@ export default function CategoryPage() {
     }
     setLoadedRows(defaultRows);
     try { sessionStorage.removeItem(storageKey); } catch { /* ignore */ }
-  }, [type, category, sortBy, brand, selectedColor, availability, viewport, defaultRows, storageKey]);
+  }, [type, category, sortBy, brand, selectedColor, availability, onSaleOnly, viewport, defaultRows, storageKey]);
 
   useEffect(() => {
     try { sessionStorage.setItem(storageKey, String(loadedRows)); } catch { /* ignore */ }
@@ -319,13 +331,13 @@ export default function CategoryPage() {
           <div className="relative" ref={brandRef}>
             <button
               onClick={() => setBrandOpen(!brandOpen)}
-              className="w-[200px] bg-white border border-gray-300 px-3 py-2 text-xs uppercase tracking-widest font-medium text-gray-900 flex items-center justify-between gap-2 hover:border-black transition-colors"
+              className="w-[140px] sm:w-[180px] lg:w-[200px] bg-white border border-gray-300 px-3 py-2 text-xs uppercase tracking-widest font-medium text-gray-900 flex items-center justify-between gap-2 hover:border-black transition-colors"
             >
               <span className="truncate">{brand || "All Brands"}</span>
               <ChevronDown className={`w-3 h-3 shrink-0 transition-transform duration-200 ${brandOpen ? "rotate-180" : ""}`} />
             </button>
             {brandOpen && (
-              <div className="absolute left-0 top-full mt-1 bg-white border border-gray-200 shadow-md z-40 min-w-[200px] max-h-60 overflow-y-auto thin-scrollbar">
+              <div className="absolute left-0 top-full mt-1 bg-white border border-gray-200 shadow-md z-40 min-w-[140px] sm:min-w-[180px] lg:min-w-[200px] max-h-60 overflow-y-auto thin-scrollbar">
                 <button
                   onClick={() => { setBrand(""); setBrandOpen(false); }}
                   className={`block w-full text-left px-4 py-2.5 text-xs uppercase tracking-widest hover:bg-gray-50 transition-colors ${brand === "" ? "text-black" : "text-gray-500"}`}
@@ -357,7 +369,7 @@ export default function CategoryPage() {
                 className="text-xs uppercase tracking-widest font-medium flex items-center gap-1"
               >
                 Sort by: {SORT_DISPLAY[sortBy]}
-                <ChevronDown className="w-3 h-3" />
+                <ChevronDown className={`w-3 h-3 transition-transform duration-200 ${sortOpen ? "rotate-180" : ""}`} />
               </button>
               {sortOpen && (
                 <div className="absolute right-0 top-full mt-1 bg-white border border-gray-200 shadow-md z-40 min-w-[180px]">
@@ -377,18 +389,42 @@ export default function CategoryPage() {
               <button
                 onClick={() => { setFilterOpen(!filterOpen); setSortOpen(false); }}
                 className={`p-1 transition-colors ${
-                  selectedColor || availability !== "all"
+                  selectedColor || availability !== "all" || onSaleOnly
                     ? "text-black"
                     : "text-gray-900 hover:opacity-70"
                 }`}
               >
                 <SlidersHorizontal className="w-4 h-4" />
-                {(selectedColor || availability !== "all") && (
+                {(selectedColor || availability !== "all" || onSaleOnly) && (
                   <span className="absolute -top-0.5 -right-0.5 w-1.5 h-1.5 rounded-full bg-black" />
                 )}
               </button>
               {filterOpen && (
                 <div className="absolute right-0 top-full mt-1 bg-white border border-gray-200 shadow-md z-40 w-[265px] p-4">
+                  {hasSaleItems && (
+                    <button
+                      type="button"
+                      role="checkbox"
+                      aria-checked={onSaleOnly}
+                      onClick={() => setOnSaleOnly((v) => !v)}
+                      className={`w-full flex items-center gap-3 border px-3 py-2.5 mb-5 text-left transition-colors ${
+                        onSaleOnly ? "border-black" : "border-gray-300 hover:border-black"
+                      }`}
+                    >
+                      <span
+                        className={`w-4 h-4 shrink-0 flex items-center justify-center border transition-colors ${
+                          onSaleOnly
+                            ? "bg-black border-black text-white"
+                            : "bg-white border-gray-400"
+                        }`}
+                      >
+                        {onSaleOnly && <Check className="w-3 h-3" strokeWidth={3} />}
+                      </span>
+                      <span className="text-[10px] uppercase tracking-widest font-medium text-gray-900">
+                        On Sale Only
+                      </span>
+                    </button>
+                  )}
                   <p className="text-[10px] uppercase tracking-widest text-gray-400 mb-3">Availability</p>
                   <div className="flex gap-2 mb-5">
                     {(["all", "available", "sold"] as const).map((opt) => (
@@ -440,9 +476,9 @@ export default function CategoryPage() {
                       </div>
                     </>
                   )}
-                  {(selectedColor || availability !== "all") && (
+                  {(selectedColor || availability !== "all" || onSaleOnly) && (
                     <button
-                      onClick={() => { setSelectedColor(""); setAvailability("all"); }}
+                      onClick={() => { setSelectedColor(""); setAvailability("all"); setOnSaleOnly(false); }}
                       className="text-[10px] uppercase tracking-widest text-gray-400 hover:text-black transition-colors mt-1"
                     >
                       Clear
