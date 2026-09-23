@@ -1,37 +1,29 @@
 # Disclaimer
 
-**Last updated:** 14 September 2026
+**Last updated:** 24 September 2026
 
-Please read this Disclaimer together with our Terms and Conditions and Privacy Policy.
+Please read this together with our Terms and Conditions and Privacy Policy.
 
 ## 1. General Information Only
 
-The Website is a digital product catalog for general reference. It does not constitute an offer to sell, solicitation, or advice of any kind.
+The Website is a digital product catalog for general reference. It is not an offer to sell, solicitation, or advice of any kind.
 
-## 2. Product Images and Descriptions
+## 2. Products
 
-- Product images are for illustration only. Colors, materials, and finishing may appear differently on screen than in person.
-- Descriptions are provided for reference and are confirmed in person at the branch.
-- Prices, stock levels, sizes, and colors shown may change without notice.
+- Product images are for illustration only; colors and materials may look different on screen than in person.
+- Prices, stock, sizes, and colors may change without notice and are confirmed at the branch.
+- Brand names and logos belong to their respective owners and are used for identification only.
 
-## 3. Third-Party Brands
+## 3. No Online Purchases
 
-ORANGE CLOSET is an independent retailer. Brand names, logos, and product names shown belong to their respective owners and are used only for identification.
+All sales happen in person at our branches.
 
-## 4. No Online Purchases
+## 4. Availability & Errors
 
-No purchases are completed through the Website. All sales happen in person at our branches.
+We try to keep the Website accurate and available, but we cannot guarantee uninterrupted access or error-free content. If you spot a mistake, please contact us and we will correct it.
 
-## 5. Website Availability
+## 5. Contact
 
-We try to keep the Website available at all times, but we do not guarantee uninterrupted access. The Website may be temporarily unavailable due to maintenance, updates, or circumstances beyond our control. We are not liable for any inconvenience or loss caused by such interruptions.
-
-## 6. Errors and Omissions
-
-We try to keep the catalog accurate, but errors may occur. If you notice a mistake, please contact us and we will correct it as soon as possible.
-
-## 7. Contact Us
-
-- **Main Branch:** Cagayan Town Center, Cagayan de Oro City, Philippines
-- **Facebook Page:** [https://www.facebook.com/may.orange.986](https://www.facebook.com/may.orange.986)
 - **Email:** orangeclosetwebsite@gmail.com
+- **Facebook:** [https://www.facebook.com/may.orange.986](https://www.facebook.com/may.orange.986)
+- **Branch:** Cagayan Town Center, Cagayan de Oro City, Philippines
