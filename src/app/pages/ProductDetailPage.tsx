@@ -624,7 +624,7 @@ export default function ProductDetailPage() {
                 })()}
               </div>
               <p className="mt-1 text-sm text-gray-500">{product.brand}</p>
-              <h1 className="text-xl sm:text-2xl font-semibold leading-snug">
+              <h1 className="text-xl sm:text-2xl font-semibold leading-snug line-clamp-2">
                 {product.name} - {color.name}
               </h1>
               <p className="mt-2 text-base">

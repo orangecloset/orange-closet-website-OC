@@ -92,7 +92,13 @@ export default function CategoryPage() {
   }, [type, category]);
 
   useEffect(() => {
-    const close = () => { setSortOpen(false); setBrandOpen(false); setFilterOpen(false); };
+    const close = (e: Event) => {
+      const target = e.target as Node;
+      if (filterRef.current?.contains(target)) return;
+      setSortOpen(false);
+      setBrandOpen(false);
+      setFilterOpen(false);
+    };
     window.addEventListener("scroll", close, { passive: true });
     return () => window.removeEventListener("scroll", close);
   }, []);

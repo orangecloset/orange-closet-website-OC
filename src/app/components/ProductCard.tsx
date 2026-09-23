@@ -76,7 +76,7 @@ function CardBody({ product, variant }: { product: Product; variant: ProductCard
   if (variant === "home") {
     return (
       <div className="mt-2 text-center text-xs sm:text-sm leading-snug pl-3 pr-1">
-        <p className="text-gray-800 whitespace-nowrap overflow-hidden text-ellipsis">
+        <p className="text-gray-800 line-clamp-2">
           {product.name} <span className="text-gray-500 capitalize">{color.name}</span>
         </p>
       </div>
@@ -86,7 +86,7 @@ function CardBody({ product, variant }: { product: Product; variant: ProductCard
   const cardText = (
     <>
       <p className="text-gray-900 text-[10px] sm:text-xs">{product.brand}</p>
-      <p className="text-gray-800 text-xs sm:text-sm truncate">{product.name}</p>
+      <p className="text-gray-800 text-xs sm:text-sm line-clamp-2">{product.name}</p>
       <p className="text-gray-500 text-xs sm:text-sm capitalize">{color.name}</p>
     </>
   );
