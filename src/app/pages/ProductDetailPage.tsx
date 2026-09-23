@@ -476,8 +476,8 @@ export default function ProductDetailPage() {
 
       <div className="flex flex-col lg:flex-row gap-8 lg:gap-14">
 
-        <div className="w-full lg:w-[55%] shrink-0 lg:sticky lg:top-24 lg:self-start">
-          <nav className="text-[11px] text-gray-500 uppercase tracking-wide mb-6 flex flex-wrap items-center gap-1.5">
+        <div className="w-full lg:w-[55%] shrink-0 lg:self-start">
+          <nav className="text-[11px] text-gray-500 uppercase tracking-wide mb-6 mt-4 flex flex-wrap items-center gap-1.5">
             <Link to="/" className="hover:text-black transition-colors">
               Home
             </Link>
