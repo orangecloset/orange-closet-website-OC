@@ -4,6 +4,7 @@ import type { AboutPageConfig } from "../../cms/store/types";
 import { useCatalog } from "../data/CatalogContext";
 import { usePageTitle } from "../hooks/usePageTitle";
 import { useViewport } from "../hooks/useViewport";
+import ImageWithFallback from "../components/ImageWithFallback";
 
 type Section = AboutPageConfig["sections"][number];
 
@@ -53,12 +54,10 @@ function ImageStack({ images }: { images: string[] }) {
   return (
     <div className={`grid gap-2 ${clean.length > 1 ? "grid-cols-2" : "grid-cols-1"}`}>
       {clean.map((src, i) => (
-        <img
+        <ImageWithFallback
           key={`${src}-${i}`}
           src={src}
           alt=""
-          loading="lazy"
-          decoding="async"
           className="w-full h-full object-cover aspect-[3/4]"
         />
       ))}
@@ -103,7 +102,7 @@ function SectionBody({ section }: { section: Section }) {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
           {section.images[0]?.trim() && (
             <div className="relative aspect-[16/10] bg-gray-100 overflow-hidden order-2 lg:order-1">
-              <img src={section.images[0]} alt="" loading="lazy" decoding="async" className="w-full h-full object-cover" />
+              <ImageWithFallback src={section.images[0]} alt="" className="w-full h-full object-cover" />
               <div className="absolute inset-0 bg-black/8" />
             </div>
           )}
@@ -236,14 +235,10 @@ export default function AboutPage() {
       <section className="relative w-full">
         <div className={`relative w-full bg-gray-200 overflow-hidden ${useMobileHero ? "" : "aspect-[1920/900]"}`}>
           {heroSrc && (
-            <img
+            <ImageWithFallback
               src={heroSrc}
               alt=""
-              loading="eager"
-              decoding="async"
-              ref={(el) => {
-                if (el) el.setAttribute("fetchpriority", "high");
-              }}
+              priority
               className={useMobileHero ? "w-full h-auto" : "w-full h-full object-cover"}
             />
           )}
