@@ -37,6 +37,7 @@ function GalleryImage({
       src={src}
       alt={alt}
       className={className}
+      crossOrigin="anonymous"
       loading={eager ? "eager" : "lazy"}
       decoding="async"
       onError={() => {
@@ -776,6 +777,7 @@ export default function ProductDetailPage() {
             <img
               src={activeImages[lightboxIndex]}
               alt={`${product.name} - ${color.name}`}
+              crossOrigin="anonymous"
               className="max-h-[90vh] max-w-[90vw] object-contain select-none"
               draggable={false}
             />
@@ -784,6 +786,7 @@ export default function ProductDetailPage() {
                 key={lightboxFadeKeyRef.current}
                 src={lightboxFade}
                 alt={`${product.name} - ${color.name}`}
+                crossOrigin="anonymous"
                 className="absolute inset-0 max-h-[90vh] max-w-[90vw] object-contain select-none"
                 style={{ transition: "opacity 350ms ease-out", opacity: 1 }}
                 ref={(el) => {
