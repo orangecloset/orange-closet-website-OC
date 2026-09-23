@@ -4,6 +4,7 @@ import { Menu, X, Search, Share2, ChevronDown, ShoppingBag } from "lucide-react"
 import { TYPE_LABELS, primaryColor } from "../../data/products";
 import { useCatalog } from "../data/CatalogContext";
 import { splitNavItems } from "../lib/site-config";
+import ImageWithFallback from "./ImageWithFallback";
 
 function formatLabel(text: string): string {
   return text.toLowerCase().replace(/\b\w/g, (c) => c.toUpperCase());
@@ -439,7 +440,7 @@ export default function Header({ onShare, showShare = true }: HeaderProps) {
             <div className="w-px bg-gray-200 my-4 shrink-0" />
             <div className="flex items-center justify-center py-6 pl-8">
               {megaPreviewImage ? (
-                <img
+                <ImageWithFallback
                   src={megaPreviewImage}
                   alt=""
                   className="h-[320px] w-auto object-cover transition-all duration-300"
@@ -500,7 +501,7 @@ export default function Header({ onShare, showShare = true }: HeaderProps) {
             <div className="w-px bg-gray-200 my-4 shrink-0" />
             <div className="flex items-center justify-center py-6 pl-8">
               {morePreviewImage ? (
-                <img
+                <ImageWithFallback
                   src={morePreviewImage}
                   alt=""
                   className="h-[320px] w-auto object-cover transition-all duration-300"
