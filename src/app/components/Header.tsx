@@ -10,15 +10,15 @@ function formatLabel(text: string): string {
   return text.toLowerCase().replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
-function HeaderSubtitleLine({ text }: { text: string }) {
+function HeaderSubtitleLine({ text, showLines = true }: { text: string; showLines?: boolean }) {
   return (
     <span
       className="flex items-center gap-2 text-[10px] font-normal tracking-[0.25em] uppercase whitespace-nowrap"
       style={{ fontFamily: "'Cinzel', serif", WebkitTextStroke: "0" }}
     >
-      <span aria-hidden="true" className="block h-px w-6 bg-current opacity-60" />
+      {showLines && <span aria-hidden="true" className="block h-px w-6 bg-current opacity-60" />}
       {text}
-      <span aria-hidden="true" className="block h-px w-6 bg-current opacity-60" />
+      {showLines && <span aria-hidden="true" className="block h-px w-6 bg-current opacity-60" />}
     </span>
   );
 }
@@ -271,7 +271,7 @@ export default function Header({ onShare, showShare = true }: HeaderProps) {
   return (
     <header className={`sticky top-0 bg-white shadow-sm border-b border-gray-100 ${mobileMenuOpen ? 'z-[100]' : 'z-50'}`}>
       <div className="px-2.5 sm:px-3.5 lg:px-16.5">
-        <div className={`relative flex items-center ${headerSubtitle ? "h-16" : "h-14"} gap-4`}>
+        <div className={`relative flex items-center ${headerSubtitle ? "h-17" : "h-14"} gap-4`}>
 
           <div
             className={`flex items-center min-w-0 flex-1 gap-4 transition-opacity duration-300 ease-out ${
@@ -334,7 +334,7 @@ export default function Header({ onShare, showShare = true }: HeaderProps) {
               onClick={() => window.scrollTo(0, 0)}
               className={
                 headerSubtitle
-                  ? "absolute left-1/2 -translate-x-1/2 flex flex-col items-center gap-1.5"
+                  ? "absolute left-1/2 -translate-x-1/2 top-3.5 sm:top-3 flex flex-col items-center gap-1"
                   : "absolute left-1/2 -translate-x-1/2"
               }
             >
@@ -543,21 +543,21 @@ export default function Header({ onShare, showShare = true }: HeaderProps) {
             onClick={closeMobileMenu}
           />
           <div className={`panel absolute top-0 left-0 h-full w-full md:w-96 bg-white shadow-2xl flex flex-col ${mobileMenuClosing ? "anim-out" : "anim-in"}`}>
-            <div className={`flex items-center justify-between px-6 ${headerSubtitle ? "h-16" : "h-14"} border-b border-gray-100 shadow-sm`}>
+            <div className={`flex ${headerSubtitle ? "items-start" : "items-center"} justify-between px-6 ${headerSubtitle ? "h-17" : "h-14"} border-b border-gray-100 shadow-sm`}>
               <Link
                 to="/"
                 className={
                   headerSubtitle
-                    ? "flex flex-col gap-1 text-lg font-black tracking-[0.15em] uppercase"
+                    ? "flex flex-col items-center gap-1 pt-3.5 text-lg font-black tracking-[0.15em] uppercase"
                     : "text-lg font-black tracking-[0.15em] uppercase"
                 }
                 style={{ fontFamily: "'Cinzel', serif", WebkitTextStroke: "0.5px" }}
                 onClick={() => { window.scrollTo(0, 0); navigateAndCloseMobileMenu(); }}
               >
                 {settings.storeName}
-                {headerSubtitle ? <HeaderSubtitleLine text={headerSubtitle} /> : null}
+                {headerSubtitle ? <HeaderSubtitleLine text={headerSubtitle} showLines={false} /> : null}
               </Link>
-              <div className="flex items-center gap-4">
+              <div className={headerSubtitle ? "flex items-center gap-4 self-center" : "flex items-center gap-4"}>
                 <button
                   aria-label="Search"
                   onClick={() => { closeMobileMenu(); setTimeout(() => setSearchOpen(true), 200); }}
