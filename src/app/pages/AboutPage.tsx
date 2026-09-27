@@ -242,7 +242,7 @@ export default function AboutPage() {
               className={useMobileHero ? "w-full h-auto" : "w-full h-full object-cover"}
             />
           )}
-          {!about.heroTextBlack && <div className="absolute inset-0 bg-black/15" />}
+          <div className="absolute inset-0 bg-black/15" />
           <div className="absolute inset-0 flex items-center">
             <div className={`max-w-screen-2xl mx-auto w-full px-4 sm:px-6 lg:px-8 ${about.heroTextBlack ? "text-black" : "text-white"} text-left`}>
               {about.heroSubtitle && (
