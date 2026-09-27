@@ -2,10 +2,12 @@ import { useEffect, useState } from "react";
 
 type Branding = {
   storeName?: string;
+  headerSubtitle?: string;
   tagline?: string;
   messageButtonLabel?: string;
   messengerUrl?: string;
   locationText?: string;
+  locationUrl?: string;
 };
 
 type StatusPayload = {
@@ -60,10 +62,12 @@ export default function CatalogLockScreen() {
   const b = status.branding ?? {};
   const faviconUrl = status.faviconUrl?.trim();
   const storeName = b.storeName?.trim();
+  const headerSubtitle = b.headerSubtitle?.trim();
   const tagline = b.tagline?.trim();
   const messageButtonLabel = b.messageButtonLabel?.trim();
   const messengerUrl = b.messengerUrl?.trim();
   const locationText = b.locationText?.trim();
+  const locationUrl = b.locationUrl?.trim();
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-white px-6 text-center font-sans text-black">
@@ -83,6 +87,16 @@ export default function CatalogLockScreen() {
           {storeName}
         </h1>
       )}
+      {headerSubtitle && (
+        <p
+          className="flex items-center gap-2 text-[10px] font-normal tracking-[0.25em] whitespace-nowrap"
+          style={{ fontFamily: "'Cinzel', serif" }}
+        >
+          <span aria-hidden="true" className="ln-l" />
+          {headerSubtitle}
+          <span aria-hidden="true" className="ln-r" />
+        </p>
+      )}
       {tagline && <p className="mt-3 text-sm text-gray-500">{tagline}</p>}
 
       {messengerUrl && (
@@ -98,7 +112,18 @@ export default function CatalogLockScreen() {
 
       <footer className="absolute inset-x-0 bottom-0 flex justify-center pb-8">
         {locationText && (
-          <p className="px-4 text-xs sm:text-sm text-gray-500">{locationText}</p>
+          locationUrl ? (
+            <a
+              href={locationUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="px-4 text-xs sm:text-sm text-gray-500 transition-colors hover:text-black"
+            >
+              {locationText}
+            </a>
+          ) : (
+            <p className="px-4 text-xs sm:text-sm text-gray-500">{locationText}</p>
+          )
         )}
       </footer>
     </div>

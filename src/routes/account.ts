@@ -35,6 +35,7 @@ app.get("/status", async (c) => {
     const faviconUrl = str("faviconUrl", "/favicon.png");
     const branding = {
       storeName: str("storeName", "Store"),
+      headerSubtitle: str("headerSubtitle"),
       tagline: str("tagline"),
       conciergeHeading: str("conciergeHeading"),
       conciergeText: str("conciergeText"),
