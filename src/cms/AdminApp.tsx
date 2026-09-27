@@ -165,7 +165,7 @@ const ROUTE_DIRTY_KEY_MAP: Record<string, string> = {
 
 function UnsavedChangesNotice() {
   const { configDirty } = useCms();
-  const { showToast, dismissAll } = useToast();
+  const { showToast, dismissAll, dismissWarnings } = useToast();
   const location = useLocation();
   const prevDirtyRef = useRef<Set<string>>(new Set());
   const prevPathRef = useRef(location.pathname);
@@ -186,12 +186,12 @@ function UnsavedChangesNotice() {
       if (added.includes(activeKey)) {
         showToast("Unsaved changes. Click Save to apply them.", true, "warning");
       } else if (prevDirtyRef.current.has(activeKey) && !configDirty.includes(activeKey)) {
-        dismissAll();
+        dismissWarnings();
       }
     }
 
     prevDirtyRef.current = new Set(configDirty);
-  }, [configDirty, location.pathname, showToast, dismissAll]);
+  }, [configDirty, location.pathname, showToast, dismissAll, dismissWarnings]);
 
   return null;
 }

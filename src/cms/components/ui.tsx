@@ -37,8 +37,12 @@ export function ToastProvider({ children }: { children: ReactNode }) {
     setToasts([]);
   }, []);
 
+  const dismissWarnings = useCallback(() => {
+    setToasts((prev) => prev.filter((t) => t.type !== "warning"));
+  }, []);
+
   return (
-    <ToastContext.Provider value={{ showToast, dismissAll }}>
+    <ToastContext.Provider value={{ showToast, dismissAll, dismissWarnings }}>
       {children}
       <div className="pointer-events-none fixed bottom-4 right-4 z-[200] flex flex-col gap-2">
         {toasts.map((t) => {
