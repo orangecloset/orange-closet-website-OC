@@ -131,6 +131,7 @@ export function seedAbout(): AboutPageConfig {
   return {
     heroHeading: "",
     heroSubtitle: "",
+    heroTextBlack: false,
     sections: [],
   };
 }

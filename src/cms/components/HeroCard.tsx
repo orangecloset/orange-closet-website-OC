@@ -26,6 +26,17 @@ export function HeroCard({ hero }: { hero: HomepageHero }) {
         </span>
         <button
           type="button"
+          onClick={() => patchHero({ textBlack: !hero.textBlack })}
+          aria-label={hero.textBlack ? "Show title in white" : "Show title in black"}
+          aria-pressed={!!hero.textBlack}
+          className={`h-5 w-5 shrink-0 rounded-full border transition-colors ${
+            hero.textBlack
+              ? "border-black bg-black"
+              : "border-[var(--border-base)] bg-white"
+          }`}
+        />
+        <button
+          type="button"
           onClick={removeHero}
           aria-label={`Remove hero ${index + 1}`}
           title="Remove this hero"

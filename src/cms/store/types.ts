@@ -78,6 +78,7 @@ export type HomepageHero = {
   mobileSrc: string;
   to: string;
   wide: boolean;
+  textBlack?: boolean;
 };
 
 export type HomepageConfig = {
@@ -145,6 +146,7 @@ export type AboutPageConfig = {
   heroSubtitle: string;
   heroImage?: string;
   mobileHeroImage?: string;
+  heroTextBlack?: boolean;
   sections: {
     id: string;
     label: string;

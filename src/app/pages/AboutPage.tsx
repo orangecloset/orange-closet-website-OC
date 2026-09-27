@@ -242,16 +242,16 @@ export default function AboutPage() {
               className={useMobileHero ? "w-full h-auto" : "w-full h-full object-cover"}
             />
           )}
-          <div className="absolute inset-0 bg-black/15" />
+          {!about.heroTextBlack && <div className="absolute inset-0 bg-black/15" />}
           <div className="absolute inset-0 flex items-center">
-            <div className="max-w-screen-2xl mx-auto w-full px-4 sm:px-6 lg:px-8 text-white text-left">
+            <div className={`max-w-screen-2xl mx-auto w-full px-4 sm:px-6 lg:px-8 ${about.heroTextBlack ? "text-black" : "text-white"} text-left`}>
               {about.heroSubtitle && (
-                <p className="text-xs uppercase tracking-widest mb-3 border-b border-white pb-0.5 inline-block">
+                <p className={`text-xs uppercase tracking-widest mb-3 border-b ${about.heroTextBlack ? "border-black" : "border-white"} pb-0.5 inline-block`}>
                   {about.heroSubtitle}
                 </p>
               )}
               {about.heroHeading && (
-                <h1 className="text-2xl sm:text-3xl lg:text-[2.5rem] font-normal tracking-wide hero-title-shadow">
+                <h1 className={`text-2xl sm:text-3xl lg:text-[2.5rem] font-normal tracking-wide ${about.heroTextBlack ? "" : "hero-title-shadow"}`}>
                   {about.heroHeading}
                 </h1>
               )}

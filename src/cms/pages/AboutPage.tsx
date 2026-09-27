@@ -28,7 +28,7 @@ export default function AboutPage() {
     }
   };
 
-  const handleHero = (patch: Partial<Pick<AboutPageConfig, "heroHeading" | "heroSubtitle" | "heroImage" | "mobileHeroImage">>) => {
+  const handleHero = (patch: Partial<Pick<AboutPageConfig, "heroHeading" | "heroSubtitle" | "heroImage" | "mobileHeroImage" | "heroTextBlack">>) => {
     updateAbout(patch);
   };
 
@@ -89,7 +89,20 @@ export default function AboutPage() {
 
       <Container>
         <div className="space-y-4 px-4 py-4">
-          <h2 className="text-[13px] font-medium text-[var(--fg-base)]">Hero</h2>
+          <div className="flex items-center gap-2">
+            <h2 className="text-[13px] font-medium text-[var(--fg-base)]">Hero</h2>
+            <button
+              type="button"
+              onClick={() => handleHero({ heroTextBlack: !about.heroTextBlack })}
+              aria-label={about.heroTextBlack ? "Show title in white" : "Show title in black"}
+              aria-pressed={!!about.heroTextBlack}
+              className={`h-5 w-5 shrink-0 rounded-full border transition-colors ${
+                about.heroTextBlack
+                  ? "border-black bg-black"
+                  : "border-[var(--border-base)] bg-white"
+              }`}
+            />
+          </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
               <Label>Subtitle</Label>

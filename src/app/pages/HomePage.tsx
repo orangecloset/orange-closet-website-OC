@@ -47,11 +47,11 @@ function HeroBlocks({ heroes, imageClickable }: { heroes: HomepageHero[]; imageC
                 />
                 {(block.hero.label || block.hero.subtitle) && (
                   <>
-                    <div className="absolute inset-0 bg-black/10" />
+                    {!block.hero.textBlack && <div className="absolute inset-0 bg-black/10" />}
                     <div className={`absolute inset-0 flex ${wideMobile ? "items-end justify-center pb-9" : "items-center justify-center"} sm:items-center sm:justify-start sm:pb-0 sm:pl-16`}>
-                      <div className="text-white text-center sm:text-left">
+                      <div className={`${block.hero.textBlack ? "text-black" : "text-white"} text-center sm:text-left`}>
                         {block.hero.label && (
-                          <h2 className={`${wideMobile ? "text-3xl" : "text-2xl"} sm:text-3xl lg:text-[2.5rem] font-normal tracking-wide mb-2`} style={{ textShadow: "0 0 5px rgba(0,0,0,0.3)" }}>
+                          <h2 className={`${wideMobile ? "text-3xl" : "text-2xl"} sm:text-3xl lg:text-[2.5rem] font-normal tracking-wide mb-2`} style={block.hero.textBlack ? undefined : { textShadow: "0 0 5px rgba(0,0,0,0.3)" }}>
                             {block.hero.label}
                           </h2>
                         )}
@@ -73,11 +73,11 @@ function HeroBlocks({ heroes, imageClickable }: { heroes: HomepageHero[]; imageC
                 />
                 {(block.hero.label || block.hero.subtitle) && (
                   <>
-                    <div className="absolute inset-0 bg-black/10" />
+                    {!block.hero.textBlack && <div className="absolute inset-0 bg-black/10" />}
                     <div className={`absolute inset-0 flex ${wideMobile ? "items-end justify-center pb-9" : "items-center justify-center"} sm:items-center sm:justify-start sm:pb-0 sm:pl-16`}>
-                      <div className="text-white text-center sm:text-left">
+                      <div className={`${block.hero.textBlack ? "text-black" : "text-white"} text-center sm:text-left`}>
                         {block.hero.label && (
-                          <h2 className={`${wideMobile ? "text-3xl" : "text-2xl"} sm:text-3xl lg:text-[2.5rem] font-normal tracking-wide mb-2`} style={{ textShadow: "0 0 5px rgba(0,0,0,0.3)" }}>
+                          <h2 className={`${wideMobile ? "text-3xl" : "text-2xl"} sm:text-3xl lg:text-[2.5rem] font-normal tracking-wide mb-2`} style={block.hero.textBlack ? undefined : { textShadow: "0 0 5px rgba(0,0,0,0.3)" }}>
                             {block.hero.label}
                           </h2>
                         )}
@@ -106,15 +106,15 @@ function HeroBlocks({ heroes, imageClickable }: { heroes: HomepageHero[]; imageC
                   />
                   {(item.label || item.subtitle) && (
                     <>
-                      <div className="absolute inset-0 bg-black/8" />
-                      <div className="absolute bottom-4 left-5 sm:top-4 sm:bottom-auto">
+                      {!item.textBlack && <div className="absolute inset-0 bg-black/8" />}
+                      <div className={`absolute bottom-4 left-5 sm:top-4 sm:bottom-auto ${item.textBlack ? "text-black" : "text-white"}`}>
                         {item.label && (
-                          <h2 className="text-white text-2xl lg:text-3xl font-normal mb-1" style={{ textShadow: "0 0 5px rgba(0,0,0,0.3)" }}>
+                          <h2 className="text-2xl lg:text-3xl font-normal mb-1" style={item.textBlack ? undefined : { textShadow: "0 0 5px rgba(0,0,0,0.3)" }}>
                             {item.label}
                           </h2>
                         )}
                         {item.subtitle && (
-                          <span className="text-white underline underline-offset-4 text-[10px] uppercase tracking-widest hover:opacity-60 transition-opacity">{item.subtitle}</span>
+                          <span className="underline underline-offset-4 text-[10px] uppercase tracking-widest hover:opacity-60 transition-opacity">{item.subtitle}</span>
                         )}
                       </div>
                     </>
@@ -130,15 +130,15 @@ function HeroBlocks({ heroes, imageClickable }: { heroes: HomepageHero[]; imageC
                   />
                   {(item.label || item.subtitle) && (
                     <>
-                      <div className="absolute inset-0 bg-black/8" />
-                      <div className="absolute bottom-4 left-5 sm:top-4 sm:bottom-auto">
+                      {!item.textBlack && <div className="absolute inset-0 bg-black/8" />}
+                      <div className={`absolute bottom-4 left-5 sm:top-4 sm:bottom-auto ${item.textBlack ? "text-black" : "text-white"}`}>
                         {item.label && (
-                          <h2 className="text-white text-2xl lg:text-3xl font-normal mb-1" style={{ textShadow: "0 0 5px rgba(0,0,0,0.3)" }}>
+                          <h2 className="text-2xl lg:text-3xl font-normal mb-1" style={item.textBlack ? undefined : { textShadow: "0 0 5px rgba(0,0,0,0.3)" }}>
                             {item.label}
                           </h2>
                         )}
                         {item.subtitle && (
-                          <Link to={item.to} className="text-white underline underline-offset-4 text-[10px] uppercase tracking-widest hover:opacity-60 transition-opacity">{item.subtitle}</Link>
+                          <Link to={item.to} className="underline underline-offset-4 text-[10px] uppercase tracking-widest hover:opacity-60 transition-opacity">{item.subtitle}</Link>
                         )}
                       </div>
                     </>
