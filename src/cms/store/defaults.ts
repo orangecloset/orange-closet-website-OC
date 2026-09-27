@@ -101,6 +101,7 @@ export function seedTypes(): ProductTypeInfo[] {
 export function seedSettings(): SettingsConfig {
   return {
     storeName: "",
+    headerSubtitle: "",
     tagline: "",
     facebookUrl: "",
     messengerUrl: "",

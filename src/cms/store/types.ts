@@ -121,6 +121,7 @@ export type FooterSocial = {
 
 export type SettingsConfig = {
   storeName: string;
+  headerSubtitle: string;
   tagline: string;
   faviconUrl: string;
   ogImageUrl: string;

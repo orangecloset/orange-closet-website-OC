@@ -199,6 +199,18 @@ export default function SettingsPage() {
               />
             </div>
             <div className="flex flex-col gap-2">
+              <Label htmlFor="header-subtitle">Header Subtitle</Label>
+              <Input
+                id="header-subtitle"
+                value={settings.headerSubtitle}
+                onChange={(e) => set({ headerSubtitle: e.target.value })}
+                placeholder="by marilou"
+              />
+              <p className="text-xs text-[var(--fg-muted)]">
+                Shown under the store name in the header and side menu. Leave empty to hide.
+              </p>
+            </div>
+            <div className="flex flex-col gap-2">
               <Label htmlFor="tagline">Tagline</Label>
               <Input
                 id="tagline"
