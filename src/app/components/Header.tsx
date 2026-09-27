@@ -13,12 +13,12 @@ function formatLabel(text: string): string {
 function HeaderSubtitleLine({ text, showLines = true }: { text: string; showLines?: boolean }) {
   return (
     <span
-      className="flex items-center gap-2 text-[10px] font-normal tracking-[0.25em] uppercase whitespace-nowrap"
+      className="flex items-center gap-2 text-[10px] font-normal tracking-[0.25em] normal-case whitespace-nowrap"
       style={{ fontFamily: "'Cinzel', serif", WebkitTextStroke: "0" }}
     >
-      {showLines && <span aria-hidden="true" className="block h-px w-6 bg-current opacity-60" />}
+      {showLines && <span aria-hidden="true" className="ln-l" />}
       {text}
-      {showLines && <span aria-hidden="true" className="block h-px w-6 bg-current opacity-60" />}
+      {showLines && <span aria-hidden="true" className="ln-r" />}
     </span>
   );
 }
@@ -334,7 +334,7 @@ export default function Header({ onShare, showShare = true }: HeaderProps) {
               onClick={() => window.scrollTo(0, 0)}
               className={
                 headerSubtitle
-                  ? "absolute left-1/2 -translate-x-1/2 top-3.5 sm:top-3 flex flex-col items-center gap-1"
+                  ? "absolute left-1/2 -translate-x-1/2 top-3.5 sm:top-3 flex flex-col items-center"
                   : "absolute left-1/2 -translate-x-1/2"
               }
             >
@@ -548,7 +548,7 @@ export default function Header({ onShare, showShare = true }: HeaderProps) {
                 to="/"
                 className={
                   headerSubtitle
-                    ? "flex flex-col items-center gap-1 pt-3.5 text-lg font-black tracking-[0.15em] uppercase"
+                    ? "flex flex-col items-start pt-3.5 text-lg font-black tracking-[0.15em] uppercase"
                     : "text-lg font-black tracking-[0.15em] uppercase"
                 }
                 style={{ fontFamily: "'Cinzel', serif", WebkitTextStroke: "0.5px" }}

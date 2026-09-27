@@ -101,6 +101,21 @@ src: url('https://storage.googleapis.com/download/storage/v1/b/prd-storytodesign
   scrollbar-color: #c4c4c4 transparent;
 }
 
+.ln-l {
+  display: block;
+  width: 26px;
+  height: 1px;
+  opacity: 0.8;
+  background: linear-gradient(to right, transparent 0%, currentColor 85%, currentColor 100%);
+}
+.ln-r {
+  display: block;
+  width: 26px;
+  height: 1px;
+  opacity: 0.8;
+  background: linear-gradient(to right, currentColor 0%, currentColor 15%, transparent 100%);
+}
+
 .hero-title-shadow {
   text-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
 }
