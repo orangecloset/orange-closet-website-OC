@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { Check, Plus, Search, X } from "lucide-react";
 import { useCms } from "../store/cmsContext";
-import type { CmsProduct } from "../store/types";
+import type { CmsProduct } from "../../data/store-types";
 import { api } from "../lib/api";
 import { Badge, Container, Header, Input } from "./ui";
 import { SortableList, DragHandle } from "./SortableList";

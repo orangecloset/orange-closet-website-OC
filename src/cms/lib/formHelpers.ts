@@ -1,4 +1,4 @@
-import type { ProductTypeInfo } from "../store/types";
+import type { ProductTypeInfo } from "../../data/store-types";
 
 export function slugify(value: string): string {
   return value

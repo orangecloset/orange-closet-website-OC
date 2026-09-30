@@ -3,7 +3,7 @@ import { Plus, Pencil, Trash2 } from "lucide-react";
 import { useToast } from "../store/toastContext";
 import { useCms } from "../store/cmsContext";
 import { api } from "../lib/api";
-import type { ProductTypeInfo, TypeCategory } from "../store/types";
+import type { ProductTypeInfo, TypeCategory } from "../../data/store-types";
 import { Button, ConfirmDialog, Container, Header } from "../components/ui";
 import { DndContainer, SortableItems, DragHandle } from "../components/SortableList";
 import { arrayMove } from "@dnd-kit/sortable";

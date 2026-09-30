@@ -2,7 +2,7 @@ import { useState, type FormEvent } from "react";
 import { Plus, X, Ban, Copy, Check, Eye, EyeOff, Trash2, TriangleAlert, Facebook, Instagram, Youtube, Twitter } from "lucide-react";
 import { useCms } from "../store/cmsContext";
 import { authHeaders } from "../store/auth";
-import type { FooterLink } from "../store/types";
+import type { FooterLink } from "../../data/store-types";
 import {
   ActionMenu,
   Badge,

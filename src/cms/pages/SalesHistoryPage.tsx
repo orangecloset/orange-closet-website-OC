@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { ChevronLeft, ChevronRight, Download, Loader2, Printer, ShoppingBag } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useCms } from "../store/cmsContext";
-import type { CmsProduct, RecentSale } from "../store/types";
+import type { CmsProduct, RecentSale } from "../../data/store-types";
 import { api } from "../lib/api";
 import type { PagedSales } from "../lib/api";
 import { parsePrice, printReceipt, downloadReceiptPdf, type ReceiptData } from "../lib/receipt";

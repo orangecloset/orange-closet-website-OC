@@ -4,7 +4,7 @@ import { Check, ChevronDown, ChevronLeft, SlidersHorizontal } from "lucide-react
 import type { Product, ProductColor, ProductType } from "../../data/products";
 import { productColorCss } from "../../data/products";
 import { getSaleInfo } from "../../data/types";
-import { useCatalog } from "../data/CatalogContext";
+import { useCatalog } from "../context/CatalogContext";
 import { useViewport } from "../hooks/useViewport";
 import NotFoundPage from "./NotFoundPage";
 import { usePageTitle } from "../hooks/usePageTitle";
@@ -450,7 +450,7 @@ export default function CategoryPage() {
                   {availableColors.length > 0 && (
                     <>
                       <p className="text-[10px] uppercase tracking-widest text-gray-400 mb-3">Color</p>
-                      <div className="max-h-[200px] overflow-y-auto thin-scrollbar pr-1">
+                      <div className="max-h-[200px] overflow-y-auto thin-scrollbar px-1.5 py-1.5">
                         <div className="grid grid-cols-3 gap-x-2 gap-y-3">
                           {availableColors.map((c) => {
                             const isActive = selectedColor === c.name;

@@ -1,4 +1,4 @@
-import type { RecentSale } from "../store/types";
+import type { RecentSale } from "../../data/store-types";
 
 export type ReceiptProductContent = {
   sections?: { title: string; body: string }[];

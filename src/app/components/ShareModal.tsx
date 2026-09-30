@@ -1,9 +1,9 @@
 import { useEffect, useRef, useState } from "react";
 import { Loader2, X } from "lucide-react";
 import QRCodeStyling from "qr-code-styling";
-import { useFocusTrap } from "../hooks/useFocusTrap";
+import { useFocusTrap } from "../../hooks/useFocusTrap";
 import { getCatalogToken, getCatalogUid } from "../lib/access";
-import { useCatalog } from "../data/CatalogContext";
+import { useCatalog } from "../context/CatalogContext";
 
 type ShareModalProps = {
   onClose: () => void;

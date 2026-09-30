@@ -1,7 +1,7 @@
 import { Link, useParams } from "react-router-dom";
 import Markdown from "react-markdown";
 import { ArrowLeft } from "lucide-react";
-import { useCatalog } from "../data/CatalogContext";
+import { useCatalog } from "../context/CatalogContext";
 import { usePageTitle } from "../hooks/usePageTitle";
 
 export default function LegalPage() {

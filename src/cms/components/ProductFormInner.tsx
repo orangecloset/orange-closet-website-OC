@@ -3,7 +3,7 @@ import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom"
 import { GripVertical, Plus, X } from "lucide-react";
 import { useToast } from "../store/toastContext";
 import { useCms } from "../store/cmsContext";
-import type { CmsProduct, ProductStatus } from "../store/types";
+import type { CmsProduct, ProductStatus } from "../../data/store-types";
 import { colorSwatchCss } from "../../data/products";
 import { Button, Container, Header, Input, Label, Select, Tabs, Textarea } from "./ui";
 import { UploadButton } from "./UploadButton";

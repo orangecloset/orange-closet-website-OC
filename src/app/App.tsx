@@ -12,10 +12,10 @@ import ProductDetailPage from "./pages/ProductDetailPage";
 import AboutPage from "./pages/AboutPage";
 import LegalPage from "./pages/LegalPage";
 import NotFoundPage from "./pages/NotFoundPage";
-import { useCatalog } from "./data/CatalogContext";
+import CatalogLockScreen from "./pages/CatalogLockScreen";
+import { useCatalog } from "./context/CatalogContext";
 import { useScrollRestoration } from "./hooks/useScrollRestoration";
 import { getCatalogToken, getCatalogMode } from "./lib/access";
-import CatalogLockScreen from "./components/CatalogLockScreen";
 
 export default function App() {
   const [shareOpen, setShareOpen] = useState(false);

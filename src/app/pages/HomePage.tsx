@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { useCatalog } from "../data/CatalogContext";
-import type { HomepageHero } from "../../cms/store/types";
+import { useCatalog } from "../context/CatalogContext";
+import type { HomepageHero } from "../../data/store-types";
 import { useViewport } from "../hooks/useViewport";
 import { usePageTitle } from "../hooks/usePageTitle";
 import ImageWithFallback from "../components/ImageWithFallback";

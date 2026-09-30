@@ -1,5 +1,5 @@
 import type { InferInsertModel, InferSelectModel } from "drizzle-orm";
-import type { CmsProduct } from "../../src/cms/store/types";
+import type { CmsProduct } from "../data/store-types";
 import type { products } from "../../db/schema.js";
 
 export type ProductRow = InferSelectModel<typeof products>;

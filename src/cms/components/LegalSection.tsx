@@ -1,6 +1,6 @@
 import { Plus, Pencil, X } from "lucide-react";
 import { Link } from "react-router-dom";
-import type { FooterLink } from "../store/types";
+import type { FooterLink } from "../../data/store-types";
 import { Button } from "../components/ui";
 import { SortableList, DragHandle } from "../components/SortableList";
 

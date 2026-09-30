@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ChevronRight, Loader2 } from "lucide-react";import { useCms } from "../store/cmsContext";
-import type { CmsProduct } from "../store/types";
+import { ChevronRight, Loader2 } from "lucide-react";
+import { useCms } from "../store/cmsContext";
+import type { CmsProduct } from "../../data/store-types";
 import { api, type ProductStats } from "../lib/api";
 import { Badge, Container, Header, StatCard } from "../components/ui";
 import { timeAgo } from "../lib/utils";

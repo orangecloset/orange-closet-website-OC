@@ -10,7 +10,7 @@ import {
 } from "react";
 import type { Product, ProductType } from "../../data/products";
 import { getSaleInfo } from "../../data/types";
-import { seedHomepage, seedSettings, seedAbout, TYPES_KEY } from "../../cms/store/defaults";
+import { seedHomepage, seedSettings, seedAbout, TYPES_KEY } from "../../data/store-defaults";
 import { getCatalogToken, clearCatalogToken } from "../lib/access";
 import type {
   AboutPageConfig,
@@ -18,7 +18,7 @@ import type {
   HomepageConfig,
   ProductTypeInfo,
   SettingsConfig,
-} from "../../cms/store/types";
+} from "../../data/store-types";
 
 type StorefrontProduct = Omit<CmsProduct, "type"> & { type: ProductType };
 

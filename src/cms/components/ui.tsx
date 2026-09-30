@@ -14,7 +14,7 @@ import { Link } from "react-router-dom";
 import { createPortal } from "react-dom";
 import { CheckCircle2, EllipsisVertical, Eye, EyeOff, ChevronLeft, ChevronRight } from "lucide-react";
 import { cn } from "../lib/utils";
-import { useFocusTrap } from "../lib/useFocusTrap";
+import { useFocusTrap } from "../../hooks/useFocusTrap";
 import { ToastContext, type ToastType } from "../store/toastContext";
 
 type ToastItem = { id: number; message: string; sticky?: boolean; type?: ToastType };

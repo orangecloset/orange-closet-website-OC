@@ -1,5 +1,5 @@
 import { authHeaders, logout } from "../store/auth";
-import type { CatalogLink, CmsProduct, RecentSale } from "../store/types";
+import type { CatalogLink, CmsProduct, RecentSale } from "../../data/store-types";
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const res = await fetch(path, {

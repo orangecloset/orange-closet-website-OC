@@ -1,4 +1,4 @@
-import type { HomepageHero } from "../store/types";
+import type { HomepageHero } from "../../data/store-types";
 import { useCms } from "../store/cmsContext";
 import { Badge, Button, Input, Label, Select } from "./ui";
 import { UploadButton } from "./UploadButton";

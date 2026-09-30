@@ -4,8 +4,8 @@ import { createRoot } from "react-dom/client";
 import { BrowserRouter, Route, Routes, useLocation } from "react-router-dom";
 import App from "./app/App.tsx";
 import { StoreProvider } from "./app/hooks/useStore.tsx";
-import { CatalogProvider } from "./app/data/CatalogContext.tsx";
-import { applyBranding } from "./cms/store/defaults";
+import { CatalogProvider } from "./app/context/CatalogContext.tsx";
+import { applyBranding } from "./data/store-defaults";
 import { ErrorBoundary } from "./app/components/ErrorBoundary.tsx";
 import "./styles/index.css";
 

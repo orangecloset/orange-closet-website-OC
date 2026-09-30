@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { ChevronDown, ChevronRight, Plus, Trash2, X } from "lucide-react";
-import type { AboutPageConfig } from "../store/types";
+import type { AboutPageConfig } from "../../data/store-types";
 import { Button, Input, Label, Switch, Textarea } from "./ui";
 import { UploadButton } from "./UploadButton";
 

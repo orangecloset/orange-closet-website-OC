@@ -3,7 +3,7 @@ import { Link, useParams } from "react-router-dom";
 import { ChevronDown, ChevronLeft, ChevronRight, ChevronUp, Check, Share2, ShoppingBag, X } from "lucide-react";
 import { TYPE_LABELS, productColorCss } from "../../data/products";
 import { getSaleInfo } from "../../data/types";
-import { useCatalog } from "../data/CatalogContext";
+import { useCatalog } from "../context/CatalogContext";
 import { useViewport } from "../hooks/useViewport";
 import { getCatalogToken, getCatalogUid, getCatalogMode } from "../lib/access";
 import ProductCard from "../components/ProductCard";

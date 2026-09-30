@@ -56,7 +56,7 @@ export default function CatalogLockScreen() {
   }, []);
 
   if (!status) {
-    return <div className="min-h-screen bg-white" aria-busy="true" />;
+    return <div className="min-h-dvh bg-white" aria-busy="true" />;
   }
 
   const b = status.branding ?? {};
@@ -70,7 +70,7 @@ export default function CatalogLockScreen() {
   const locationUrl = b.locationUrl?.trim();
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-white px-6 text-center font-sans text-black">
+    <div className="flex min-h-dvh flex-col items-center justify-center bg-white px-6 text-center font-sans text-black">
       {faviconUrl && (
         <img
           src={faviconUrl}

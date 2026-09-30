@@ -4,7 +4,7 @@ import QRCodeStyling from "qr-code-styling";
 import {
   Facebook, Instagram, Youtube, Twitter, type LucideIcon,
 } from "lucide-react";
-import { useCatalog } from "../data/CatalogContext";
+import { useCatalog } from "../context/CatalogContext";
 
 const SOCIAL_ICONS = [
   { label: "Facebook", Icon: Facebook },

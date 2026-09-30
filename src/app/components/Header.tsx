@@ -2,7 +2,7 @@
 import { Link, useLocation } from "react-router-dom";
 import { Menu, X, Search, Share2, ChevronDown, ShoppingBag } from "lucide-react";
 import { TYPE_LABELS, primaryColor } from "../../data/products";
-import { useCatalog } from "../data/CatalogContext";
+import { useCatalog } from "../context/CatalogContext";
 import { splitNavItems } from "../lib/site-config";
 import ImageWithFallback from "./ImageWithFallback";
 

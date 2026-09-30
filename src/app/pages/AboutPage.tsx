@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState, type MouseEvent } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import type { AboutPageConfig } from "../../cms/store/types";
-import { useCatalog } from "../data/CatalogContext";
+import type { AboutPageConfig } from "../../data/store-types";
+import { useCatalog } from "../context/CatalogContext";
 import { usePageTitle } from "../hooks/usePageTitle";
 import { useViewport } from "../hooks/useViewport";
 import ImageWithFallback from "../components/ImageWithFallback";

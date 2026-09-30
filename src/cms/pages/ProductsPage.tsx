@@ -4,7 +4,7 @@ import { ChevronLeft, ChevronRight, Plus, Trash2, Search, Pencil, SwatchBook, Sh
 import { useToast } from "../store/toastContext";
 import { useCms } from "../store/cmsContext";
 import { invalidateProducts, usePagedProducts, useProductSuggestions } from "../lib/queries";
-import { isNewProduct, type CmsProduct, type ProductStatus } from "../store/types";
+import { isNewProduct, type CmsProduct, type ProductStatus } from "../../data/store-types";
 import { ActionMenu, Badge, Button, Checkbox, ConfirmDialog, Container, Header, Input, Modal, Select, Tabs } from "../components/ui";
 import { formatDate } from "../lib/utils";
 import { productColorCss } from "../../data/products";

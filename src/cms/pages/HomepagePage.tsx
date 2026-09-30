@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Plus } from "lucide-react";
 import { useCms } from "../store/cmsContext";
-import { HOMEPAGE_KEY } from "../store/defaults";
+import { HOMEPAGE_KEY } from "../../data/store-defaults";
 import { Button, Container, Header, Switch } from "../components/ui";
 import { useToast } from "../store/toastContext";
 import { HeroCard } from "../components/HeroCard";

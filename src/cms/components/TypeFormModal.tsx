@@ -1,6 +1,6 @@
 import { type FormEvent } from "react";
 import { X } from "lucide-react";
-import type { ProductTypeInfo } from "../store/types";
+import type { ProductTypeInfo } from "../../data/store-types";
 import { Button, Input, Label, Modal } from "./ui";
 import { UploadButton } from "./UploadButton";
 import { slugify, type FormState } from "../lib/formHelpers";

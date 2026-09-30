@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { Loader2 } from "lucide-react";
 import { api } from "../lib/api";
-import type { CmsProduct } from "../store/types";
+import type { CmsProduct } from "../../data/store-types";
 import { Button } from "../components/ui";
 import { ProductFormInner } from "../components/ProductFormInner";
 

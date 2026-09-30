@@ -13,16 +13,14 @@ import { invalidateProducts } from "../lib/queries";
 import {
   ABOUT_KEY,
   HOMEPAGE_KEY,
-  LINK_KEY,
   SETTINGS_KEY,
   TYPES_KEY,
   applyBranding,
-  createCatalogLinkValue,
-  loadLinks,
   seedAbout,
   seedHomepage,
   seedSettings,
-} from "./defaults";
+} from "../../data/store-defaults";
+import { LINK_KEY, createCatalogLinkValue, loadLinks } from "./links";
 import type {
   AboutPageConfig,
   CmsProduct,
@@ -33,7 +31,7 @@ import type {
   ProductTypeInfo,
   RecentSale,
   SettingsConfig,
-} from "./types";
+} from "../../data/store-types";
 import { CmsContext } from "./cmsContext";
 
 export function CmsProvider({ children }: { children: ReactNode }) {

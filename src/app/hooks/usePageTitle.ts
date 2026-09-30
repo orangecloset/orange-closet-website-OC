@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { useCatalog } from "../data/CatalogContext";
+import { useCatalog } from "../context/CatalogContext";
 
 export function usePageTitle(title?: string) {
   const { settings } = useCatalog();

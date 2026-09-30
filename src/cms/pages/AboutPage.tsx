@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { Plus, X } from "lucide-react";
 import { useCms } from "../store/cmsContext";
-import type { AboutPageConfig } from "../store/types";
-import { ABOUT_KEY } from "../store/defaults";
+import type { AboutPageConfig } from "../../data/store-types";
+import { ABOUT_KEY } from "../../data/store-defaults";
 import { Button, Container, Input, Label } from "../components/ui";
 import { useToast } from "../store/toastContext";
 import { UploadButton } from "../components/UploadButton";

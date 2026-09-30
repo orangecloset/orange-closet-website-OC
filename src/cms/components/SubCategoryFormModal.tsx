@@ -1,6 +1,6 @@
 import { type FormEvent } from "react";
 import { Pencil, Trash2, X } from "lucide-react";
-import type { ProductTypeInfo, TypeCategory } from "../store/types";
+import type { ProductTypeInfo, TypeCategory } from "../../data/store-types";
 import { Button, Input, Label, Modal } from "./ui";
 import { UploadButton } from "./UploadButton";
 import { SortableList, DragHandle } from "./SortableList";

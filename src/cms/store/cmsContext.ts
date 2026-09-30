@@ -9,7 +9,7 @@ import type {
   ProductTypeInfo,
   RecentSale,
   SettingsConfig,
-} from "./types";
+} from "../../data/store-types";
 import type { SaleInput } from "../lib/api";
 
 export type CmsContextValue = {
