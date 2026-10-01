@@ -556,7 +556,7 @@ export default function ProductDetailPage() {
               )}
             </div>
 
-            <div ref={galleryRef} className="order-1 lg:order-2 relative flex-1 bg-gray-100 cursor-zoom-in" onClick={() => { if (activeImages.length > 0) setLightboxIndex(imageIndex); }}>
+            <div ref={galleryRef} className="order-1 lg:order-2 relative flex-1 bg-[#f5f5f5] cursor-zoom-in" onClick={() => { if (activeImages.length > 0) setLightboxIndex(imageIndex); }}>
               <div className="relative aspect-[4/3] lg:aspect-[3/4] w-full overflow-hidden">
                 {activeImages.length > 0 ? (
                   <div
