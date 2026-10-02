@@ -59,6 +59,37 @@ export function seedAbout(): AboutPageConfig {
   };
 }
 
+export function normalizeAbout(raw: unknown): AboutPageConfig {
+  const merged: Partial<AboutPageConfig> =
+    typeof raw === "object" && raw !== null ? (raw as Partial<AboutPageConfig>) : {};
+  const sections = Array.isArray(merged.sections) ? merged.sections : [];
+  return {
+    ...seedAbout(),
+    ...merged,
+    sections: sections.map((s, i) => {
+      const sec = (typeof s === "object" && s !== null ? s : {}) as Partial<
+        AboutPageConfig["sections"][number]
+      >;
+      return {
+        id: typeof sec.id === "string" && sec.id.trim() ? sec.id : `section-${i}`,
+        label: sec.label ?? "",
+        enabled: sec.enabled ?? true,
+        heading: sec.heading ?? "",
+        body: Array.isArray(sec.body) ? sec.body : [],
+        images: Array.isArray(sec.images) ? sec.images : [],
+        cards: (Array.isArray(sec.cards) ? sec.cards : []).map((c) => ({
+          title: c?.title ?? "",
+          description: c?.description ?? "",
+          image: c?.image ?? "",
+        })),
+        closingText: sec.closingText ?? "",
+        ctaLabel: sec.ctaLabel ?? "",
+        ctaUrl: sec.ctaUrl ?? "",
+      };
+    }),
+  };
+}
+
 export function applyBranding(settings?: SettingsConfig) {
   const s = settings ?? load(SETTINGS_KEY, seedSettings());
   if (typeof document === "undefined") return;

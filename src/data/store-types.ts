@@ -155,7 +155,7 @@ export type AboutPageConfig = {
     heading: string;
     body: string[];
     images: string[];
-    cards: { title: string; description: string }[];
+    cards: { title: string; description: string; image?: string }[];
     closingText: string;
     ctaLabel: string;
     ctaUrl: string;

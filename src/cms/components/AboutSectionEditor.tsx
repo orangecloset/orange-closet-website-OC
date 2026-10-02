@@ -60,8 +60,8 @@ function CardListInput({
   onChange,
 }: {
   label: string;
-  cards: { title: string; description: string }[];
-  onChange: (v: { title: string; description: string }[]) => void;
+  cards: { title: string; description: string; image?: string }[];
+  onChange: (v: { title: string; description: string; image?: string }[]) => void;
 }) {
   return (
     <div>
@@ -98,13 +98,45 @@ function CardListInput({
               placeholder="Description"
               rows={2}
             />
+            <div className="flex items-center gap-2">
+              {c.image ? (
+                <div className="relative">
+                  <img
+                    src={c.image}
+                    alt=""
+                    className="h-10 w-10 rounded border border-[var(--border-subtle)] bg-[var(--bg-subtle)] object-contain"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const next = [...cards];
+                      next[i] = { ...next[i], image: "" };
+                      onChange(next);
+                    }}
+                    aria-label={`Remove icon from card ${i + 1}`}
+                    className="absolute -right-1.5 -top-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-[var(--bg-base)] text-[var(--fg-muted)] shadow-[var(--borders-base)] hover:text-[var(--tag-red-text)]"
+                  >
+                    <X className="h-3 w-3" />
+                  </button>
+                </div>
+              ) : null}
+              <UploadButton
+                preset="raw"
+                label={c.image ? "Change Icon" : "Upload Icon"}
+                onUploaded={(url) => {
+                  const next = [...cards];
+                  next[i] = { ...next[i], image: url };
+                  onChange(next);
+                }}
+              />
+            </div>
           </div>
         ))}
         <Button
           variant="secondary"
           size="small"
           type="button"
-          onClick={() => onChange([...cards, { title: "", description: "" }])}
+          onClick={() => onChange([...cards, { title: "", description: "", image: "" }])}
         >
           <Plus className="h-4 w-4" /> Add Card
         </Button>

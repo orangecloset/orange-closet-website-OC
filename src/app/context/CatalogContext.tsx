@@ -10,7 +10,7 @@ import {
 } from "react";
 import type { Product, ProductType } from "../../data/products";
 import { getSaleInfo } from "../../data/types";
-import { seedHomepage, seedSettings, seedAbout, TYPES_KEY } from "../../data/store-defaults";
+import { seedHomepage, seedSettings, seedAbout, normalizeAbout, TYPES_KEY } from "../../data/store-defaults";
 import { getCatalogToken, clearCatalogToken } from "../lib/access";
 import type {
   AboutPageConfig,
@@ -85,10 +85,9 @@ export function CatalogProvider({ children }: { children: ReactNode }) {
     ...seedHomepage(),
     ...(cached.homepage ?? {}),
   }));
-  const [about, setAbout] = useState<AboutPageConfig>(() => ({
-    ...seedAbout(),
-    ...(cached.about ?? {}),
-  }));
+  const [about, setAbout] = useState<AboutPageConfig>(() =>
+    normalizeAbout({ ...seedAbout(), ...(cached.about ?? {}) })
+  );
   const [types, setTypes] = useState<ProductTypeInfo[]>(() =>
     cached.types && cached.types.length > 0 ? cached.types : []
   );
@@ -142,7 +141,7 @@ export function CatalogProvider({ children }: { children: ReactNode }) {
         }
         const a = all["orange-cms-about"];
         if (a && typeof a === "object") {
-          setAbout({ ...seedAbout(), ...(a as AboutPageConfig) });
+          setAbout(normalizeAbout(a));
         }
         const t = all[TYPES_KEY];
         if (Array.isArray(t) && t.length > 0) {
@@ -151,7 +150,7 @@ export function CatalogProvider({ children }: { children: ReactNode }) {
         writeCatalogCache({
           ...(s && typeof s === "object" ? { settings: s as SettingsConfig } : {}),
           ...(h && typeof h === "object" ? { homepage: h as HomepageConfig } : {}),
-          ...(a && typeof a === "object" ? { about: a as AboutPageConfig } : {}),
+          ...(a && typeof a === "object" ? { about: normalizeAbout(a) } : {}),
           ...(Array.isArray(t) && t.length > 0 ? { types: t as ProductTypeInfo[] } : {}),
         });
       })

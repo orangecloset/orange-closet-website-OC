@@ -16,6 +16,7 @@ import {
   SETTINGS_KEY,
   TYPES_KEY,
   applyBranding,
+  normalizeAbout,
   seedAbout,
   seedHomepage,
   seedSettings,
@@ -81,13 +82,13 @@ export function CmsProvider({ children }: { children: ReactNode }) {
         }
         const storedAbout = all[ABOUT_KEY];
         if (storedAbout && typeof storedAbout === "object") {
-          setAbout({ ...seedAbout(), ...(storedAbout as AboutPageConfig) });
+          setAbout(normalizeAbout(storedAbout));
         }
         savedSnapshotRef.current = {
           [SETTINGS_KEY]: storedSettings && typeof storedSettings === "object" ? { ...seedSettings(), ...(storedSettings as SettingsConfig) } : undefined,
           [HOMEPAGE_KEY]: storedHomepage && typeof storedHomepage === "object" ? { ...seedHomepage(), ...(storedHomepage as HomepageConfig) } : undefined,
           [TYPES_KEY]: Array.isArray(storedTypes) ? storedTypes : undefined,
-          [ABOUT_KEY]: storedAbout && typeof storedAbout === "object" ? { ...seedAbout(), ...(storedAbout as AboutPageConfig) } : undefined,
+          [ABOUT_KEY]: storedAbout && typeof storedAbout === "object" ? normalizeAbout(storedAbout) : undefined,
         };
       })
       .catch((err) => console.error("[cms] failed to load settings", err));

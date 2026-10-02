@@ -19,6 +19,21 @@ function Paragraphs({ items }: { items: string[] }) {
   );
 }
 
+function CardIcon({ src }: { src?: string }) {
+  const [failed, setFailed] = useState(false);
+  if (!src?.trim() || failed) return null;
+  return (
+    <img
+      src={src}
+      alt=""
+      className="block mb-2 h-8 w-8 object-contain"
+      loading="lazy"
+      decoding="async"
+      onError={() => setFailed(true)}
+    />
+  );
+}
+
 function IconCards({
   section,
   stepStyle = false,
@@ -34,7 +49,8 @@ function IconCards({
       } ${stepStyle ? "" : "mt-8"}`}
     >
       {section.cards.map((card, i) => (
-        <div key={card.title || i} className="border border-gray-100 p-4">
+        <div key={i} className="border border-gray-100 p-4">
+          <CardIcon src={card.image} />
           {stepStyle && (
             <p className="text-[11px] uppercase tracking-widest text-gray-400 mb-1">
               Step {i + 1}
@@ -92,6 +108,7 @@ function SectionBody({ section }: { section: Section }) {
             {section.closingText && (
               <p className="text-sm text-gray-600 leading-relaxed mt-8 max-w-2xl">{section.closingText}</p>
             )}
+            <CtaButton section={section} />
           </div>
           <ImageStack images={section.images.slice(0, 2)} />
         </div>
@@ -110,6 +127,7 @@ function SectionBody({ section }: { section: Section }) {
             <h2 className="text-xl sm:text-2xl font-semibold tracking-wide mb-6">{section.heading}</h2>
             <Paragraphs items={section.body} />
             <IconCards section={section} />
+            <CtaButton section={section} />
           </div>
         </div>
       );
@@ -124,6 +142,7 @@ function SectionBody({ section }: { section: Section }) {
               {section.body[0] || section.closingText}
             </p>
           )}
+          <CtaButton section={section} />
         </>
       );
 
@@ -133,6 +152,7 @@ function SectionBody({ section }: { section: Section }) {
           <div>
             <h2 className="text-xl sm:text-2xl font-semibold tracking-wide mb-6">{section.heading}</h2>
             <Paragraphs items={section.body} />
+            <IconCards section={section} />
             <CtaButton section={section} />
           </div>
           <ImageStack images={section.images.slice(0, 4)} />
@@ -202,7 +222,8 @@ export default function AboutPage() {
         s.body.length > 0 ||
         s.cards.length > 0 ||
         s.closingText.trim() ||
-        s.images.some((i) => i.trim()))
+        s.images.some((i) => i.trim()) ||
+        (s.ctaLabel.trim() && s.ctaUrl.trim()))
   );
 
   const sectionScrollRef = useRef<HTMLDivElement>(null);
