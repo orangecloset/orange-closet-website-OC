@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { primaryColor } from "../../data/products";
+import { displayColor } from "../../data/products";
 import type { Product } from "../../data/products";
 import { getSaleInfo } from "../../data/types";
 import ProductCardImage from "./ProductCardImage";
@@ -9,10 +9,11 @@ export type ProductCardVariant = "full" | "simple" | "compact" | "sale" | "home"
 type ProductCardProps = {
   product: Product;
   variant?: ProductCardVariant;
+  preferColor?: string;
 };
 
-function CardMedia({ product, variant }: { product: Product; variant: ProductCardVariant }) {
-  const color = primaryColor(product);
+function CardMedia({ product, variant, preferColor }: { product: Product; variant: ProductCardVariant; preferColor?: string }) {
+  const color = displayColor(product, preferColor);
   const soldOut = product.inStock === false;
   const hasSecondImage = color.images.length > 1;
   const saleInfo = getSaleInfo(product.price, product.compareAtPrice);
@@ -70,8 +71,8 @@ function CardMedia({ product, variant }: { product: Product; variant: ProductCar
   );
 }
 
-function CardBody({ product, variant }: { product: Product; variant: ProductCardVariant }) {
-  const color = primaryColor(product);
+function CardBody({ product, variant, preferColor }: { product: Product; variant: ProductCardVariant; preferColor?: string }) {
+  const color = displayColor(product, preferColor);
 
   if (variant === "home") {
     return (
@@ -104,11 +105,11 @@ function CardBody({ product, variant }: { product: Product; variant: ProductCard
   );
 }
 
-export default function ProductCard({ product, variant = "full" }: ProductCardProps) {
+export default function ProductCard({ product, variant = "full", preferColor }: ProductCardProps) {
   return (
     <Link to={`/products/${product.id}`} className="block group">
-      <CardMedia product={product} variant={variant} />
-      <CardBody product={product} variant={variant} />
+      <CardMedia product={product} variant={variant} preferColor={preferColor} />
+      <CardBody product={product} variant={variant} preferColor={preferColor} />
     </Link>
   );
 }

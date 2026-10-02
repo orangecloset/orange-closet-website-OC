@@ -59,6 +59,9 @@ export const colorStock = (color: ProductColor): number =>
 export const primaryColor = (p: Product): ProductColor =>
   p.colors.find((c) => colorStock(c) > 0) ?? p.colors[0];
 
+export const displayColor = (p: Product, preferName?: string | null): ProductColor =>
+  (preferName ? p.colors.find((c) => c.name === preferName) : undefined) ?? primaryColor(p);
+
 export const colorSwatchCss = (colors: string[]): string => {
   const list = colors.filter((c) => typeof c === "string" && c.trim() !== "");
   if (list.length === 0) return "#e5e7eb";

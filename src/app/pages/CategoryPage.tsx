@@ -540,7 +540,7 @@ export default function CategoryPage() {
         <section className="mb-16 px-2.5 sm:px-3.5 lg:px-10">
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-1.5">
             {visibleProducts.map((product) => (
-              <ProductCard key={product.id} product={product} variant="full" />
+              <ProductCard key={product.id} product={product} variant="full" preferColor={selectedColor} />
             ))}
           </div>
           {hiddenCount > 0 && (
