@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { ChevronDown, ChevronLeft, ChevronRight, ChevronUp, Check, Share2, ShoppingBag, X } from "lucide-react";
-import { TYPE_LABELS, productColorCss } from "../../data/products";
+import { TYPE_LABELS, colorStock, productColorCss } from "../../data/products";
 import { getSaleInfo } from "../../data/types";
 import { useCatalog } from "../context/CatalogContext";
 import { useViewport } from "../hooks/useViewport";
@@ -107,7 +107,19 @@ export default function ProductDetailPage() {
   const viewport = useViewport();
   const product = productId ? getProduct(productId) : undefined;
 
-  const [colorIndex, setColorIndex] = useState(0);
+  const colorOrder: number[] = (() => {
+    if (!product) return [];
+    const available: number[] = [];
+    const unavailable: number[] = [];
+    product.colors.forEach((c, i) => (colorStock(c) > 0 ? available : unavailable).push(i));
+    return [...available, ...unavailable];
+  })();
+
+  const [pickedColor, setPickedColor] = useState<number | null>(null);
+  const colorIndex = Math.min(
+    pickedColor ?? colorOrder[0] ?? 0,
+    Math.max((product?.colors.length ?? 1) - 1, 0)
+  );
   const [imageIndex, setImageIndex] = useState(0);
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
   const lightboxCloseRef = useRef<HTMLButtonElement>(null);
@@ -267,7 +279,7 @@ export default function ProductDetailPage() {
   }, []);
 
   useEffect(() => {
-    setColorIndex(0);
+    setPickedColor(null);
     setImageIndex(0);
     setAdded(false);
     setFailedImages([]);
@@ -317,7 +329,7 @@ export default function ProductDetailPage() {
   const [sharing, setSharing] = useState(false);
 
   const handleSelectColor = (index: number) => {
-    setColorIndex(index);
+    setPickedColor(index);
     setImageIndex(0);
     setSelectedSize("");
   };
@@ -630,14 +642,17 @@ export default function ProductDetailPage() {
                     </>
                   );
                 })()}
-                {settings.showStockOnStorefront && (() => {
-                  const colorStock = (color.sizes ?? []).reduce((sum, s) => sum + s.stock, 0);
-                  return colorStock > 0 ? (
+                {colorStock(color) > 0 ? (
+                  settings.showStockOnStorefront ? (
                     <span className="inline-block text-[10px] uppercase tracking-widest px-2 py-[3px] border border-gray-100 bg-gray-100 text-gray-600 leading-none">
-                      {colorStock} in stock
+                      {colorStock(color)} in stock
                     </span>
-                  ) : null;
-                })()}
+                  ) : null
+                ) : (
+                  <span className="inline-block border border-red-800/90 bg-red-800/90 text-white px-2 py-[3px] text-[10px] uppercase tracking-widest leading-none">
+                    Out of Stock
+                  </span>
+                )}
               </div>
               <p className="mt-1 text-sm text-gray-500">{product.brand}</p>
               <h1 className="text-xl sm:text-2xl font-semibold leading-snug line-clamp-2">
@@ -669,19 +684,22 @@ export default function ProductDetailPage() {
               Colour: <span className="text-black">{color.name}</span>
             </p>
             <div className="flex items-center gap-2">
-              {product.colors.map((color, i) => (
-                <button
-                  key={color.name}
-                  onClick={() => handleSelectColor(i)}
-                  aria-label={`Select colour ${color.name}`}
-                  className={`w-8 h-8 rounded-full border transition-all ${
-                    i === colorIndex
-                      ? "border-black ring-1 ring-black ring-offset-2"
-                      : "border-gray-300 hover:border-black"
-                  }`}
-                  style={{ background: productColorCss(color) }}
-                />
-              ))}
+              {colorOrder.map((i) => {
+                const swatch = product.colors[i];
+                return (
+                  <button
+                    key={swatch.name}
+                    onClick={() => handleSelectColor(i)}
+                    aria-label={`Select colour ${swatch.name}`}
+                    className={`w-8 h-8 rounded-full border transition-all ${
+                      i === colorIndex
+                        ? "border-black ring-1 ring-black ring-offset-2"
+                        : "border-gray-300 hover:border-black"
+                    }`}
+                    style={{ background: productColorCss(swatch) }}
+                  />
+                );
+              })}
             </div>
           </div>
 
