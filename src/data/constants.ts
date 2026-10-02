@@ -53,7 +53,11 @@ export const TYPE_CATEGORIES: Record<ProductType, Category[]> = {
 export const getCategoryLabel = (type: ProductType, category: string): string | undefined =>
   TYPE_CATEGORIES[type].find((c) => c.slug === category)?.label;
 
-export const primaryColor = (p: Product): ProductColor => p.colors[0];
+export const colorStock = (color: ProductColor): number =>
+  (color.sizes ?? []).reduce((sum, vs) => sum + vs.stock, 0);
+
+export const primaryColor = (p: Product): ProductColor =>
+  p.colors.find((c) => colorStock(c) > 0) ?? p.colors[0];
 
 export const colorSwatchCss = (colors: string[]): string => {
   const list = colors.filter((c) => typeof c === "string" && c.trim() !== "");

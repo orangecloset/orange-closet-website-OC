@@ -249,9 +249,10 @@ export function CmsProvider({ children }: { children: ReactNode }) {
       if (input.compareAtPrice !== undefined) patch.compareAtPrice = input.compareAtPrice ?? null;
       if (input.sections !== undefined) patch.sections = input.sections;
       if (input.sectionsOpen !== undefined) patch.sectionsOpen = input.sectionsOpen;
+      const sizeList = input.sizes ?? current.sizes;
+      const hasSizes = sizeList.length > 0;
+      if (input.sizes !== undefined) patch.sizes = sizeList;
       if (input.colors !== undefined) {
-        const sizeList = input.sizes ?? current.sizes;
-        const hasSizes = sizeList.length > 0;
         patch.colors = input.colors.map((c) => {
           const existing = current.colors.find((pc) => pc.name === c.name);
           const stocks = c.stockBySize;
@@ -286,7 +287,21 @@ export function CmsProvider({ children }: { children: ReactNode }) {
                 : [{ size: "One Size", stock: 0 }]),
           };
         }) as ProductColor[];
-        patch.sizes = hasSizes ? sizeList : [];
+      } else if (input.sizes !== undefined) {
+        patch.colors = current.colors.map((c) => {
+          const stocks = new Map((c.sizes ?? []).map((vs) => [vs.size, vs.stock]));
+          if (hasSizes) {
+            return {
+              ...c,
+              sizes: sizeList.map((s) => ({
+                size: s,
+                stock: Math.max(0, Math.floor(stocks.get(s) ?? 0)),
+              })),
+            };
+          }
+          const total = (c.sizes ?? []).reduce((sum, vs) => sum + vs.stock, 0);
+          return { ...c, sizes: [{ size: "One Size", stock: total }] };
+        });
       }
       const colors = (patch.colors as ProductColor[] | undefined) ?? current.colors;
       patch.stock = colors.reduce(

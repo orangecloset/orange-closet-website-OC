@@ -238,7 +238,7 @@ app.patch("/:id", async (c) => {
     description: (v) => String(v),
     status: (v) => (v === "active" || v === "draft" ? v : undefined),
     colors: (v) => (isColorsArray(v) ? v : undefined),
-    sizes: (v) => (isColorsArray(v) ? v : undefined),
+    sizes: (v) => (isStringArray(v) ? v : undefined),
     details: (v) => (isStringArray(v) ? v : undefined),
     sections: (v) => (isStringArray(v) ? v : undefined),
     sectionsOpen: (v) => (typeof v === "boolean" ? v : undefined),

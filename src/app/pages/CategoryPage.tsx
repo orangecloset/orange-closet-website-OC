@@ -60,6 +60,7 @@ export default function CategoryPage() {
   const [onSaleOnly, setOnSaleOnly] = useState(false);
   const brandRef = useRef<HTMLDivElement>(null);
   const filterRef = useRef<HTMLDivElement>(null);
+  const sortRef = useRef<HTMLDivElement>(null);
   const catScrollRef = useRef<HTMLDivElement>(null);
   const [catHasMore, setCatHasMore] = useState(false);
 
@@ -94,14 +95,52 @@ export default function CategoryPage() {
   useEffect(() => {
     const close = (e: Event) => {
       const target = e.target as Node;
-      if (filterRef.current?.contains(target)) return;
+      if (
+        filterRef.current?.contains(target) ||
+        brandRef.current?.contains(target) ||
+        sortRef.current?.contains(target)
+      ) {
+        return;
+      }
       setSortOpen(false);
       setBrandOpen(false);
       setFilterOpen(false);
     };
-    window.addEventListener("scroll", close, { passive: true });
-    return () => window.removeEventListener("scroll", close);
+    window.addEventListener("scroll", close, { passive: true, capture: true });
+    return () => window.removeEventListener("scroll", close, { capture: true });
   }, []);
+
+  useEffect(() => {
+    if (!filterOpen && !brandOpen && !sortOpen) return;
+    const getRoot = (target: Node): HTMLDivElement | undefined =>
+      [filterRef.current, brandRef.current, sortRef.current].find(
+        (el): el is HTMLDivElement => el !== null && el.contains(target)
+      );
+    const canScrollInside = (root: HTMLElement, target: Node, deltaY: number): boolean => {
+      let el = target instanceof HTMLElement ? target : null;
+      while (el && root.contains(el)) {
+        const style = window.getComputedStyle(el);
+        if (
+          el.scrollHeight > el.clientHeight &&
+          (style.overflowY === "auto" || style.overflowY === "scroll")
+        ) {
+          return deltaY < 0
+            ? el.scrollTop > 0
+            : el.scrollTop + el.clientHeight < el.scrollHeight - 1;
+        }
+        el = el.parentElement;
+      }
+      return false;
+    };
+    const handleWheel = (e: WheelEvent) => {
+      const root = getRoot(e.target as Node);
+      if (!root) return;
+      if (canScrollInside(root, e.target as Node, e.deltaY)) return;
+      e.preventDefault();
+    };
+    window.addEventListener("wheel", handleWheel, { passive: false });
+    return () => window.removeEventListener("wheel", handleWheel);
+  }, [filterOpen, brandOpen, sortOpen]);
 
   useEffect(() => {
     if (!brandOpen) return;
@@ -343,7 +382,7 @@ export default function CategoryPage() {
               <ChevronDown className={`w-3 h-3 shrink-0 transition-transform duration-200 ${brandOpen ? "rotate-180" : ""}`} />
             </button>
             {brandOpen && (
-              <div className="absolute left-0 top-full mt-1 bg-white border border-gray-200 shadow-md z-40 min-w-[140px] sm:min-w-[180px] lg:min-w-[200px] max-h-60 overflow-y-auto thin-scrollbar">
+              <div className="absolute left-0 top-full mt-1 bg-white border border-gray-200 shadow-md z-40 min-w-[140px] sm:min-w-[180px] lg:min-w-[200px] max-h-60 overflow-y-auto overscroll-contain thin-scrollbar">
                 <button
                   onClick={() => { setBrand(""); setBrandOpen(false); }}
                   className={`block w-full text-left px-4 py-2.5 text-xs uppercase tracking-widest hover:bg-gray-50 transition-colors ${brand === "" ? "text-black" : "text-gray-500"}`}
@@ -369,7 +408,7 @@ export default function CategoryPage() {
         <div className="flex items-center justify-between border-b border-gray-200 pb-3">
           <p className="text-xs text-gray-500">{filtered.length} Products</p>
           <div className="flex items-center gap-3">
-            <div className="relative">
+            <div className="relative" ref={sortRef}>
               <button
                 onClick={() => { setSortOpen(!sortOpen); setFilterOpen(false); }}
                 className="text-xs uppercase tracking-widest font-medium flex items-center gap-1"
@@ -450,7 +489,7 @@ export default function CategoryPage() {
                   {availableColors.length > 0 && (
                     <>
                       <p className="text-[10px] uppercase tracking-widest text-gray-400 mb-3">Color</p>
-                      <div className="max-h-[200px] overflow-y-auto thin-scrollbar px-1.5 py-1.5">
+                      <div className="max-h-[200px] overflow-y-auto overscroll-contain thin-scrollbar px-1.5 py-1.5">
                         <div className="grid grid-cols-3 gap-x-2 gap-y-3">
                           {availableColors.map((c) => {
                             const isActive = selectedColor === c.name;

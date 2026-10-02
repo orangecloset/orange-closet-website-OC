@@ -26,6 +26,12 @@ type ColorInput = {
   stockBySize: Record<string, string>;
 };
 
+function parseStockValue(raw: string | undefined): number {
+  const trimmed = (raw ?? "").trim();
+  const parsed = Number(trimmed);
+  return trimmed === "" || Number.isNaN(parsed) ? 0 : Math.max(0, Math.floor(parsed));
+}
+
 export function ProductFormInner({ editing }: { editing?: CmsProduct }) {
   const { productId } = useParams();
   const [searchParams] = useSearchParams();
@@ -141,12 +147,31 @@ export function ProductFormInner({ editing }: { editing?: CmsProduct }) {
   const addSize = () => {
     const trimmed = newSize.trim();
     if (!trimmed || sizes.includes(trimmed)) return;
+    if (sizes.length === 0) {
+      setColors((cols) =>
+        cols.map((c) => {
+          const one = c.stockBySize["One Size"];
+          if (!one || one.trim() === "") return c;
+          return { ...c, stockBySize: { ...c.stockBySize, [trimmed]: one } };
+        })
+      );
+    }
     setSizes((prev) => [...prev, trimmed]);
     setNewSize("");
   };
 
   const removeSize = (size: string) => {
-    setSizes((prev) => prev.filter((s) => s !== size));
+    const next = sizes.filter((s) => s !== size);
+    if (next.length === 0 && sizes.length > 0) {
+      setColors((cols) =>
+        cols.map((c) => {
+          const total = sizes.reduce((sum, s) => sum + parseStockValue(c.stockBySize[s]), 0);
+          if (total <= 0) return c;
+          return { ...c, stockBySize: { ...c.stockBySize, "One Size": String(total) } };
+        })
+      );
+    }
+    setSizes(next);
   };
 
   const validate = (): boolean => {
@@ -171,11 +196,7 @@ export function ProductFormInner({ editing }: { editing?: CmsProduct }) {
       ? colors
       : [{ name: "Default", hexes: ["#e5e7eb"], images: [image], stockBySize: {} }];
 
-    const parseStock = (raw: string | undefined): number => {
-      const trimmed = (raw ?? "").trim();
-      const parsed = Number(trimmed);
-      return trimmed === "" || Number.isNaN(parsed) ? 0 : Math.max(0, Math.floor(parsed));
-    };
+    const parseStock = parseStockValue;
 
     const colorVariants = variants.map((c, i) => {
       const stockBySize: Record<string, number> = {};
@@ -214,7 +235,7 @@ export function ProductFormInner({ editing }: { editing?: CmsProduct }) {
       sections: validSections,
       sectionsOpen,
       colors: colorVariants,
-      sizes: sizes.length > 0 ? sizes : undefined,
+      sizes,
       status,
     };
 
