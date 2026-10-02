@@ -629,7 +629,7 @@ export default function ProductDetailPage() {
                           New
                         </span>
                       )}
-                      {product.inStock === false && (
+                      {colorStock(color) === 0 && (
                         <span className="inline-block border border-red-800/90 bg-red-800/90 text-white px-2 py-[3px] text-[10px] uppercase tracking-widest leading-none">
                           Sold Out
                         </span>
@@ -642,15 +642,9 @@ export default function ProductDetailPage() {
                     </>
                   );
                 })()}
-                {colorStock(color) > 0 ? (
-                  settings.showStockOnStorefront ? (
-                    <span className="inline-block text-[10px] uppercase tracking-widest px-2 py-[3px] border border-gray-100 bg-gray-100 text-gray-600 leading-none">
-                      {colorStock(color)} in stock
-                    </span>
-                  ) : null
-                ) : (
-                  <span className="inline-block border border-red-800/90 bg-red-800/90 text-white px-2 py-[3px] text-[10px] uppercase tracking-widest leading-none">
-                    Out of Stock
+                {colorStock(color) > 0 && settings.showStockOnStorefront && (
+                  <span className="inline-block text-[10px] uppercase tracking-widest px-2 py-[3px] border border-gray-100 bg-gray-100 text-gray-600 leading-none">
+                    {colorStock(color)} in stock
                   </span>
                 )}
               </div>
