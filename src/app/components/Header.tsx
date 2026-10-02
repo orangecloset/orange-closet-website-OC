@@ -411,6 +411,7 @@ export default function Header({ onShare, showShare = true }: HeaderProps) {
                               src={color.images[0]}
                               alt=""
                               crossOrigin="anonymous"
+                              draggable={false}
                               className="w-10 h-10 object-cover bg-gray-100 shrink-0"
                             />
                             <div className="min-w-0">

@@ -40,6 +40,7 @@ function GalleryImage({
       crossOrigin="anonymous"
       loading={eager ? "eager" : "lazy"}
       decoding="async"
+      draggable={false}
       onError={() => {
         setFailed(true);
         onError?.(src);

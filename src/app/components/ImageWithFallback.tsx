@@ -25,6 +25,7 @@ function ImageWithFallback({ src, alt, className, priority = false }: ImageWithF
       crossOrigin="anonymous"
       loading={priority ? "eager" : "lazy"}
       decoding="async"
+      draggable={false}
       ref={(el) => {
         if (el && priority) el.setAttribute("fetchpriority", "high");
       }}

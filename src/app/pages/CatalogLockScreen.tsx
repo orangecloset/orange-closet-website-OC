@@ -76,6 +76,7 @@ export default function CatalogLockScreen() {
           src={faviconUrl}
           alt=""
           className="mb-6 h-16 w-16 object-contain"
+          draggable={false}
           onError={(e) => {
             (e.currentTarget as HTMLImageElement).style.display = "none";
           }}

@@ -26,9 +26,10 @@ function CardIcon({ src }: { src?: string }) {
     <img
       src={src}
       alt=""
-      className="block mb-2 h-8 w-8 object-contain"
+      className="block mb-2.5 h-8 w-8 object-contain"
       loading="lazy"
       decoding="async"
+      draggable={false}
       onError={() => setFailed(true)}
     />
   );

@@ -111,6 +111,7 @@ export default function ProductCardImage({ images, alt, className, hoverIndex }:
             loading="lazy"
             decoding="async"
             crossOrigin="anonymous"
+            draggable={false}
             src={validImages[Math.min(index, validImages.length - 1)]}
             alt={alt}
             className={`absolute inset-0 w-full h-full object-cover animate-in ${
@@ -125,6 +126,7 @@ export default function ProductCardImage({ images, alt, className, hoverIndex }:
             key={`slide-out-${slide.key}`}
             src={slide.src}
             crossOrigin="anonymous"
+            draggable={false}
             alt={alt}
             className={`absolute inset-0 w-full h-full object-cover animate-out ${
               slide.dir === 1 ? "slide-out-to-left" : "slide-out-to-right"
@@ -139,6 +141,7 @@ export default function ProductCardImage({ images, alt, className, hoverIndex }:
             loading="lazy"
             decoding="async"
             crossOrigin="anonymous"
+            draggable={false}
             src={currentSrc}
             alt={alt}
             className={`absolute inset-0 w-full h-full object-cover ${className ?? ""}`}
@@ -150,6 +153,7 @@ export default function ProductCardImage({ images, alt, className, hoverIndex }:
               loading="lazy"
               decoding="async"
               crossOrigin="anonymous"
+              draggable={false}
               src={hoverSrc}
               alt={alt}
               className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-300 ease-out ${
