@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { ChevronDown, ChevronLeft, ChevronRight, ChevronUp, Check, Share2, ShoppingBag, X } from "lucide-react";
 import { TYPE_LABELS, productColorCss } from "../../data/products";
@@ -142,6 +142,17 @@ export default function ProductDetailPage() {
     update();
     mq.addEventListener("change", update);
     return () => mq.removeEventListener("change", update);
+  }, []);
+
+  const [stickyTop, setStickyTop] = useState(80);
+  useLayoutEffect(() => {
+    const header = document.querySelector<HTMLElement>("header");
+    if (!header) return;
+    const update = () => setStickyTop(header.offsetHeight + 24);
+    update();
+    const observer = new ResizeObserver(update);
+    observer.observe(header);
+    return () => observer.disconnect();
   }, []);
 
   const advanceImage = (direction: number) => {
@@ -476,7 +487,10 @@ export default function ProductDetailPage() {
 
       <div className="flex flex-col lg:flex-row gap-8 lg:gap-14 lg:items-start">
 
-        <div className="w-full lg:w-[55%] shrink-0 lg:sticky lg:top-20 lg:pt-4 lg:self-start">
+        <div
+          className="w-full lg:w-[55%] shrink-0 lg:sticky lg:pt-4 lg:self-start"
+          style={{ top: stickyTop }}
+        >
           <nav className="text-[11px] text-gray-500 uppercase tracking-wide mb-6 flex flex-wrap items-center gap-1.5">
             <Link to="/" className="hover:text-black transition-colors">
               Home
