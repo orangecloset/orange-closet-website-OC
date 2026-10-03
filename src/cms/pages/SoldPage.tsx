@@ -38,13 +38,14 @@ function totalStock(p: CmsProduct): number {
 }
 
 export default function SoldPage() {
-  const { recordSale, settings } = useCms();
+  const { recordSale, settings, types } = useCms();
   const { showToast } = useToast();
 
   const [page, setPage] = useState(1);
   const [query, setQuery] = useState("");
   const [debouncedQuery, setDebouncedQuery] = useState("");
   const [availabilityFilter, setAvailabilityFilter] = useState("all");
+  const [typeFilter, setTypeFilter] = useState("all");
   const [selectedProduct, setSelectedProduct] = useState<CmsProduct | null>(null);
   const [colorIndex, setColorIndex] = useState(0);
   const [selectedSize, setSelectedSize] = useState("");
@@ -73,6 +74,7 @@ export default function SoldPage() {
   const productsQuery = usePagedProducts({
     page,
     availability: availabilityApi,
+    type: typeFilter,
     limit: PAGE_SIZE,
   });
   const items = productsQuery.data?.data ?? [];
@@ -82,7 +84,7 @@ export default function SoldPage() {
 
   useEffect(() => {
     setPage(1);
-  }, [availabilityFilter]);
+  }, [availabilityFilter, typeFilter]);
 
   const reload = invalidateProducts;
 
@@ -211,8 +213,8 @@ export default function SoldPage() {
       <Container>
         {!product ? (
           <>
-            <div className="border-b border-[var(--border-subtle)] px-6 py-4">
-              <div className="relative z-20">
+            <div className="flex flex-col gap-3 border-b border-[var(--border-subtle)] px-6 py-4 lg:flex-row lg:items-center">
+              <div className="relative z-20 flex-1">
                 <Search className="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--fg-muted)]" />
                 <Input
                   value={query}
@@ -262,6 +264,12 @@ export default function SoldPage() {
                     )}
                   </div>
                 )}
+              </div>
+              <div className="w-full shrink-0 lg:w-44">
+                <Select value={typeFilter} onChange={(e) => setTypeFilter(e.target.value)}>
+                  <option value="all">All types</option>
+                  {types.map((t) => (<option key={t.slug} value={t.slug}>{t.label}</option>))}
+                </Select>
               </div>
             </div>
 
