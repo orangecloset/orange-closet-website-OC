@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { ChevronLeft, ChevronRight, Loader2, Search, Boxes } from "lucide-react";
 import { api } from "../lib/api";
 import type { InventoryStats, PagedStockMovements, StockMovement } from "../lib/api";
-import { Badge, Button, Container, Header, Input } from "../components/ui";
+import { Badge, Button, Container, Header, Input, Select } from "../components/ui";
 
 const PAGE_SIZE = 50;
 const SEARCH_DEBOUNCE_MS = 350;
@@ -39,6 +39,7 @@ export default function InventoryPage() {
   const [statsLoading, setStatsLoading] = useState(true);
   const [query, setQuery] = useState("");
   const [debouncedQuery, setDebouncedQuery] = useState("");
+  const [kindFilter, setKindFilter] = useState("all");
 
   useEffect(() => {
     const t = setTimeout(() => setDebouncedQuery(query), SEARCH_DEBOUNCE_MS);
@@ -47,7 +48,7 @@ export default function InventoryPage() {
 
   useEffect(() => {
     setPage(1);
-  }, [debouncedQuery]);
+  }, [debouncedQuery, kindFilter]);
 
   useEffect(() => {
     let cancelled = false;
@@ -70,7 +71,7 @@ export default function InventoryPage() {
     let cancelled = false;
     setLoading(true);
     api
-      .listStockMovementsPaged({ page, search: debouncedQuery, limit: PAGE_SIZE })
+      .listStockMovementsPaged({ page, search: debouncedQuery, kind: kindFilter, limit: PAGE_SIZE })
       .then((res: PagedStockMovements) => {
         if (cancelled) return;
         setItems(res.data);
@@ -84,7 +85,7 @@ export default function InventoryPage() {
     return () => {
       cancelled = true;
     };
-  }, [page, debouncedQuery]);
+  }, [page, debouncedQuery, kindFilter]);
 
   const statCards = useMemo(
     () => [
@@ -94,7 +95,7 @@ export default function InventoryPage() {
         value: stats ? `₱${formatMoney(stats.totalValue)}` : "—",
       },
       { label: "Products with stock", value: stats ? String(stats.productsWithStock) : "—" },
-      { label: "Sold out", value: stats ? String(stats.soldOut) : "—" },
+      { label: "Out of stock", value: stats ? String(stats.soldOut) : "—" },
     ],
     [stats]
   );
@@ -122,8 +123,8 @@ export default function InventoryPage() {
       </div>
 
       <Container>
-        <div className="border-b border-[var(--border-subtle)] px-6 py-4">
-          <div className="relative max-w-md">
+        <div className="flex flex-col gap-3 border-b border-[var(--border-subtle)] px-6 py-4 sm:flex-row sm:items-center">
+          <div className="relative min-w-0 flex-1">
             <Search className="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--fg-muted)]" />
             <Input
               value={query}
@@ -135,20 +136,28 @@ export default function InventoryPage() {
               className="pl-8"
             />
           </div>
+          <div className="w-full shrink-0 sm:w-44">
+            <Select value={kindFilter} onChange={(e) => setKindFilter(e.target.value)}>
+              <option value="all">All types</option>
+              <option value="sale">Sale</option>
+              <option value="edit">Edit</option>
+              <option value="create">Created</option>
+            </Select>
+          </div>
         </div>
 
         <div className="overflow-x-auto">
           <table className="w-full min-w-[860px] text-left">
             <thead>
               <tr className="border-b border-[var(--border-subtle)] text-xs text-[var(--fg-muted)]">
-                <th className="w-40 px-6 py-2.5 font-medium">Date</th>
-                <th className="px-6 py-2.5 font-medium">Product</th>
-                <th className="w-40 px-6 py-2.5 font-medium">Variant</th>
-                <th className="w-28 px-6 py-2.5 font-medium">Change</th>
-                <th className="w-28 px-6 py-2.5 font-medium">Type</th>
-                <th className="w-44 px-6 py-2.5 font-medium">Reason</th>
-                <th className="w-36 px-6 py-2.5 font-medium">By</th>
-                <th className="w-28 px-6 py-2.5 font-medium">Ref</th>
+                <th className="w-[16%] px-6 py-2.5 font-medium">Date</th>
+                <th className="w-[24%] px-6 py-2.5 font-medium">Product</th>
+                <th className="w-[13%] px-6 py-2.5 font-medium">Variant</th>
+                <th className="w-[9%] px-6 py-2.5 font-medium">Change</th>
+                <th className="w-[8%] px-6 py-2.5 font-medium">Type</th>
+                <th className="w-[14%] px-6 py-2.5 font-medium">Reason</th>
+                <th className="w-[9%] px-6 py-2.5 font-medium">By</th>
+                <th className="w-[7%] px-6 py-2.5 font-medium">Ref</th>
               </tr>
             </thead>
             <tbody>
@@ -168,7 +177,6 @@ export default function InventoryPage() {
               ) : (
                 items.map((m) => {
                   const kind = KIND_BADGES[m.kind] ?? KIND_BADGES.edit;
-                  const diff = m.newStock - m.prevStock;
                   return (
                     <tr
                       key={m.id}
@@ -183,11 +191,8 @@ export default function InventoryPage() {
                       <td className="whitespace-nowrap px-6 py-3 text-sm text-[var(--fg-muted)]">
                         {m.colorName} · {m.size}
                       </td>
-                      <td className="whitespace-nowrap px-6 py-3 text-sm">
-                        <span className="text-[var(--fg-muted)]">{m.prevStock} → {m.newStock}</span>
-                        <span className={`ml-1.5 text-xs font-medium ${diff > 0 ? "text-emerald-600" : "text-red-600"}`}>
-                          {diff > 0 ? `+${diff}` : diff}
-                        </span>
+                      <td className="whitespace-nowrap px-6 py-3 text-sm text-[var(--fg-base)]">
+                        {m.prevStock} → {m.newStock}
                       </td>
                       <td className="whitespace-nowrap px-6 py-3">
                         <Badge color={kind.color}>{kind.label}</Badge>

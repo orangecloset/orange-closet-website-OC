@@ -163,12 +163,18 @@ export const api = {
   recordSale: (sale: SaleInput) =>
     request<RecentSale>("/api/sales", { method: "POST", body: JSON.stringify(sale) }),
 
-  listStockMovementsPaged: (params: { page: number; search?: string; limit?: number }) => {
+  listStockMovementsPaged: (params: {
+    page: number;
+    search?: string;
+    kind?: string;
+    limit?: number;
+  }) => {
     const q = new URLSearchParams({
       page: String(params.page),
       limit: String(params.limit ?? 50),
     });
     if (params.search?.trim()) q.set("search", params.search.trim());
+    if (params.kind && params.kind !== "all") q.set("kind", params.kind);
     return request<PagedStockMovements>(`/api/stock-movements?${q}`);
   },
 

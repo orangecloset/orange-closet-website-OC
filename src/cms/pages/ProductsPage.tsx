@@ -146,7 +146,10 @@ export default function ProductsPage() {
 
   const stockReasonValid =
     !stocksChanged ||
-    (stockReason !== "" && (stockReason !== "Other" || stockReasonNote.trim().length > 0));
+    (stockReason !== "" && (stockReason !== "Others" || stockReasonNote.trim().length > 0));
+
+  const reasonMissing = stocksChanged && !stockReason;
+  const noteMissing = stocksChanged && stockReason === "Others" && !stockReasonNote.trim();
 
   const saveStocks = async () => {
     if (!stocksTarget || !stockReasonValid) return;
@@ -169,7 +172,7 @@ export default function ProductsPage() {
     setSavingStocks(true);
     try {
       const reasonText =
-        stockReason === "Other" ? stockReasonNote.trim() : stockReason;
+        stockReason === "Others" ? stockReasonNote.trim() : stockReason;
       await updateProduct(stocksTarget.id, { colors, stockReason: reasonText });
       showToast("Stock updated.");
       setStocksTarget(null);
@@ -472,24 +475,32 @@ export default function ProductsPage() {
                 id="stock-reason"
                 value={stockReason}
                 onChange={(e) => setStockReason(e.target.value)}
+                className={
+                  reasonMissing
+                    ? "shadow-[0_0_0_1px_#ef4444,0_1px_2px_0_rgba(0,0,0,0.12)]"
+                    : undefined
+                }
               >
                 <option value="">Select a reason…</option>
-                <option value="New arrival">New arrival</option>
+                <option value="New Arrival">New Arrival</option>
+                <option value="Restock">Restock</option>
                 <option value="Correction">Correction</option>
-                <option value="Other">Other</option>
+                <option value="Others">Others</option>
               </Select>
-              {stockReason === "Other" && (
+              {stockReason === "Others" && (
                 <div className="mt-2">
                   <Input
                     value={stockReasonNote}
                     onChange={(e) => setStockReasonNote(e.target.value)}
                     placeholder="Type the reason…"
                     maxLength={200}
+                    className={
+                      noteMissing
+                        ? "shadow-[0_0_0_1px_#ef4444,0_1px_2px_0_rgba(0,0,0,0.12)]"
+                        : undefined
+                    }
                   />
                 </div>
-              )}
-              {stocksChanged && !stockReasonValid && (
-                <p className="mt-2 text-xs text-red-600">Please choose a reason before saving.</p>
               )}
             </div>
             <p className="text-xs text-[var(--fg-muted)]">

@@ -1,5 +1,5 @@
 import { Hono } from "hono";
-import { desc, ilike, sql } from "drizzle-orm";
+import { and, desc, eq, ilike, sql } from "drizzle-orm";
 import { getDb, schema } from "../lib/db.js";
 import { isAuthorized } from "../lib/auth.js";
 import type { Env } from "../env.js";
@@ -32,10 +32,18 @@ app.get("/", async (c) => {
   const page = Math.max(1, Math.floor(Number(c.req.query("page")) || 1));
   const limit = Math.min(100, Math.max(1, Number(c.req.query("limit")) || 50));
   const search = typeof c.req.query("search") === "string" ? c.req.query("search")!.trim() : "";
+  const kind = typeof c.req.query("kind") === "string" ? c.req.query("kind")!.trim() : "";
 
-  const where = search
-    ? ilike(schema.stockMovements.productName, `%${search.replace(/[%_]/g, "\\$&")}%`)
-    : undefined;
+  const conditions = [];
+  if (search) {
+    conditions.push(
+      ilike(schema.stockMovements.productName, `%${search.replace(/[%_]/g, "\\$&")}%`)
+    );
+  }
+  if (kind === "sale" || kind === "edit" || kind === "create") {
+    conditions.push(eq(schema.stockMovements.kind, kind));
+  }
+  const where = conditions.length > 0 ? and(...conditions) : undefined;
 
   const [countResult, rows] = await Promise.all([
     db
