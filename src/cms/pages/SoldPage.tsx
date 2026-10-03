@@ -95,6 +95,13 @@ export default function SoldPage() {
   );
   const sizeStock = activeVariant?.stock ?? 0;
   const qty = Math.max(1, quantity || 1);
+  const sizeChoices = activeColor?.sizes ?? [];
+  const hasSizeVariety = sizeChoices.length > 1;
+
+  useEffect(() => {
+    const sizes = activeColor?.sizes ?? [];
+    if (sizes.length === 1) setSelectedSize(sizes[0].size);
+  }, [activeColor]);
 
   const cycleAvailability = () => {
     const keys = AVAILABILITY_FILTERS.map((f) => f.key);
@@ -390,7 +397,14 @@ export default function SoldPage() {
                       onClick={() => {
                         if (!empty) {
                           setColorIndex(i);
-                          setSelectedSize("");
+                          const nextSizes = product.colors[i]?.sizes ?? [];
+                          if (nextSizes.length === 1) {
+                            setSelectedSize(nextSizes[0].size);
+                          } else {
+                            setSelectedSize((prev) =>
+                              nextSizes.some((s) => s.size === prev) ? prev : ""
+                            );
+                          }
                           setQuantity(1);
                         }
                       }}
@@ -416,13 +430,13 @@ export default function SoldPage() {
               )}
             </div>
 
-            {activeColor && (activeColor.sizes?.length ?? 0) > 0 && (
+            {activeColor && hasSizeVariety && (
               <div className="border-t border-[var(--border-subtle)] pt-4">
                 <p className="mb-3 text-[11px] uppercase tracking-widest text-[var(--fg-muted)]">
                   Size{selectedSize ? `: ${selectedSize}` : ""}
                 </p>
                 <div className="flex flex-wrap gap-2.5">
-                  {(activeColor.sizes ?? []).map((vs) => {
+                  {sizeChoices.map((vs) => {
                     const out = vs.stock <= 0;
                     const selected = vs.size === selectedSize;
                     return (
