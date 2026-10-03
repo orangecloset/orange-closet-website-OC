@@ -69,6 +69,38 @@ export type PagedSales = {
   hasPrevPage: boolean;
 };
 
+export type StockMovement = {
+  id: string;
+  productId: string;
+  productName: string;
+  colorName: string;
+  size: string;
+  prevStock: number;
+  newStock: number;
+  kind: "sale" | "edit" | "create";
+  reason: string | null;
+  changedBy: string | null;
+  ref: string | null;
+  createdAt: string;
+};
+
+export type PagedStockMovements = {
+  data: StockMovement[];
+  page: number;
+  limit: number;
+  totalItems: number;
+  totalPages: number;
+  hasNextPage: boolean;
+  hasPrevPage: boolean;
+};
+
+export type InventoryStats = {
+  totalUnits: number;
+  productsWithStock: number;
+  soldOut: number;
+  totalValue: number;
+};
+
 export const api = {
   getProduct: (id: string) => request<CmsProduct>(`/api/products/${id}`),
 
@@ -114,10 +146,10 @@ export const api = {
   createProduct: (product: CmsProduct) =>
     request<{ ok: true }>("/api/products", { method: "POST", body: JSON.stringify(product) }),
 
-  updateProduct: (id: string, product: CmsProduct) =>
+  updateProduct: (id: string, product: CmsProduct, stockReason?: string) =>
     request<{ ok: true }>(`/api/products/${id}`, {
       method: "PUT",
-      body: JSON.stringify(product),
+      body: JSON.stringify(stockReason ? { ...product, stockReason } : product),
     }),
 
   deleteProduct: (id: string) =>
@@ -130,6 +162,17 @@ export const api = {
 
   recordSale: (sale: SaleInput) =>
     request<RecentSale>("/api/sales", { method: "POST", body: JSON.stringify(sale) }),
+
+  listStockMovementsPaged: (params: { page: number; search?: string; limit?: number }) => {
+    const q = new URLSearchParams({
+      page: String(params.page),
+      limit: String(params.limit ?? 50),
+    });
+    if (params.search?.trim()) q.set("search", params.search.trim());
+    return request<PagedStockMovements>(`/api/stock-movements?${q}`);
+  },
+
+  getInventoryStats: () => request<InventoryStats>("/api/stock-movements/stats"),
 
   loadSettings: () => request<SettingsMap>("/api/settings"),
 

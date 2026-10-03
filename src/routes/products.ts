@@ -1,10 +1,11 @@
 import { Hono } from "hono";
 import { and, desc, eq, inArray, sql } from "drizzle-orm";
 import { getDb, schema } from "../lib/db.js";
-import { isAuthorized } from "../lib/auth.js";
+import { getAuthUser, isAuthorized } from "../lib/auth.js";
 import { rateLimit } from "../lib/ratelimit.js";
 import { getCatalogAccess } from "../lib/catalog.js";
 import { cmsProductToRow, rowToCmsProduct } from "../lib/products.js";
+import { flattenStock, logStockDiff, resolveChangedBy } from "../lib/stock-movements.js";
 import type { Env } from "../env.js";
 
 const MAX_PAGE_SIZE = 30;
@@ -139,7 +140,21 @@ app.post("/", async (c) => {
     .from(schema.products)
     .where(eq(schema.products.id, body.id));
   if (existing.length > 0) return c.json({ error: "Product id already exists" }, 400);
-  await db.insert(schema.products).values(cmsProductToRow(body as never));
+  const row = cmsProductToRow(body as never);
+  await db.insert(schema.products).values(row);
+
+  const initialStock = flattenStock(row.colors);
+  const changedBy = await resolveChangedBy(c.env, (await getAuthUser(c.env, c.req.header("authorization")))?.id ?? null);
+  await logStockDiff(c.env, {
+    productId: row.id,
+    productName: row.name,
+    before: new Map(),
+    after: initialStock,
+    kind: "create",
+    reason: "Initial stock",
+    changedBy,
+  });
+
   return c.json({ ok: true }, 201);
 });
 
@@ -178,14 +193,19 @@ app.put("/:id", async (c) => {
   const id = c.req.param("id");
   if (!id) return c.json({ error: "Missing product id" }, 400);
 
-  if (!(await isAuthorized(c.env, c.req.header("authorization")))) {
-    return c.json({ error: "Unauthorized" }, 401);
-  }
+  const authUser = await getAuthUser(c.env, c.req.header("authorization"));
+  if (!authUser) return c.json({ error: "Unauthorized" }, 401);
 
-  const body = await c.req.json<{ name?: string }>();
+  const body = await c.req.json<{ name?: string; stockReason?: string }>();
   if (!body?.name) return c.json({ error: "Invalid product body" }, 400);
 
   const db = getDb(c.env);
+  const [oldRow] = await db
+    .select({ name: schema.products.name, colors: schema.products.colors })
+    .from(schema.products)
+    .where(eq(schema.products.id, id));
+  if (!oldRow) return c.json({ error: "Product not found" }, 404);
+
   const values = cmsProductToRow(body as never);
   delete values.createdAt;
   const updated = await db
@@ -194,6 +214,23 @@ app.put("/:id", async (c) => {
     .where(eq(schema.products.id, id))
     .returning({ id: schema.products.id });
   if (updated.length === 0) return c.json({ error: "Product not found" }, 404);
+
+  const before = flattenStock(oldRow.colors);
+  const after = flattenStock(values.colors ?? []);
+  const reason =
+    typeof body.stockReason === "string" && body.stockReason.trim()
+      ? body.stockReason.trim().slice(0, 200)
+      : null;
+  await logStockDiff(c.env, {
+    productId: id,
+    productName: values.name ?? oldRow.name,
+    before,
+    after,
+    kind: "edit",
+    reason,
+    changedBy: await resolveChangedBy(c.env, authUser.id),
+  });
+
   return c.json({ ok: true });
 });
 

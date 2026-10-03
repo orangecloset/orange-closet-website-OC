@@ -29,7 +29,10 @@ export type CmsContextValue = {
   updateSettings: (patch: Partial<SettingsConfig>) => void;
   flushSaves: () => Promise<void>;
   addProduct: (input: CmsProductInput) => Promise<CmsProduct>;
-  updateProduct: (id: string, input: Partial<CmsProductInput>) => Promise<void>;
+  updateProduct: (
+    id: string,
+    input: Partial<CmsProductInput> & { stockReason?: string }
+  ) => Promise<void>;
   deleteProduct: (id: string) => Promise<void>;
   recordSale: (sale: SaleInput) => Promise<RecentSale>;
   bulkDeleteProducts: (ids: string[]) => Promise<void>;

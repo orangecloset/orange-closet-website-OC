@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { NavLink, Route, Routes, Link, useNavigate, useLocation } from "react-router-dom";
-import { LayoutDashboard, Package, Home, Tags, Settings, LogOut, Store, Menu, Info, ShoppingBag, Users } from "lucide-react";
+import { LayoutDashboard, Package, Home, Tags, Settings, LogOut, Store, Menu, Info, ShoppingBag, Users, Boxes } from "lucide-react";
 import { isAuthenticated, logout, getCmsSession } from "./store/auth";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { queryClient } from "./lib/queries";
@@ -16,6 +16,7 @@ import ProductsPage from "./pages/ProductsPage";
 import ProductFormPage from "./pages/ProductFormPage";
 import SoldPage from "./pages/SoldPage";
 import SalesHistoryPage from "./pages/SalesHistoryPage";
+import InventoryPage from "./pages/InventoryPage";
 import HomepagePage from "./pages/HomepagePage";
 import TypesPage from "./pages/TypesPage";
 import SettingsPage from "./pages/SettingsPage";
@@ -30,6 +31,7 @@ const NAV_SECTIONS = [
       { label: "Dashboard", to: "/cms-admin", icon: LayoutDashboard, end: true },
       { label: "Sell", to: "/cms-admin/sell", icon: ShoppingBag, end: false },
       { label: "Products", to: "/cms-admin/products", icon: Package, end: false },
+      { label: "Inventory", to: "/cms-admin/inventory", icon: Boxes, end: false },
       { label: "Categories", to: "/cms-admin/categories", icon: Tags, end: false },
     ],
   },
@@ -50,6 +52,7 @@ const NAV_TITLES: Record<string, string> = {
   "/cms-admin/sell": "Sell",
   "/cms-admin/sales-history": "Sales History",
   "/cms-admin/products": "Products",
+  "/cms-admin/inventory": "Inventory",
   "/cms-admin/products/new": "Add Product",
   "/cms-admin/homepage": "Homepage",
   "/cms-admin/about": "About Page",
@@ -334,6 +337,7 @@ function AdminShell({ onLogout }: { onLogout: () => void }) {
             <Route path="products" element={<ProductsPage />} />
             <Route path="products/new" element={<ProductFormPage />} />
             <Route path="products/:productId/edit" element={<ProductFormPage />} />
+            <Route path="inventory" element={<InventoryPage />} />
             <Route path="homepage" element={<HomepagePage />} />
             <Route path="about" element={<AboutPage />} />
             <Route path="categories" element={<TypesPage />} />

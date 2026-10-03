@@ -4,6 +4,7 @@ import type { Env } from "./env.js";
 import usersRoutes from "./routes/users.js";
 import productsRoutes from "./routes/products.js";
 import salesRoutes from "./routes/sales.js";
+import stockMovementsRoutes from "./routes/stock-movements.js";
 import settingsRoutes from "./routes/settings.js";
 import uploadRoutes from "./routes/upload.js";
 import catalogLinksRoutes from "./routes/catalog-links.js";
@@ -26,6 +27,7 @@ api.use(
 api.route("/users", usersRoutes);
 api.route("/products", productsRoutes);
 api.route("/sales", salesRoutes);
+api.route("/stock-movements", stockMovementsRoutes);
 api.route("/settings", settingsRoutes);
 api.route("/upload", uploadRoutes);
 api.route("/catalog-links", catalogLinksRoutes);

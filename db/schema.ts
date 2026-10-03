@@ -63,6 +63,30 @@ export const sales = pgTable(
   (table) => [index("sales_created_at_idx").on(table.createdAt)]
 );
 
+export const stockMovements = pgTable(
+  "stock_movements",
+  {
+    id: text("id").primaryKey(),
+    productId: text("product_id"),
+    productName: text("product_name").notNull(),
+    colorName: text("color_name").notNull(),
+    size: text("size").notNull(),
+    prevStock: integer("prev_stock").notNull(),
+    newStock: integer("new_stock").notNull(),
+    kind: text("kind").notNull().default("edit"),
+    reason: text("reason"),
+    changedBy: text("changed_by"),
+    ref: text("ref"),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (table) => [
+    index("stock_movements_product_id_idx").on(table.productId),
+    index("stock_movements_created_at_idx").on(table.createdAt),
+  ]
+);
+
 export const settings = pgTable("settings", {
   key: text("key").primaryKey(),
   value: jsonb("value").notNull(),

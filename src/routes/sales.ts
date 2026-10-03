@@ -1,8 +1,9 @@
 import { Hono } from "hono";
-import { desc, sql } from "drizzle-orm";
+import { desc, eq, sql } from "drizzle-orm";
 import { getDb, schema } from "../lib/db.js";
-import { isAuthorized } from "../lib/auth.js";
+import { getAuthUser, isAuthorized } from "../lib/auth.js";
 import { rateLimit } from "../lib/ratelimit.js";
+import { flattenStock, insertMovements, resolveChangedBy } from "../lib/stock-movements.js";
 import type { Env } from "../env.js";
 
 type SaleRow = typeof schema.sales.$inferSelect;
@@ -132,6 +133,18 @@ app.post("/", async (c) => {
   }
 
   const db = getDb(c.env);
+
+  const [productRow] = await db
+    .select({ name: schema.products.name, colors: schema.products.colors })
+    .from(schema.products)
+    .where(eq(schema.products.id, body.productId!));
+  const beforeStock = flattenStock(productRow?.colors);
+  const key = `${body.colorName}::${body.size}`;
+  const prevStock = beforeStock.get(key) ?? 0;
+  const authUser = await getAuthUser(c.env, c.req.header("authorization"));
+  const changedBy =
+    optionalText(body.soldBy) ?? (await resolveChangedBy(c.env, authUser?.id ?? null));
+
   const [row] = await db
     .insert(schema.sales)
     .values({
@@ -174,6 +187,22 @@ app.post("/", async (c) => {
       updated_at = now()
     where id = ${body.productId}
   `);
+
+  const newStock = Math.max(0, prevStock - body.quantity);
+  await insertMovements(c.env, [
+    {
+      productId: body.productId!,
+      productName: body.productName!,
+      colorName: body.colorName!,
+      size: body.size!,
+      prevStock,
+      newStock,
+      kind: "sale",
+      reason: null,
+      changedBy,
+      ref: row.receiptNo || null,
+    },
+  ]);
 
   return c.json(toApiSale(row), 201);
 });

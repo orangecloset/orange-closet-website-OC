@@ -96,6 +96,9 @@ export default function ProductsPage() {
   const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
   const [stocksTarget, setStocksTarget] = useState<CmsProduct | null>(null);
   const [stockValues, setStockValues] = useState<Record<string, string>>({});
+  const [initialStockValues, setInitialStockValues] = useState<Record<string, string>>({});
+  const [stockReason, setStockReason] = useState("");
+  const [stockReasonNote, setStockReasonNote] = useState("");
   const [savingStocks, setSavingStocks] = useState(false);
 
   const [bulkAction, setBulkAction] = useState<string | null>(null);
@@ -126,11 +129,27 @@ export default function ProductsPage() {
       });
     });
     setStockValues(values);
+    setInitialStockValues(values);
+    setStockReason("");
+    setStockReasonNote("");
     setStocksTarget(product);
   };
 
+  const stocksChanged = useMemo(
+    () =>
+      stocksTarget !== null &&
+      Object.keys({ ...initialStockValues, ...stockValues }).some(
+        (k) => (stockValues[k] ?? "") !== (initialStockValues[k] ?? "")
+      ),
+    [stocksTarget, stockValues, initialStockValues]
+  );
+
+  const stockReasonValid =
+    !stocksChanged ||
+    (stockReason !== "" && (stockReason !== "Other" || stockReasonNote.trim().length > 0));
+
   const saveStocks = async () => {
-    if (!stocksTarget) return;
+    if (!stocksTarget || !stockReasonValid) return;
     const colors = stocksTarget.colors.map((c) => ({
       name: c.name,
       hex: c.hex,
@@ -149,7 +168,9 @@ export default function ProductsPage() {
     }));
     setSavingStocks(true);
     try {
-      await updateProduct(stocksTarget.id, { colors });
+      const reasonText =
+        stockReason === "Other" ? stockReasonNote.trim() : stockReason;
+      await updateProduct(stocksTarget.id, { colors, stockReason: reasonText });
       showToast("Stock updated.");
       setStocksTarget(null);
       reload();
@@ -399,7 +420,7 @@ export default function ProductsPage() {
         footer={
           <>
             <Button variant="secondary" size="small" onClick={() => setStocksTarget(null)} disabled={savingStocks}>Cancel</Button>
-            <Button variant="primary" size="small" onClick={saveStocks} disabled={savingStocks}>
+            <Button variant="primary" size="small" onClick={saveStocks} disabled={savingStocks || !stockReasonValid}>
               {savingStocks ? "Saving…" : "Save"}
             </Button>
           </>
@@ -443,6 +464,34 @@ export default function ProductsPage() {
                 </div>
               );
             })}
+            <div className="rounded-md border border-[var(--border-subtle)] bg-[var(--bg-subtle)] p-3">
+              <label htmlFor="stock-reason" className="mb-1.5 block text-sm font-medium text-[var(--fg-base)]">
+                Reason <span className="text-[var(--fg-muted)]">(required when stock changes)</span>
+              </label>
+              <Select
+                id="stock-reason"
+                value={stockReason}
+                onChange={(e) => setStockReason(e.target.value)}
+              >
+                <option value="">Select a reason…</option>
+                <option value="New arrival">New arrival</option>
+                <option value="Correction">Correction</option>
+                <option value="Other">Other</option>
+              </Select>
+              {stockReason === "Other" && (
+                <div className="mt-2">
+                  <Input
+                    value={stockReasonNote}
+                    onChange={(e) => setStockReasonNote(e.target.value)}
+                    placeholder="Type the reason…"
+                    maxLength={200}
+                  />
+                </div>
+              )}
+              {stocksChanged && !stockReasonValid && (
+                <p className="mt-2 text-xs text-red-600">Please choose a reason before saving.</p>
+              )}
+            </div>
             <p className="text-xs text-[var(--fg-muted)]">
               Sales deduct automatically on the Sell page.
             </p>

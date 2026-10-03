@@ -236,7 +236,7 @@ export function CmsProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const updateProduct = useCallback(
-    async (id: string, input: Partial<CmsProductInput>) => {
+    async (id: string, input: Partial<CmsProductInput> & { stockReason?: string }) => {
       const current = await api.getProduct(id);
       const now = new Date().toISOString();
       const patch: Record<string, unknown> = { updatedAt: now };
@@ -310,7 +310,7 @@ export function CmsProvider({ children }: { children: ReactNode }) {
       );
       if (input.status !== undefined) patch.status = input.status;
       const updated = { ...current, ...patch } as CmsProduct;
-      await api.updateProduct(id, updated);
+      await api.updateProduct(id, updated, input.stockReason);
       invalidateProducts();
     },
     []
