@@ -5,7 +5,7 @@ import { useCms } from "../store/cmsContext";
 import type { CmsProduct, RecentSale } from "../../data/store-types";
 import { api } from "../lib/api";
 import type { PagedSales } from "../lib/api";
-import { parsePrice, downloadReceiptPdf, openReceiptTab, writeReceiptToTab, type ReceiptData } from "../lib/receipt";
+import { parsePrice, downloadReceiptPdf, openReceiptTab, openReceiptPdfTab, type ReceiptData } from "../lib/receipt";
 import { Badge, Button, Container, Header } from "../components/ui";
 
 const PAGE_SIZE = 50;
@@ -83,7 +83,7 @@ export default function SalesHistoryPage() {
     const win = openReceiptTab();
     if (!win) return;
     buildReceiptData(sale)
-      .then((data) => writeReceiptToTab(win, data))
+      .then((data) => openReceiptPdfTab(win, data))
       .catch((err) => {
         console.error("[cms] failed to open receipt", err);
         win.close();

@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { ChevronLeft, ChevronRight, Loader2, Search, Boxes } from "lucide-react";
 import { api } from "../lib/api";
 import type { InventoryStats, PagedStockMovements, StockMovement } from "../lib/api";
-import { openReceiptTab, writeReceiptToTab, type ReceiptData } from "../lib/receipt";
+import { openReceiptTab, openReceiptPdfTab, type ReceiptData } from "../lib/receipt";
 import { useCms } from "../store/cmsContext";
 import { Badge, Button, Container, Header, Input, Select } from "../components/ui";
 
@@ -112,7 +112,7 @@ export default function InventoryPage() {
         productContent,
       } satisfies ReceiptData;
     })()
-      .then((data) => writeReceiptToTab(win, data))
+      .then((data) => openReceiptPdfTab(win, data))
       .catch((err) => {
         console.error("[cms] failed to open receipt from inventory", err);
         win.close();
@@ -183,12 +183,12 @@ export default function InventoryPage() {
             <thead>
               <tr className="border-b border-[var(--border-subtle)] text-xs text-[var(--fg-muted)]">
                 <th className="w-[15%] px-6 py-2.5 font-medium">Date</th>
-                <th className="w-[23%] px-6 py-2.5 font-medium">Product</th>
-                <th className="w-[13%] px-6 py-2.5 font-medium">Variant</th>
-                <th className="w-[9%] px-6 py-2.5 font-medium">Change</th>
+                <th className="w-[21%] px-6 py-2.5 font-medium">Product</th>
+                <th className="w-[12%] px-6 py-2.5 font-medium">Variant</th>
+                <th className="w-[8%] px-6 py-2.5 font-medium">Change</th>
                 <th className="w-[8%] px-6 py-2.5 font-medium">Type</th>
                 <th className="w-[13%] px-6 py-2.5 font-medium">Reason</th>
-                <th className="w-[10%] px-6 py-2.5 font-medium">By</th>
+                <th className="w-[14%] px-6 py-2.5 font-medium">By</th>
                 <th className="w-[9%] px-6 py-2.5 font-medium">Receipt #</th>
               </tr>
             </thead>
@@ -232,7 +232,7 @@ export default function InventoryPage() {
                       <td className="px-6 py-3 text-sm text-[var(--fg-base)]">
                         <span className="block max-w-[180px] truncate">{m.reason || "—"}</span>
                       </td>
-                      <td className="max-w-[8rem] truncate px-6 py-3 text-sm text-[var(--fg-muted)]">
+                      <td className="px-6 py-3 text-sm text-[var(--fg-muted)]">
                         {m.changedBy || "—"}
                       </td>
                       <td className="whitespace-nowrap px-6 py-3 text-xs text-[var(--fg-muted)]">

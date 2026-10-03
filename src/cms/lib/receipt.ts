@@ -317,14 +317,14 @@ export function openReceiptTab(): Window | null {
   return window.open("about:blank", "_blank");
 }
 
-export function writeReceiptToTab(win: Window, data: ReceiptData): void {
-  const doc = win.document;
-  doc.open();
-  doc.write(buildReceiptHtml(data));
-  doc.close();
+export async function openReceiptPdfTab(win: Window, data: ReceiptData): Promise<void> {
+  const blob = await generateReceiptPdfBlob(data);
+  const url = URL.createObjectURL(blob);
+  win.location.href = url;
+  setTimeout(() => URL.revokeObjectURL(url), 60_000);
 }
 
-export async function downloadReceiptPdf(data: ReceiptData): Promise<void> {
+async function generateReceiptPdfBlob(data: ReceiptData): Promise<Blob> {
   const [{ default: html2canvas }, { jsPDF }] = await Promise.all([
     import("html2canvas"),
     import("jspdf"),
@@ -388,8 +388,20 @@ export async function downloadReceiptPdf(data: ReceiptData): Promise<void> {
         yPx += h - (yPx + h < canvas.height ? OVERLAP_PX : 0);
       }
     }
-    pdf.save(`Receipt-${data.sale.receiptNo || data.sale.id}.pdf`);
+    return pdf.output("blob");
   } finally {
     holder.remove();
   }
+}
+
+export async function downloadReceiptPdf(data: ReceiptData): Promise<void> {
+  const blob = await generateReceiptPdfBlob(data);
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `Receipt-${data.sale.receiptNo || data.sale.id}.pdf`;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 60_000);
 }
