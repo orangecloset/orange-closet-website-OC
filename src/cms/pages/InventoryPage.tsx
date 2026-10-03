@@ -2,6 +2,8 @@ import { useEffect, useMemo, useState } from "react";
 import { ChevronLeft, ChevronRight, Loader2, Search, Boxes } from "lucide-react";
 import { api } from "../lib/api";
 import type { InventoryStats, PagedStockMovements, StockMovement } from "../lib/api";
+import { openReceiptTab, writeReceiptToTab, type ReceiptData } from "../lib/receipt";
+import { useCms } from "../store/cmsContext";
 import { Badge, Button, Container, Header, Input, Select } from "../components/ui";
 
 const PAGE_SIZE = 50;
@@ -30,6 +32,7 @@ function formatMoney(value: number): string {
 }
 
 export default function InventoryPage() {
+  const { settings } = useCms();
   const [stats, setStats] = useState<InventoryStats | null>(null);
   const [items, setItems] = useState<StockMovement[]>([]);
   const [totalItems, setTotalItems] = useState(0);
@@ -86,6 +89,35 @@ export default function InventoryPage() {
       cancelled = true;
     };
   }, [page, debouncedQuery, kindFilter]);
+
+  const handleOpenReceipt = (movement: StockMovement) => {
+    if (!movement.ref || movement.kind !== "sale") return;
+    const win = openReceiptTab();
+    if (!win) return;
+    (async () => {
+      const sale = await api.getSaleByReceipt(movement.ref!);
+      let productContent: ReceiptData["productContent"];
+      if (sale.productId) {
+        try {
+          const product = await api.getProduct(sale.productId);
+          productContent = { sections: product.sections };
+        } catch {
+          productContent = undefined;
+        }
+      }
+      return {
+        storeName: settings.storeName || "Store",
+        logoUrl: settings.faviconUrl || undefined,
+        sale,
+        productContent,
+      } satisfies ReceiptData;
+    })()
+      .then((data) => writeReceiptToTab(win, data))
+      .catch((err) => {
+        console.error("[cms] failed to open receipt from inventory", err);
+        win.close();
+      });
+  };
 
   const statCards = useMemo(
     () => [
@@ -150,14 +182,14 @@ export default function InventoryPage() {
           <table className="w-full min-w-[860px] text-left">
             <thead>
               <tr className="border-b border-[var(--border-subtle)] text-xs text-[var(--fg-muted)]">
-                <th className="w-[16%] px-6 py-2.5 font-medium">Date</th>
-                <th className="w-[24%] px-6 py-2.5 font-medium">Product</th>
+                <th className="w-[15%] px-6 py-2.5 font-medium">Date</th>
+                <th className="w-[23%] px-6 py-2.5 font-medium">Product</th>
                 <th className="w-[13%] px-6 py-2.5 font-medium">Variant</th>
                 <th className="w-[9%] px-6 py-2.5 font-medium">Change</th>
                 <th className="w-[8%] px-6 py-2.5 font-medium">Type</th>
-                <th className="w-[14%] px-6 py-2.5 font-medium">Reason</th>
-                <th className="w-[9%] px-6 py-2.5 font-medium">By</th>
-                <th className="w-[7%] px-6 py-2.5 font-medium">Ref</th>
+                <th className="w-[13%] px-6 py-2.5 font-medium">Reason</th>
+                <th className="w-[10%] px-6 py-2.5 font-medium">By</th>
+                <th className="w-[9%] px-6 py-2.5 font-medium">Receipt #</th>
               </tr>
             </thead>
             <tbody>
@@ -204,7 +236,22 @@ export default function InventoryPage() {
                         {m.changedBy || "—"}
                       </td>
                       <td className="whitespace-nowrap px-6 py-3 text-xs text-[var(--fg-muted)]">
-                        {m.ref ? <Badge color="grey">{m.ref}</Badge> : "—"}
+                        {m.ref ? (
+                          m.kind === "sale" ? (
+                            <button
+                              type="button"
+                              onClick={() => handleOpenReceipt(m)}
+                              title="Open receipt"
+                              className="focus:outline-none"
+                            >
+                              <Badge color="grey">{m.ref}</Badge>
+                            </button>
+                          ) : (
+                            <Badge color="grey">{m.ref}</Badge>
+                          )
+                        ) : (
+                          "—"
+                        )}
                       </td>
                     </tr>
                   );

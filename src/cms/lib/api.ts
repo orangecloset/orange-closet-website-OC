@@ -163,6 +163,9 @@ export const api = {
   recordSale: (sale: SaleInput) =>
     request<RecentSale>("/api/sales", { method: "POST", body: JSON.stringify(sale) }),
 
+  getSaleByReceipt: (receiptNo: string) =>
+    request<RecentSale>(`/api/sales/by-receipt/${encodeURIComponent(receiptNo)}`),
+
   listStockMovementsPaged: (params: {
     page: number;
     search?: string;

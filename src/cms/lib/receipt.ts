@@ -313,6 +313,17 @@ export function printReceipt(data: ReceiptData): void {
   void printWhenReady();
 }
 
+export function openReceiptTab(): Window | null {
+  return window.open("about:blank", "_blank");
+}
+
+export function writeReceiptToTab(win: Window, data: ReceiptData): void {
+  const doc = win.document;
+  doc.open();
+  doc.write(buildReceiptHtml(data));
+  doc.close();
+}
+
 export async function downloadReceiptPdf(data: ReceiptData): Promise<void> {
   const [{ default: html2canvas }, { jsPDF }] = await Promise.all([
     import("html2canvas"),

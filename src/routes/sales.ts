@@ -80,6 +80,22 @@ app.get("/", async (c) => {
   });
 });
 
+app.get("/by-receipt/:receiptNo", async (c) => {
+  if (!(await isAuthorized(c.env, c.req.header("authorization")))) {
+    return c.json({ error: "Unauthorized" }, 401);
+  }
+  const receiptNo = c.req.param("receiptNo");
+  if (!receiptNo) return c.json({ error: "Missing receipt number" }, 400);
+  const db = getDb(c.env);
+  const [row] = await db
+    .select()
+    .from(schema.sales)
+    .where(eq(schema.sales.receiptNo, receiptNo))
+    .limit(1);
+  if (!row) return c.json({ error: "Sale not found" }, 404);
+  return c.json(toApiSale(row));
+});
+
 app.post("/", async (c) => {
   const rl = await rateLimit(c.env, c.req.raw.headers, {
     key: "sales-create",

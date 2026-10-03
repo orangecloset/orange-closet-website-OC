@@ -1,11 +1,11 @@
 import { useCallback, useEffect, useState } from "react";
-import { ChevronLeft, ChevronRight, Download, Loader2, Printer, ShoppingBag } from "lucide-react";
+import { ChevronLeft, ChevronRight, Download, Loader2, ShoppingBag } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useCms } from "../store/cmsContext";
 import type { CmsProduct, RecentSale } from "../../data/store-types";
 import { api } from "../lib/api";
 import type { PagedSales } from "../lib/api";
-import { parsePrice, printReceipt, downloadReceiptPdf, type ReceiptData } from "../lib/receipt";
+import { parsePrice, downloadReceiptPdf, openReceiptTab, writeReceiptToTab, type ReceiptData } from "../lib/receipt";
 import { Badge, Button, Container, Header } from "../components/ui";
 
 const PAGE_SIZE = 50;
@@ -68,10 +68,6 @@ export default function SalesHistoryPage() {
     };
   };
 
-  const handlePrint = async (sale: RecentSale) => {
-    printReceipt(await buildReceiptData(sale));
-  };
-
   const handleDownload = async (sale: RecentSale) => {
     setDownloadingId(sale.id);
     try {
@@ -81,6 +77,17 @@ export default function SalesHistoryPage() {
     } finally {
       setDownloadingId(null);
     }
+  };
+
+  const handleOpenReceipt = (sale: RecentSale) => {
+    const win = openReceiptTab();
+    if (!win) return;
+    buildReceiptData(sale)
+      .then((data) => writeReceiptToTab(win, data))
+      .catch((err) => {
+        console.error("[cms] failed to open receipt", err);
+        win.close();
+      });
   };
 
   return (
@@ -100,14 +107,14 @@ export default function SalesHistoryPage() {
           <table className="w-full min-w-[860px] text-left">
             <thead>
               <tr className="border-b border-[var(--border-subtle)] text-xs text-[var(--fg-muted)]">
-                <th className="px-6 py-2.5 font-medium">Receipt #</th>
-                <th className="px-6 py-2.5 font-medium">Product</th>
-                <th className="w-36 px-6 py-2.5 font-medium">Variant</th>
-                <th className="w-16 px-6 py-2.5 font-medium">Qty</th>
-                <th className="w-28 px-6 py-2.5 font-medium">Total</th>
-                <th className="w-32 px-6 py-2.5 font-medium">Date Sold</th>
-                <th className="w-32 px-6 py-2.5 font-medium">Sold By</th>
-                <th className="w-24 px-6 py-2.5 font-medium"></th>
+                <th className="w-[11%] px-6 py-2.5 font-medium">Receipt #</th>
+                <th className="w-[26%] px-6 py-2.5 font-medium">Product</th>
+                <th className="w-[16%] px-6 py-2.5 font-medium">Variant</th>
+                <th className="w-[7%] px-6 py-2.5 font-medium">Qty</th>
+                <th className="w-[13%] px-6 py-2.5 font-medium">Total</th>
+                <th className="w-[15%] px-6 py-2.5 font-medium">Date Sold</th>
+                <th className="w-[9%] px-6 py-2.5 font-medium">Sold By</th>
+                <th className="w-[3%] px-6 py-2.5 font-medium"></th>
               </tr>
             </thead>
             <tbody>
@@ -129,7 +136,8 @@ export default function SalesHistoryPage() {
                   return (
                     <tr
                       key={s.id}
-                      className="border-b border-[var(--border-subtle)] transition-colors last:border-b-0 hover:bg-[var(--bg-subtle-hover)]"
+                      onClick={() => handleOpenReceipt(s)}
+                      className="cursor-pointer border-b border-[var(--border-subtle)] transition-colors last:border-b-0 hover:bg-[var(--bg-subtle-hover)]"
                     >
                       <td className="whitespace-nowrap px-6 py-3 text-xs font-medium text-[var(--fg-base)]">
                         {s.receiptNo ? <Badge color="grey">{s.receiptNo}</Badge> : <span className="text-[var(--fg-muted)]">—</span>}
@@ -158,31 +166,23 @@ export default function SalesHistoryPage() {
                       <td className="whitespace-nowrap px-6 py-3 text-sm text-[var(--fg-muted)]">{formatDate(s.soldAt ?? s.createdAt)}</td>
                       <td className="max-w-[7rem] truncate px-6 py-3 text-sm text-[var(--fg-muted)]">{s.soldBy || "—"}</td>
                       <td className="px-6 py-3">
-                        <div className="flex items-center gap-1">
-                          <button
-                            type="button"
-                            onClick={() => void handlePrint(s)}
-                            title="Print receipt"
-                            aria-label={`Print receipt ${s.receiptNo || s.id}`}
-                            className="flex h-7 w-7 items-center justify-center rounded-md text-[var(--fg-subtle)] transition-colors hover:bg-[var(--bg-subtle-hover)] hover:text-[var(--fg-base)]"
-                          >
-                            <Printer className="h-4 w-4" />
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => void handleDownload(s)}
-                            disabled={downloadingId === s.id}
-                            title="Download PDF receipt"
-                            aria-label={`Download PDF receipt ${s.receiptNo || s.id}`}
-                            className="flex h-7 w-7 items-center justify-center rounded-md text-[var(--fg-subtle)] transition-colors hover:bg-[var(--bg-subtle-hover)] hover:text-[var(--fg-base)] disabled:opacity-50"
-                          >
-                            {downloadingId === s.id ? (
-                              <Loader2 className="h-4 w-4 animate-spin" />
-                            ) : (
-                              <Download className="h-4 w-4" />
-                            )}
-                          </button>
-                        </div>
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            void handleDownload(s);
+                          }}
+                          disabled={downloadingId === s.id}
+                          title="Download PDF receipt"
+                          aria-label={`Download PDF receipt ${s.receiptNo || s.id}`}
+                          className="flex h-7 w-7 items-center justify-center rounded-md text-[var(--fg-subtle)] transition-colors hover:bg-[var(--bg-subtle-hover)] hover:text-[var(--fg-base)] disabled:opacity-50"
+                        >
+                          {downloadingId === s.id ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                          ) : (
+                            <Download className="h-4 w-4" />
+                          )}
+                        </button>
                       </td>
                     </tr>
                   );

@@ -77,10 +77,6 @@ export async function insertMovements(env: Env, rows: MovementInput[]): Promise<
   );
 }
 
-/**
- * Compare two flattened stock maps and log every changed color/size.
- * Keys are `${colorName}::${size}`.
- */
 export async function logStockDiff(
   env: Env,
   opts: {
