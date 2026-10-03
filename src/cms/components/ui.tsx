@@ -616,8 +616,8 @@ export function SlideToConfirm({
   disabled?: boolean;
   className?: string;
 }) {
-  const THUMB_PX = 36;
-  const PAD_PX = 4;
+  const THUMB_PX = 44;
+  const PAD_PX = 0;
   const THRESHOLD = 0.9;
 
   const trackRef = useRef<HTMLDivElement>(null);
@@ -694,7 +694,7 @@ export function SlideToConfirm({
     >
       <div
         aria-hidden
-        className="absolute inset-y-0 left-0 bg-[var(--bg-interactive)]"
+        className="absolute inset-y-0 left-0 bg-[var(--button-inverted-pressed)]"
         style={{ width: `calc(${PAD_PX + THUMB_PX / 2}px + (100% - ${PAD_PX * 2 + THUMB_PX}px) * ${progress})` }}
       />
       <span
@@ -718,7 +718,7 @@ export function SlideToConfirm({
         onPointerUp={finishDrag}
         onPointerCancel={finishDrag}
         onKeyDown={handleKeyDown}
-        className="absolute top-1 flex h-9 w-9 touch-none items-center justify-center rounded-full bg-[var(--button-inverted)] text-[var(--contrast-fg-primary)] shadow-[var(--elevation-flyout)] transition-[left] duration-300 ease-out select-none"
+        className="absolute inset-y-0 flex w-11 touch-none items-center justify-center rounded-full bg-[var(--button-inverted)] text-[var(--contrast-fg-primary)] shadow-[var(--elevation-flyout)] transition-[left] duration-300 ease-out select-none"
         style={{
           left: `calc(${PAD_PX}px + (100% - ${PAD_PX * 2 + THUMB_PX}px) * ${progress})`,
           transitionDuration: dragging ? "0ms" : undefined,
