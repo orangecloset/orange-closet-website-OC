@@ -462,8 +462,8 @@ export default function SettingsPage() {
 
         <Container>
           <Header
-            title="Staff Access Links"
-            subtitle="Access links and PINs shared with staff"
+            title="Access Link"
+            subtitle="Access links and PINs for the storefront"
             actions={
               <Button variant="primary" size="small" type="button" onClick={createCatalogLink}>
                 <Plus className="h-4 w-4" />

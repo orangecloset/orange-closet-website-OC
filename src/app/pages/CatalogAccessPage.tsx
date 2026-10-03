@@ -128,7 +128,7 @@ export default function CatalogAccessPage() {
           <Lock className="h-6 w-6 text-gray-500" />
         </div>
         <h1 className="text-sm font-semibold uppercase tracking-widest text-black">
-          Staff Access
+          Access
         </h1>
         <p className="text-xs leading-relaxed text-gray-500">
           Enter the PIN provided by the admin to unlock this catalog.
