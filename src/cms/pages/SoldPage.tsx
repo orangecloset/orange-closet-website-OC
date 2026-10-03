@@ -8,7 +8,7 @@ import { invalidateProducts, usePagedProducts, useProductSuggestions } from "../
 import { parsePrice, downloadReceiptPdf } from "../lib/receipt";
 import { getCmsSession } from "../store/auth";
 import { productColorCss } from "../../data/products";
-import { Badge, Button, Container, Header, Input, Label, Modal, Select } from "../components/ui";
+import { Badge, Button, Container, Header, Input, Label, Modal, Select, SlideToConfirm } from "../components/ui";
 
 const PAGE_SIZE = 30;
 const SEARCH_DEBOUNCE_MS = 350;
@@ -53,8 +53,11 @@ export default function SoldPage() {
   const [paymentMethod, setPaymentMethod] = useState("Cash");
   const [customerName, setCustomerName] = useState("");
   const [customerPhone, setCustomerPhone] = useState("");
+  const [customerEmail, setCustomerEmail] = useState("");
+  const [itemCode, setItemCode] = useState("");
   const [showConfirm, setShowConfirm] = useState(false);
   const [recording, setRecording] = useState(false);
+  const [sliderKey, setSliderKey] = useState(0);
 
   useEffect(() => {
     const t = setTimeout(() => setDebouncedQuery(query), SEARCH_DEBOUNCE_MS);
@@ -114,6 +117,8 @@ export default function SoldPage() {
     setPaymentMethod("Cash");
     setCustomerName("");
     setCustomerPhone("");
+    setCustomerEmail("");
+    setItemCode("");
   };
 
   const handleBack = () => {
@@ -145,6 +150,8 @@ export default function SoldPage() {
         paymentMethod,
         customerName: customerName.trim() || undefined,
         customerPhone: customerPhone.trim() || undefined,
+        customerEmail: customerEmail.trim() || undefined,
+        itemCode: itemCode.trim() || undefined,
       });
       showToast("Sale recorded — stock updated.");
       setShowConfirm(false);
@@ -169,6 +176,7 @@ export default function SoldPage() {
     } catch (err) {
       console.error("[cms] failed to record sale", err);
       showToast("Couldn't record the sale. Please try again. (SLL_01)");
+      setSliderKey((k) => k + 1);
     } finally {
       setRecording(false);
     }
@@ -508,6 +516,30 @@ export default function SoldPage() {
                     className="mt-1.5"
                   />
                 </div>
+                <div>
+                  <Label htmlFor="sell-customer-email">Customer Email (optional)</Label>
+                  <Input
+                    id="sell-customer-email"
+                    type="email"
+                    value={customerEmail}
+                    onChange={(e) => setCustomerEmail(e.target.value)}
+                    placeholder="customer@example.com"
+                    className="mt-1.5"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="sell-item-code">Item Code (optional)</Label>
+                  <Input
+                    id="sell-item-code"
+                    value={itemCode}
+                    onChange={(e) => setItemCode(e.target.value)}
+                    placeholder="oc#213889798123"
+                    className="mt-1.5"
+                  />
+                  <p className="mt-1.5 text-xs text-[var(--fg-muted)]">
+                    From the product tag — shown on the receipt.
+                  </p>
+                </div>
               </div>
             </div>
 
@@ -535,12 +567,22 @@ export default function SoldPage() {
           description="This will deduct stock from the product and record the sale permanently."
           footer={
             <>
-              <Button variant="secondary" size="small" onClick={() => setShowConfirm(false)} disabled={recording}>
+              <Button
+                variant="secondary"
+                size="small"
+                onClick={() => setShowConfirm(false)}
+                disabled={recording}
+              >
                 Cancel
               </Button>
-              <Button variant="primary" size="small" onClick={() => finalizeSale()} disabled={recording}>
-                Confirm Sale
-              </Button>
+              <SlideToConfirm
+                key={sliderKey}
+                onConfirm={() => finalizeSale()}
+                disabled={recording}
+                label="Slide to confirm sale"
+                confirmedLabel="Sale recorded"
+                className="min-w-0 flex-1"
+              />
             </>
           }
         >
@@ -582,6 +624,18 @@ export default function SoldPage() {
               <div className="flex justify-between gap-4">
                 <dt className="text-[var(--fg-muted)]">Contact no.</dt>
                 <dd className="text-[var(--fg-base)]">{customerPhone.trim()}</dd>
+              </div>
+            )}
+            {customerEmail.trim() && (
+              <div className="flex justify-between gap-4">
+                <dt className="text-[var(--fg-muted)]">Email</dt>
+                <dd className="text-[var(--fg-base)]">{customerEmail.trim()}</dd>
+              </div>
+            )}
+            {itemCode.trim() && (
+              <div className="flex justify-between gap-4">
+                <dt className="text-[var(--fg-muted)]">Item code</dt>
+                <dd className="text-[var(--fg-base)]">{itemCode.trim()}</dd>
               </div>
             )}
           </dl>

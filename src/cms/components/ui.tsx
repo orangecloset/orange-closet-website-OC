@@ -12,7 +12,7 @@ import {
 } from "react";
 import { Link } from "react-router-dom";
 import { createPortal } from "react-dom";
-import { CheckCircle2, EllipsisVertical, Eye, EyeOff, ChevronLeft, ChevronRight } from "lucide-react";
+import { Check, CheckCircle2, EllipsisVertical, Eye, EyeOff, ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
 import { cn } from "../lib/utils";
 import { useFocusTrap } from "../../hooks/useFocusTrap";
 import { ToastContext, type ToastType } from "../store/toastContext";
@@ -595,6 +595,141 @@ export function Modal({
           <div className="flex shrink-0 items-center justify-end gap-2 border-t border-[var(--border-subtle)] bg-[var(--bg-base)] px-6 py-4">
             {footer}
           </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+export function SlideToConfirm({
+  onConfirm,
+  label = "Slide to confirm",
+  confirmedLabel = "Confirmed",
+  loadingLabel = "Recording…",
+  disabled = false,
+  className,
+}: {
+  onConfirm: () => void;
+  label?: string;
+  confirmedLabel?: string;
+  loadingLabel?: string;
+  disabled?: boolean;
+  className?: string;
+}) {
+  const THUMB_PX = 36;
+  const PAD_PX = 4;
+  const THRESHOLD = 0.9;
+
+  const trackRef = useRef<HTMLDivElement>(null);
+  const [progress, setProgress] = useState(0);
+  const [dragging, setDragging] = useState(false);
+  const [confirmed, setConfirmed] = useState(false);
+  const progressRef = useRef(0);
+  const startRef = useRef({ x: 0, p: 0 });
+  const travelRef = useRef(1);
+
+  const applyProgress = (value: number) => {
+    const clamped = Math.min(1, Math.max(0, value));
+    progressRef.current = clamped;
+    setProgress(clamped);
+  };
+
+  const confirm = () => {
+    setConfirmed(true);
+    applyProgress(1);
+    onConfirm();
+  };
+
+  const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (disabled || confirmed) return;
+    const el = trackRef.current;
+    if (!el) return;
+    travelRef.current = Math.max(1, el.clientWidth - THUMB_PX - PAD_PX * 2);
+    startRef.current = { x: e.clientX, p: progressRef.current };
+    setDragging(true);
+    e.currentTarget.setPointerCapture(e.pointerId);
+  };
+
+  const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (!dragging || disabled || confirmed) return;
+    const delta = e.clientX - startRef.current.x;
+    applyProgress(startRef.current.p + delta / travelRef.current);
+  };
+
+  const finishDrag = () => {
+    if (!dragging) return;
+    setDragging(false);
+    if (progressRef.current >= THRESHOLD) confirm();
+    else applyProgress(0);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    if (disabled || confirmed) return;
+    let next = progressRef.current;
+    if (e.key === "ArrowRight" || e.key === "ArrowUp") next += 0.1;
+    else if (e.key === "ArrowLeft" || e.key === "ArrowDown") next -= 0.1;
+    else if (e.key === "Home") next = 0;
+    else if (e.key === "End") next = 1;
+    else if (e.key === "Enter" || e.key === " ") next = 1;
+    else return;
+    e.preventDefault();
+    applyProgress(Math.round(next * 10) / 10);
+    if (progressRef.current >= THRESHOLD) confirm();
+  };
+
+  const loading = confirmed && disabled;
+  const settled = confirmed;
+  const labelOpacity = settled ? 1 : Math.max(0, 1 - progress * 2);
+
+  return (
+    <div
+      ref={trackRef}
+      className={cn(
+        "relative h-11 w-full overflow-hidden rounded-full border border-[var(--border-base)] bg-[var(--bg-subtle)] outline-none",
+        !settled && !disabled && "cursor-grab",
+        dragging && "cursor-grabbing",
+        disabled && !settled && "opacity-60",
+        className
+      )}
+    >
+      <div
+        aria-hidden
+        className="absolute inset-y-0 left-0 bg-[var(--bg-interactive)]"
+        style={{ width: `calc(${PAD_PX + THUMB_PX / 2}px + (100% - ${PAD_PX * 2 + THUMB_PX}px) * ${progress})` }}
+      />
+      <span
+        aria-hidden
+        className="pointer-events-none absolute inset-0 flex items-center justify-center text-[13px] font-medium text-[var(--fg-muted)] transition-opacity"
+        style={{ opacity: labelOpacity }}
+      >
+        {settled ? (loading ? loadingLabel : confirmedLabel) : label}
+      </span>
+      <div
+        role="slider"
+        tabIndex={disabled && !settled ? -1 : 0}
+        aria-label={label}
+        aria-valuemin={0}
+        aria-valuemax={100}
+        aria-valuenow={Math.round(progress * 100)}
+        aria-valuetext={settled ? confirmedLabel : `${Math.round(progress * 100)}%`}
+        aria-disabled={disabled && !settled}
+        onPointerDown={handlePointerDown}
+        onPointerMove={handlePointerMove}
+        onPointerUp={finishDrag}
+        onPointerCancel={finishDrag}
+        onKeyDown={handleKeyDown}
+        className="absolute top-1 flex h-9 w-9 touch-none items-center justify-center rounded-full bg-[var(--button-inverted)] text-[var(--contrast-fg-primary)] shadow-[var(--elevation-flyout)] transition-[left] duration-300 ease-out select-none"
+        style={{
+          left: `calc(${PAD_PX}px + (100% - ${PAD_PX * 2 + THUMB_PX}px) * ${progress})`,
+          transitionDuration: dragging ? "0ms" : undefined,
+        }}
+      >
+        {loading ? (
+          <Loader2 className="h-4 w-4 animate-spin" />
+        ) : settled ? (
+          <Check className="h-4 w-4" />
+        ) : (
+          <ChevronRight className="h-4 w-4" />
         )}
       </div>
     </div>

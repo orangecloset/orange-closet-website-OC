@@ -230,17 +230,18 @@ export function buildReceiptHtml({ storeName, logoUrl, sale, productContent }: R
     <table class="details">
       <tr><td>Date sold</td><td>${esc(formatDate(sale.soldAt))}</td></tr>
       <tr><td>Time of transaction</td><td>${esc(formatTime(sale.createdAt))}</td></tr>
-      ${sale.soldBy ? `<tr><td>Sold by</td><td>${esc(sale.soldBy)}</td></tr>` : ""}
       ${sale.paymentMethod ? `<tr><td>Payment method</td><td>${esc(sale.paymentMethod)}</td></tr>` : ""}
+      ${sale.itemCode ? `<tr><td>Item code</td><td>${esc(sale.itemCode)}</td></tr>` : ""}
     </table>
   </div>
 
-  ${(sale.customerName || sale.customerPhone) ? `
+  ${(sale.customerName || sale.customerPhone || sale.customerEmail) ? `
   <div class="section">
     <div class="section-label">Customer</div>
     <table class="details">
       ${sale.customerName ? `<tr><td>Name</td><td>${esc(sale.customerName)}</td></tr>` : ""}
       ${sale.customerPhone ? `<tr><td>Contact no.</td><td>${esc(sale.customerPhone)}</td></tr>` : ""}
+      ${sale.customerEmail ? `<tr><td>Email</td><td>${esc(sale.customerEmail)}</td></tr>` : ""}
     </table>
   </div>` : ""}
 

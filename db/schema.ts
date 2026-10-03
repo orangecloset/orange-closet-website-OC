@@ -56,6 +56,8 @@ export const sales = pgTable(
     paymentMethod: text("payment_method"),
     customerName: text("customer_name"),
     customerPhone: text("customer_phone"),
+    customerEmail: text("customer_email"),
+    itemCode: text("item_code"),
     createdAt: timestamp("created_at", { withTimezone: true })
       .notNull()
       .defaultNow(),

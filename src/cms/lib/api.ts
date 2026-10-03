@@ -36,6 +36,8 @@ export type SaleInput = {
   paymentMethod?: string;
   customerName?: string;
   customerPhone?: string;
+  customerEmail?: string;
+  itemCode?: string;
 };
 
 export type SettingsMap = Record<string, unknown>;

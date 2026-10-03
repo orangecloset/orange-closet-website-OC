@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ChevronRight, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { useCms } from "../store/cmsContext";
 import type { CmsProduct } from "../../data/store-types";
 import { api, type ProductStats } from "../lib/api";
@@ -109,16 +109,6 @@ export default function DashboardPage() {
               <Header
                 title="Recently Sold"
                 subtitle="Latest items sold via the Sell page"
-                actions={
-                  <button
-                    type="button"
-                    onClick={() => navigate("/cms-admin/sales-history")}
-                    className="inline-flex shrink-0 items-center gap-1 rounded-md px-2 py-1 text-[13px] font-medium text-[var(--fg-muted)] transition-colors hover:bg-[var(--bg-subtle-hover)] hover:text-[var(--fg-base)]"
-                  >
-                    View All
-                    <ChevronRight className="h-3.5 w-3.5" />
-                  </button>
-                }
               />
           {loadingStats ? (
             <div className="flex justify-center py-6">

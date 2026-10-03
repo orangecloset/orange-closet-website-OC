@@ -24,6 +24,8 @@ function toApiSale(r: SaleRow) {
     paymentMethod: r.paymentMethod,
     customerName: r.customerName,
     customerPhone: r.customerPhone,
+    customerEmail: r.customerEmail,
+    itemCode: r.itemCode,
     createdAt: r.createdAt.toISOString(),
   };
 }
@@ -124,6 +126,8 @@ app.post("/", async (c) => {
     paymentMethod?: string;
     customerName?: string;
     customerPhone?: string;
+    customerEmail?: string;
+    itemCode?: string;
   }>();
 
   if (
@@ -178,6 +182,8 @@ app.post("/", async (c) => {
       paymentMethod: optionalText(body.paymentMethod),
       customerName: optionalText(body.customerName),
       customerPhone: optionalText(body.customerPhone),
+      customerEmail: optionalText(body.customerEmail),
+      itemCode: optionalText(body.itemCode),
     })
     .returning();
 

@@ -44,6 +44,8 @@ export type RecentSale = {
   paymentMethod?: string | null;
   customerName?: string | null;
   customerPhone?: string | null;
+  customerEmail?: string | null;
+  itemCode?: string | null;
   createdAt: string;
 };
 

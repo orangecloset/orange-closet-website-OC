@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { ChevronLeft, ChevronRight, Loader2, Search, Boxes } from "lucide-react";
 import { api } from "../lib/api";
 import type { InventoryStats, PagedStockMovements, StockMovement } from "../lib/api";
@@ -33,6 +34,7 @@ function formatMoney(value: number): string {
 
 export default function InventoryPage() {
   const { settings } = useCms();
+  const navigate = useNavigate();
   const [stats, setStats] = useState<InventoryStats | null>(null);
   const [items, setItems] = useState<StockMovement[]>([]);
   const [totalItems, setTotalItems] = useState(0);
@@ -137,6 +139,16 @@ export default function InventoryPage() {
       <Header
         title="Inventory"
         subtitle={`${totalItems} stock change${totalItems === 1 ? "" : "s"} recorded`}
+        actions={
+          <button
+            type="button"
+            onClick={() => navigate("/cms-admin/sales-history")}
+            className="inline-flex h-[30px] shrink-0 items-center gap-x-1.5 rounded-md bg-[var(--button-neutral)] px-3 text-[13px] font-medium text-[var(--fg-base)] shadow-[var(--buttons-neutral)] outline-none transition-colors hover:bg-[var(--button-neutral-hover)] active:bg-[var(--button-neutral-pressed)]"
+          >
+            Sales History
+            <ChevronRight className="h-4 w-4 shrink-0" />
+          </button>
+        }
       />
 
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
