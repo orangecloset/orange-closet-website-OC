@@ -9,7 +9,7 @@ import {
 import type { ProductColor } from "../../data/products";
 import { randomString } from "../lib/utils";
 import { api, type SaleInput } from "../lib/api";
-import { invalidateProducts } from "../lib/queries";
+import { invalidateInventory, invalidateProducts } from "../lib/queries";
 import {
   ABOUT_KEY,
   HOMEPAGE_KEY,
@@ -227,6 +227,7 @@ export function CmsProvider({ children }: { children: ReactNode }) {
       .createProduct(product)
       .then(() => {
         invalidateProducts();
+        invalidateInventory();
         return product;
       })
       .catch((err) => {
@@ -312,13 +313,17 @@ export function CmsProvider({ children }: { children: ReactNode }) {
       const updated = { ...current, ...patch } as CmsProduct;
       await api.updateProduct(id, updated, input.stockReason);
       invalidateProducts();
+      invalidateInventory();
     },
     []
   );
 
   const deleteProduct = useCallback((id: string) => {
     return api.deleteProduct(id).then(
-      () => invalidateProducts(),
+      () => {
+        invalidateProducts();
+        invalidateInventory();
+      },
       (err) => {
         console.error("[cms] failed to delete product", err);
         throw err;
@@ -330,7 +335,10 @@ export function CmsProvider({ children }: { children: ReactNode }) {
     await Promise.all(
       ids.map((id) =>
         api.deleteProduct(id).then(
-          () => invalidateProducts(),
+          () => {
+            invalidateProducts();
+            invalidateInventory();
+          },
           (err) => {
             console.error("[cms] failed to delete product", err);
             throw err;
@@ -344,6 +352,7 @@ export function CmsProvider({ children }: { children: ReactNode }) {
     const created = await api.recordSale(sale);
     setRecentSales((prev) => [created, ...prev]);
     invalidateProducts();
+    invalidateInventory();
     return created;
   }, []);
 

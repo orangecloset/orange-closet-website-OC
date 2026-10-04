@@ -2,10 +2,11 @@ import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ChevronLeft, ChevronRight, Loader2, Search, Boxes } from "lucide-react";
 import { api } from "../lib/api";
-import type { InventoryStats, PagedStockMovements, StockMovement } from "../lib/api";
+import type { StockMovement } from "../lib/api";
+import { useInventoryStats, useStockMovementsPaged } from "../lib/queries";
 import { openReceiptTab, openReceiptPdfTab, type ReceiptData } from "../lib/receipt";
 import { useCms } from "../store/cmsContext";
-import { Badge, Button, Container, Header, Input, Select } from "../components/ui";
+import { Badge, Button, Container, Header, Input, Select, StatCard } from "../components/ui";
 
 const PAGE_SIZE = 50;
 const SEARCH_DEBOUNCE_MS = 350;
@@ -35,13 +36,7 @@ function formatMoney(value: number): string {
 export default function InventoryPage() {
   const { settings } = useCms();
   const navigate = useNavigate();
-  const [stats, setStats] = useState<InventoryStats | null>(null);
-  const [items, setItems] = useState<StockMovement[]>([]);
-  const [totalItems, setTotalItems] = useState(0);
-  const [totalPages, setTotalPages] = useState(1);
   const [page, setPage] = useState(1);
-  const [loading, setLoading] = useState(true);
-  const [statsLoading, setStatsLoading] = useState(true);
   const [query, setQuery] = useState("");
   const [debouncedQuery, setDebouncedQuery] = useState("");
   const [kindFilter, setKindFilter] = useState("all");
@@ -55,42 +50,28 @@ export default function InventoryPage() {
     setPage(1);
   }, [debouncedQuery, kindFilter]);
 
-  useEffect(() => {
-    let cancelled = false;
-    setStatsLoading(true);
-    api
-      .getInventoryStats()
-      .then((s) => {
-        if (!cancelled) setStats(s);
-      })
-      .catch((err) => console.error("[cms] failed to load inventory stats", err))
-      .finally(() => {
-        if (!cancelled) setStatsLoading(false);
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, []);
+  const statsQuery = useInventoryStats();
+  const stats = useMemo(() => statsQuery.data ?? null, [statsQuery.data]);
+
+  const movementsQuery = useStockMovementsPaged({
+    page,
+    search: debouncedQuery,
+    kind: kindFilter,
+    limit: PAGE_SIZE,
+  });
+  const items = useMemo(() => movementsQuery.data?.data ?? [], [movementsQuery.data]);
+  const totalItems = movementsQuery.data?.totalItems ?? 0;
+  const totalPages = movementsQuery.data?.totalPages ?? 1;
+  const loading = movementsQuery.isPending;
 
   useEffect(() => {
-    let cancelled = false;
-    setLoading(true);
-    api
-      .listStockMovementsPaged({ page, search: debouncedQuery, kind: kindFilter, limit: PAGE_SIZE })
-      .then((res: PagedStockMovements) => {
-        if (cancelled) return;
-        setItems(res.data);
-        setTotalItems(res.totalItems);
-        setTotalPages(res.totalPages);
-      })
-      .catch((err) => console.error("[cms] failed to load stock history", err))
-      .finally(() => {
-        if (!cancelled) setLoading(false);
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [page, debouncedQuery, kindFilter]);
+    if (statsQuery.isError) {
+      console.error("[cms] failed to load inventory stats", statsQuery.error);
+    }
+    if (movementsQuery.isError) {
+      console.error("[cms] failed to load stock history", movementsQuery.error);
+    }
+  }, [statsQuery.isError, statsQuery.error, movementsQuery.isError, movementsQuery.error]);
 
   const handleOpenReceipt = (movement: StockMovement) => {
     if (!movement.ref || movement.kind !== "sale") return;
@@ -139,34 +120,21 @@ export default function InventoryPage() {
         title="Inventory"
         subtitle={`${totalItems} stock change${totalItems === 1 ? "" : "s"} recorded`}
         actions={
-          <button
-            type="button"
-            onClick={() => navigate("/cms-admin/sales-history")}
-            className="inline-flex h-[30px] shrink-0 items-center gap-x-1.5 rounded-md bg-[var(--button-neutral)] px-3 text-[13px] font-medium text-[var(--fg-base)] shadow-[var(--buttons-neutral)] outline-none transition-colors hover:bg-[var(--button-neutral-hover)] active:bg-[var(--button-neutral-pressed)]"
-          >
+          <Button variant="secondary" size="header" onClick={() => navigate("/cms-admin/sales-history")}>
             Sales History
             <ChevronRight className="h-4 w-4 shrink-0" />
-          </button>
+          </Button>
         }
       />
 
-      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 xl:grid-cols-4">
         {statCards.map((card) => (
-          <Container key={card.label}>
-            <div className="px-5 py-4">
-              <p className="text-xs text-[var(--fg-muted)]">{card.label}</p>
-              {statsLoading ? (
-                <Loader2 className="mt-2 h-4 w-4 animate-spin text-[var(--fg-muted)]" />
-              ) : (
-                <p className="mt-1 truncate text-xl font-semibold text-[var(--fg-base)]">{card.value}</p>
-              )}
-            </div>
-          </Container>
+          <StatCard key={card.label} label={card.label} value={card.value} />
         ))}
       </div>
 
       <Container>
-        <div className="flex flex-col gap-3 border-b border-[var(--border-subtle)] px-6 py-4 sm:flex-row sm:items-center">
+        <div className="flex flex-col gap-3 border-b border-[var(--border-subtle)] px-6 py-4 lg:flex-row lg:items-center">
           <div className="relative min-w-0 flex-1">
             <Search className="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--fg-muted)]" />
             <Input
@@ -179,7 +147,7 @@ export default function InventoryPage() {
               className="pl-8"
             />
           </div>
-          <div className="w-full shrink-0 sm:w-44">
+          <div className="w-full shrink-0 lg:w-44">
             <Select value={kindFilter} onChange={(e) => setKindFilter(e.target.value)}>
               <option value="all">All types</option>
               <option value="sale">Sale</option>
@@ -253,7 +221,7 @@ export default function InventoryPage() {
                               type="button"
                               onClick={() => handleOpenReceipt(m)}
                               title="Open receipt"
-                              className="focus:outline-none"
+                              className="rounded focus-visible:shadow-[var(--borders-focus)]"
                             >
                               <Badge color="grey">{m.ref}</Badge>
                             </button>

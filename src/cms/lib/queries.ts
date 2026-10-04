@@ -47,3 +47,35 @@ export function useProductSuggestions(query: string) {
 export function invalidateProducts() {
   void queryClient.invalidateQueries({ queryKey: productKeys.all });
 }
+
+export const inventoryKeys = {
+  all: ["inventory"] as const,
+  stats: ["inventory", "stats"] as const,
+  list: (params: InventoryListParams) => ["inventory", "list", params] as const,
+};
+
+export type InventoryListParams = {
+  page: number;
+  search?: string;
+  kind?: string;
+  limit?: number;
+};
+
+export function useInventoryStats() {
+  return useQuery({
+    queryKey: inventoryKeys.stats,
+    queryFn: () => api.getInventoryStats(),
+  });
+}
+
+export function useStockMovementsPaged(params: InventoryListParams) {
+  return useQuery({
+    queryKey: inventoryKeys.list(params),
+    queryFn: () => api.listStockMovementsPaged(params),
+    placeholderData: keepPreviousData,
+  });
+}
+
+export function invalidateInventory() {
+  void queryClient.invalidateQueries({ queryKey: inventoryKeys.all });
+}
