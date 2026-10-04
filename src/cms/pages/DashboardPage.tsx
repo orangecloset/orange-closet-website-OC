@@ -147,7 +147,7 @@ export default function DashboardPage() {
           ) : (
           <div className="flex flex-col divide-y divide-[var(--border-subtle)]">
             {stats.soldOutProducts.length === 0 && (
-              <p className="px-6 py-4 text-sm text-[var(--fg-muted)]">No sold out products.</p>
+              <p className="px-6 py-4 text-sm text-[var(--fg-muted)]">No out of stock products.</p>
             )}
             {stats.soldOutProducts.map((p) => (
               <button
