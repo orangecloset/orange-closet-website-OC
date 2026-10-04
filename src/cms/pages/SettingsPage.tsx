@@ -602,9 +602,8 @@ export default function SettingsPage() {
           />
           <div className="px-6 py-4">
             <p className="text-xs text-[var(--fg-muted)]">
-              Images are kept for 7 days after they stop being used, so recent
-              changes are never affected. A weekly automatic cleanup also runs
-              on the server.
+              Unused images are deleted as soon as a cleanup runs. A weekly
+              automatic cleanup also runs on the server.
             </p>
           </div>
         </Container>
@@ -627,7 +626,7 @@ export default function SettingsPage() {
             void handleCloudinaryCleanup();
           }}
           title="Clean unused images"
-          description="This permanently deletes uploaded images that haven't been used by any product, page, or setting in the last 7 days. This cannot be undone."
+          description="This permanently deletes every uploaded image that isn't currently used by any product, page, or setting. This cannot be undone."
           confirmLabel="Run cleanup"
         />
       </form>

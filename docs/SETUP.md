@@ -117,32 +117,40 @@ To test them locally use `vercel dev` (requires the Vercel CLI).
 
 ## 5.1 Cloudinary cleanup cron (weekly garbage collector)
 
-`api/cron/cloudinary-gc.ts` deletes orphaned images from Cloudinary so the
-account doesn't fill with files that are no longer used by the CMS.
+`src/routes/cron.ts` deletes orphaned images from Cloudinary so the
+account doesn't fill with files that are no longer used by the CMS. It runs
+from the Worker's `scheduled` handler in `src/index.ts`.
 
 How it works:
 
-1. Lists every asset in the Cloudinary `orange-closet/` folder.
-2. Scans the database (`products`, plus all settings keys — which covers
-   favicon, social share image, homepage heroes, about page, and category
-   images) and collects every referenced URL.
-3. Deletes any asset that is **not referenced anywhere** AND **older than
-   7 days** (grace period protects images uploaded mid-edit).
+1. Lists every asset under the Cloudinary `orange-closet/` folder. The
+   prefix also matches subfolders, so `orange-closet/hero/` and
+   `orange-closet/settings/` are covered automatically.
+2. Scans the database — `products.colors`, `products.sections`, every
+   settings key (favicon, social share image, homepage heroes, about page,
+   category images) and `sales.productImage` / `sales.productSections` —
+   and collects every referenced URL.
+3. Deletes any asset that is **not referenced anywhere** — immediately, with
+   no waiting period. The weekly schedule itself is the only buffer, so an
+   image uploaded but not yet saved to the database can be removed if a run
+   happens first.
 
-Schedule: Mondays 03:00 UTC via Vercel Cron (`vercel.json`). Requires
-`CRON_SECRET` in Vercel env vars — Vercel sends it automatically; the
-endpoint returns 401 without it.
+Schedule: Mondays 03:00 UTC via the Cloudflare Worker cron trigger —
+`crons = ["0 3 * * 1"]` in `wrangler.toml`. The `scheduled` handler calls
+`runCloudinaryGC()` directly and needs no secret header. The HTTP endpoint
+below still requires `CRON_SECRET` (`wrangler secret put CRON_SECRET`) and
+returns 401 without it.
 
 Manual runs:
 
 ```
 # Preview only — shows what would be deleted, deletes nothing:
 curl -H "Authorization: Bearer $CRON_SECRET" \
-  https://<your-deployment>/api/cron/cloudinary-gc?dry=1
+  https://<your-worker>.workers.dev/api/cron/cloudinary-gc?dry=1
 
 # Actually delete orphans:
 curl -X POST -H "Authorization: Bearer $CRON_SECRET" \
-  https://<your-deployment>/api/cron/cloudinary-gc
+  https://<your-worker>.workers.dev/api/cron/cloudinary-gc
 ```
 
 > After first deploying this, run the dry-run once and sanity-check that it

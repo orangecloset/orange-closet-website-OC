@@ -13,7 +13,6 @@ import { config } from "dotenv";
 config({ path: ".env.local" });
 
 const FOLDER = "orange-closet";
-const GRACE_DAYS = 7;
 
 const cloudName =
   process.env.VITE_CLOUDINARY_CLOUD_NAME ?? process.env.CLOUDINARY_CLOUD_NAME;
@@ -66,27 +65,28 @@ const assets = await listAssets();
 console.log(`Cloudinary assets in "${FOLDER}/": ${assets.length}`);
 
 const referenced = new Set();
-const productRows = await sql`select colors from products`;
-for (const row of productRows) collectUrls(row.colors, referenced);
+const productRows = await sql`select colors, sections from products`;
+for (const row of productRows) {
+  collectUrls(row.colors, referenced);
+  collectUrls(row.sections, referenced);
+}
+const saleRows = await sql`select product_image, product_sections from sales`;
+for (const row of saleRows) {
+  collectUrls(row.product_image, referenced);
+  collectUrls(row.product_sections, referenced);
+}
 const settingRows = await sql`select value from settings`;
 for (const row of settingRows) collectUrls(row.value, referenced);
 console.log(`Referenced image URLs in database: ${referenced.size}`);
 
-const cutoff = Date.now() - GRACE_DAYS * 24 * 60 * 60 * 1000;
-const orphans = [];
-const keptRecent = [];
-for (const a of assets) {
-  if ([...referenced].some((url) => url.includes(a.public_id))) continue;
-  if (new Date(a.created_at).getTime() < cutoff) orphans.push(a);
-  else keptRecent.push(a);
-}
+const orphans = assets.filter(
+  (a) => ![...referenced].some((url) => url.includes(a.public_id))
+);
 
 console.log(`\nWOULD DELETE (${orphans.length}):`);
 orphans.forEach((a) =>
   console.log(`  - ${a.public_id}  (uploaded ${a.created_at}, ${(a.bytes / 1024).toFixed(0)} KB)`)
 );
-console.log(`\nKEPT — unused but newer than ${GRACE_DAYS} days (${keptRecent.length}):`);
-keptRecent.forEach((a) => console.log(`  - ${a.public_id}  (uploaded ${a.created_at})`));
-if (orphans.length === 0 && keptRecent.length === 0) {
+if (orphans.length === 0) {
   console.log("  (none — everything in Cloudinary is referenced)");
 }

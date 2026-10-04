@@ -4,7 +4,6 @@ import { getAuthUser } from "../lib/auth.js";
 import type { Env } from "../env.js";
 
 const FOLDER = "orange-closet";
-const GRACE_DAYS = 7;
 const CLOUDINARY_API_BASE = "https://api.cloudinary.com/v1_1";
 const MAX_BATCH = 100;
 
@@ -95,14 +94,24 @@ async function collectReferencedUrls(env: Env): Promise<Set<string>> {
   const db = getDb(env);
   const urls = new Set<string>();
 
-  const productRows = await db.select({ colors: schema.products.colors }).from(schema.products);
-  for (const row of productRows) collectCloudinaryUrls(row.colors, urls);
+  const productRows = await db
+    .select({ colors: schema.products.colors, sections: schema.products.sections })
+    .from(schema.products);
+  for (const row of productRows) {
+    collectCloudinaryUrls(row.colors, urls);
+    collectCloudinaryUrls(row.sections, urls);
+  }
 
   const settingsRows = await db.select({ value: schema.settings.value }).from(schema.settings);
   for (const row of settingsRows) collectCloudinaryUrls(row.value, urls);
 
-  const saleRows = await db.select({ productImage: schema.sales.productImage }).from(schema.sales);
-  for (const row of saleRows) collectCloudinaryUrls(row.productImage, urls);
+  const saleRows = await db
+    .select({ productImage: schema.sales.productImage, productSections: schema.sales.productSections })
+    .from(schema.sales);
+  for (const row of saleRows) {
+    collectCloudinaryUrls(row.productImage, urls);
+    collectCloudinaryUrls(row.productSections, urls);
+  }
 
   return urls;
 }
@@ -118,12 +127,10 @@ export async function runCloudinaryGC(env: Env, dryRun: boolean) {
     collectReferencedUrls(env),
   ]);
 
-  const cutoff = Date.now() - GRACE_DAYS * 24 * 60 * 60 * 1000;
   const orphans = assets.filter(
     (asset) =>
       !referencedUrls.has(asset.public_id) &&
-      ![...referencedUrls].some((url) => url.includes(asset.public_id)) &&
-      new Date(asset.created_at).getTime() < cutoff
+      ![...referencedUrls].some((url) => url.includes(asset.public_id))
   );
 
   if (dryRun) {
