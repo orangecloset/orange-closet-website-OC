@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { ChevronLeft, ChevronRight, Download, Loader2, ShoppingBag } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useCms } from "../store/cmsContext";
-import type { CmsProduct, RecentSale } from "../../data/store-types";
+import type { RecentSale } from "../../data/store-types";
 import { api } from "../lib/api";
 import type { PagedSales } from "../lib/api";
 import { parsePrice, downloadReceiptPdf, openReceiptTab, openReceiptPdfTab, type ReceiptData } from "../lib/receipt";
@@ -50,21 +50,19 @@ export default function SalesHistoryPage() {
   }, [load]);
 
   const buildReceiptData = async (sale: RecentSale): Promise<ReceiptData> => {
-    let product: CmsProduct | null = null;
-    if (sale.productId) {
+    let sections = sale.productSections;
+    if (sections == null && sale.productId) {
       try {
-        product = await api.getProduct(sale.productId);
+        sections = (await api.getProduct(sale.productId)).sections;
       } catch {
-        product = null;
+        sections = undefined;
       }
     }
     return {
       storeName: settings.storeName || "Store",
       logoUrl: settings.faviconUrl || undefined,
       sale,
-      productContent: product
-        ? { sections: product.sections }
-        : undefined,
+      productContent: sections ? { sections } : undefined,
     };
   };
 

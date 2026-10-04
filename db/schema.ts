@@ -47,6 +47,7 @@ export const sales = pgTable(
     productId: text("product_id"),
     productName: text("product_name").notNull(),
     productImage: text("product_image"),
+    productSections: jsonb("product_sections"),
     colorName: text("color_name").notNull(),
     size: text("size").notNull(),
     quantity: integer("quantity").notNull(),

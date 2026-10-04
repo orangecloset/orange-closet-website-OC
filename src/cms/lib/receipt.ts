@@ -137,15 +137,16 @@ const RECEIPT_STYLES = `
   table.totals tr.grand td { border-top: 1px solid #1a1a1a; padding-top: 8px; font-weight: 700; font-size: 15px; }
   table.details { width: 100%; border-collapse: collapse; padding: 12px 0; }
   table.details td { font-size: 12px; padding: 3px 0; vertical-align: top; }
-  table.details td:first-child { color: #666; width: 42%; }
+  table.details td:first-child { color: #666; width: 1%; white-space: nowrap; padding-right: 28px; }
   .section { padding: 12px 0; border-bottom: 1px solid #ddd; }
   .section-label { font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: #888; margin-bottom: 6px; }
   .content-desc { font-size: 12px; color: #333; line-height: 1.6; margin-bottom: 8px; white-space: pre-line; }
   ul.content-list { list-style: disc; padding-left: 18px; }
   ul  .content-list li { font-size: 12px; color: #333; line-height: 1.6; }
   table.content-table { width: 100%; border-collapse: collapse; margin: 4px 0; }
-  table.content-table td { font-size: 12px; color: #333; padding: 3px 0; vertical-align: top; white-space: nowrap; }
-  table.content-table td:first-child { font-weight: 600; padding-right: 12px; }
+  table.content-table td { font-size: 12px; color: #333; padding: 3px 0; vertical-align: top; }
+  table.content-table td:not(:last-child) { padding-right: 24px; }
+  table.content-table td:first-child { font-weight: 600; width: 1%; white-space: nowrap; }
   .signatures { display: flex; gap: 24px; padding: 32px 0 8px; }
   .sig { flex: 1; text-align: center; }
   .sig-line { border-top: 1px solid #1a1a1a; margin-bottom: 5px; }

@@ -98,20 +98,19 @@ export default function InventoryPage() {
     if (!win) return;
     (async () => {
       const sale = await api.getSaleByReceipt(movement.ref!);
-      let productContent: ReceiptData["productContent"];
-      if (sale.productId) {
+      let sections = sale.productSections;
+      if (sections == null && sale.productId) {
         try {
-          const product = await api.getProduct(sale.productId);
-          productContent = { sections: product.sections };
+          sections = (await api.getProduct(sale.productId)).sections;
         } catch {
-          productContent = undefined;
+          sections = undefined;
         }
       }
       return {
         storeName: settings.storeName || "Store",
         logoUrl: settings.faviconUrl || undefined,
         sale,
-        productContent,
+        productContent: sections ? { sections } : undefined,
       } satisfies ReceiptData;
     })()
       .then((data) => openReceiptPdfTab(win, data))

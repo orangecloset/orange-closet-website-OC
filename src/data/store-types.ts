@@ -35,6 +35,7 @@ export type RecentSale = {
   productId?: string;
   productName: string;
   productImage?: string | null;
+  productSections?: { title: string; body: string }[] | null;
   colorName: string;
   size: string;
   quantity: number;

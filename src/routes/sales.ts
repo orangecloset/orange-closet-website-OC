@@ -15,6 +15,7 @@ function toApiSale(r: SaleRow) {
     productId: r.productId,
     productName: r.productName,
     productImage: r.productImage,
+    productSections: (r.productSections ?? null) as { title: string; body: string }[] | null,
     colorName: r.colorName,
     size: r.size,
     quantity: r.quantity,
@@ -155,7 +156,11 @@ app.post("/", async (c) => {
   const db = getDb(c.env);
 
   const [productRow] = await db
-    .select({ name: schema.products.name, colors: schema.products.colors })
+    .select({
+      name: schema.products.name,
+      colors: schema.products.colors,
+      sections: schema.products.sections,
+    })
     .from(schema.products)
     .where(eq(schema.products.id, body.productId!));
   const beforeStock = flattenStock(productRow?.colors);
@@ -173,6 +178,7 @@ app.post("/", async (c) => {
       productId: body.productId!,
       productName: body.productName!,
       productImage: optionalText(body.productImage, 2048),
+      productSections: (productRow?.sections ?? []) as { title: string; body: string }[],
       colorName: body.colorName!,
       size: body.size!,
       quantity: body.quantity!,

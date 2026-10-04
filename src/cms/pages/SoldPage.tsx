@@ -174,7 +174,7 @@ export default function SoldPage() {
             logoUrl: settings.faviconUrl || undefined,
             sale,
             productContent: {
-              sections: product.sections,
+              sections: sale.productSections ?? product.sections,
             },
           });
         } catch (pdfErr) {
@@ -198,15 +198,16 @@ export default function SoldPage() {
         subtitle="Search the sold item and deduct it from stock."
         actions={
           <>
-            <button
-              type="button"
-              onClick={cycleAvailability}
-              disabled={Boolean(product)}
-              className="inline-flex h-[30px] w-36 shrink-0 items-center justify-center gap-x-1.5 rounded-md bg-[var(--button-neutral)] px-3 text-[13px] font-medium text-[var(--fg-base)] shadow-[var(--buttons-neutral)] outline-none transition-colors hover:bg-[var(--button-neutral-hover)] active:bg-[var(--button-neutral-pressed)] disabled:cursor-not-allowed disabled:bg-[var(--bg-disabled)] disabled:text-[var(--fg-disabled)]"
-            >
-              <ListFilter className="h-4 w-4 shrink-0" />
-              {AVAILABILITY_FILTERS.find((f) => f.key === availabilityFilter)?.label}
-            </button>
+            {!product && (
+              <button
+                type="button"
+                onClick={cycleAvailability}
+                className="inline-flex h-[30px] w-36 shrink-0 items-center justify-center gap-x-1.5 rounded-md bg-[var(--button-neutral)] px-3 text-[13px] font-medium text-[var(--fg-base)] shadow-[var(--buttons-neutral)] outline-none transition-colors hover:bg-[var(--button-neutral-hover)] active:bg-[var(--button-neutral-pressed)]"
+              >
+                <ListFilter className="h-4 w-4 shrink-0" />
+                {AVAILABILITY_FILTERS.find((f) => f.key === availabilityFilter)?.label}
+              </button>
+            )}
             {product && (
               <Button variant="secondary" size="small" onClick={handleBack}>
                 <ArrowLeft className="h-4 w-4" />
