@@ -80,8 +80,8 @@ export default function DashboardPage() {
         <Container className="w-full">
           <Header title="Recently Added" subtitle="Latest additions to the catalog" />
           {loadingRecent ? (
-            <div className="flex justify-center py-6">
-              <Loader2 className="h-4 w-4 animate-spin text-[var(--fg-muted)]" />
+            <div className="flex justify-center py-12">
+              <Loader2 className="h-5 w-5 animate-spin text-[var(--fg-muted)]" />
             </div>
           ) : (
           <div className="flex flex-col divide-y divide-[var(--border-subtle)]">
@@ -111,8 +111,8 @@ export default function DashboardPage() {
                 subtitle="Latest items sold via the Sell page"
               />
           {loadingStats ? (
-            <div className="flex justify-center py-6">
-              <Loader2 className="h-4 w-4 animate-spin text-[var(--fg-muted)]" />
+            <div className="flex justify-center py-12">
+              <Loader2 className="h-5 w-5 animate-spin text-[var(--fg-muted)]" />
             </div>
           ) : (
           <div className="flex flex-col divide-y divide-[var(--border-subtle)]">
@@ -141,8 +141,8 @@ export default function DashboardPage() {
         <Container className="w-full xl:col-span-2">
           <Header title="Out of Stock" subtitle="Products with no remaining stock" />
           {loadingStats ? (
-            <div className="flex justify-center py-6">
-              <Loader2 className="h-4 w-4 animate-spin text-[var(--fg-muted)]" />
+            <div className="flex justify-center py-12">
+              <Loader2 className="h-5 w-5 animate-spin text-[var(--fg-muted)]" />
             </div>
           ) : (
           <div className="flex flex-col divide-y divide-[var(--border-subtle)]">

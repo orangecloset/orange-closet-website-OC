@@ -1,7 +1,7 @@
 import { Plus, Pencil, X } from "lucide-react";
 import { Link } from "react-router-dom";
 import type { FooterLink } from "../../data/store-types";
-import { Button } from "../components/ui";
+import { Button, Input } from "../components/ui";
 import { SortableList, DragHandle } from "../components/SortableList";
 
 function deriveSlug(label: string) {
@@ -44,16 +44,16 @@ export function LegalSection({
             return (
               <div className="flex items-center gap-2">
                 <DragHandle handleProps={dragHandleProps} />
-                <input
+                <Input
                   value={link.label}
                   onChange={(e) => onChange(links.map((l, i) => i === index ? { ...l, label: e.target.value } : l))}
                   placeholder="Page title"
-                  className="flex-1 rounded border border-[var(--border-subtle)] bg-[var(--bg-base)] px-2 py-1 text-sm"
+                  className="flex-1"
                 />
                 {slug && (
                   <Link to={`/cms-admin/legal/${slug}/edit`}>
                     <Button variant="ghost" size="small" type="button">
-                      <Pencil className="h-3.5 w-3.5" />
+                      <Pencil className="h-4 w-4" />
                       Edit
                     </Button>
                   </Link>

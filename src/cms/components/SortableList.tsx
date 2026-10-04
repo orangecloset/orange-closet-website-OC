@@ -46,7 +46,7 @@ export function DragHandle({ handleProps }: { handleProps: Record<string, unknow
   return (
     <button
       type="button"
-      className="cursor-grab touch-none text-[var(--fg-muted)] hover:text-[var(--fg-base)]"
+      className="cursor-grab touch-none rounded-sm p-1 text-[var(--fg-muted)] transition-colors hover:bg-[var(--bg-subtle-hover)] hover:text-[var(--fg-base)]"
       aria-label="Drag to reorder"
       {...handleProps}
     >

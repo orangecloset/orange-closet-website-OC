@@ -199,17 +199,13 @@ export default function SoldPage() {
         actions={
           <>
             {!product && (
-              <button
-                type="button"
-                onClick={cycleAvailability}
-                className="inline-flex h-[30px] w-36 shrink-0 items-center justify-center gap-x-1.5 rounded-md bg-[var(--button-neutral)] px-3 text-[13px] font-medium text-[var(--fg-base)] shadow-[var(--buttons-neutral)] outline-none transition-colors hover:bg-[var(--button-neutral-hover)] active:bg-[var(--button-neutral-pressed)]"
-              >
+              <Button variant="secondary" size="header" className="w-36" onClick={cycleAvailability}>
                 <ListFilter className="h-4 w-4 shrink-0" />
                 {AVAILABILITY_FILTERS.find((f) => f.key === availabilityFilter)?.label}
-              </button>
+              </Button>
             )}
             {product && (
-              <Button variant="secondary" size="small" onClick={handleBack}>
+              <Button variant="secondary" size="header" onClick={handleBack}>
                 <ArrowLeft className="h-4 w-4" />
                 Back
               </Button>
@@ -386,7 +382,7 @@ export default function SoldPage() {
             </div>
 
             <div className="border-t border-[var(--border-subtle)] pt-4">
-              <p className="mb-3 text-[11px] uppercase tracking-widest text-[var(--fg-muted)]">Colour</p>
+              <p className="mb-3 text-sm font-medium text-[var(--fg-base)]">Colour</p>
               <div className="flex flex-wrap items-center gap-2.5">
                 {product.colors.map((color, i) => {
                   const colorStock = (color.sizes ?? []).reduce((s, vs) => s + vs.stock, 0);
@@ -433,7 +429,7 @@ export default function SoldPage() {
 
             {activeColor && hasSizeVariety && (
               <div className="border-t border-[var(--border-subtle)] pt-4">
-                <p className="mb-3 text-[11px] uppercase tracking-widest text-[var(--fg-muted)]">
+                <p className="mb-3 text-sm font-medium text-[var(--fg-base)]">
                   Size{selectedSize ? `: ${selectedSize}` : ""}
                 </p>
                 <div className="flex flex-wrap gap-2.5">

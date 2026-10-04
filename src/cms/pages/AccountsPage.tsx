@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState, type FormEvent } from "react";
-import { Check, Pencil, Plus, ShieldCheck, Trash2, X } from "lucide-react";
+import { Check, Loader2, Pencil, Plus, ShieldCheck, Trash2, X } from "lucide-react";
 import { useToast } from "../store/toastContext";
 import {
   Badge,
@@ -256,7 +256,7 @@ export default function AccountsPage() {
   };
 
   const myAccountButton = (
-    <Button variant="secondary" size="small" onClick={openProfileEditor}>
+    <Button variant="secondary" size="header" onClick={openProfileEditor}>
       My Account
     </Button>
   );
@@ -326,7 +326,7 @@ export default function AccountsPage() {
             autoComplete="new-password"
           />
         </div>
-        {profileError && <p className="text-sm text-[var(--fg-error)]">{profileError}</p>}
+        {profileError && <p className="text-xs text-[var(--tag-red-text)]">{profileError}</p>}
       </form>
     </Modal>
   );
@@ -360,7 +360,7 @@ export default function AccountsPage() {
         actions={
           <>
             {myAccountButton}
-            <Button variant="primary" size="small" onClick={() => setCreating(true)}>
+            <Button variant="primary" size="header" onClick={() => setCreating(true)}>
               <Plus className="h-4 w-4" />
               Add Account
             </Button>
@@ -373,7 +373,7 @@ export default function AccountsPage() {
           Signed in as <span className="font-medium text-[var(--fg-base)]">{me?.email}</span>
         </div>
 
-        <div className="overflow-x-auto border-t border-[var(--border-subtle)]">
+        <div className="overflow-x-auto">
           <table className="w-full min-w-[560px] text-left">
             <thead>
               <tr className="border-b border-[var(--border-subtle)] text-xs text-[var(--fg-muted)]">
@@ -387,8 +387,8 @@ export default function AccountsPage() {
             <tbody>
               {loading ? (
                 <tr>
-                  <td colSpan={5} className="px-6 py-12 text-center text-sm text-[var(--fg-muted)]">
-                    Loading…
+                  <td colSpan={5} className="px-6 py-12 text-center">
+                    <Loader2 className="mx-auto h-5 w-5 animate-spin text-[var(--fg-muted)]" />
                   </td>
                 </tr>
               ) : users.length === 0 ? (
@@ -402,7 +402,7 @@ export default function AccountsPage() {
                   const isMe = u.id === me?.id;
                   const isSuper = u.role === "super_admin";
                   return (
-                    <tr key={u.id} className="border-b border-[var(--border-subtle)] last:border-b-0">
+                    <tr key={u.id} className="border-b border-[var(--border-subtle)] transition-colors last:border-b-0 hover:bg-[var(--bg-subtle-hover)]">
                       <td className="max-w-[180px] truncate px-6 py-3 text-sm text-[var(--fg-base)]">
                         {u.name}
                         {isMe && (
@@ -427,7 +427,7 @@ export default function AccountsPage() {
                                 onClick={() => openEditAccount(u)}
                                 aria-label={`Edit ${u.email}`}
                               >
-                                <Pencil className="h-3.5 w-3.5" />
+                                <Pencil className="h-4 w-4" />
                               </Button>
                               {u.role === "pending" ? (
                                 <Button
@@ -437,7 +437,7 @@ export default function AccountsPage() {
                                   disabled={busyId === u.id}
                                   onClick={() => handleSetRole(u, "staff")}
                                 >
-                                  <Check className="h-3.5 w-3.5" />
+                                  <Check className="h-4 w-4" />
                                   Unblock
                                 </Button>
                               ) : (
@@ -448,7 +448,7 @@ export default function AccountsPage() {
                                   disabled={busyId === u.id}
                                   onClick={() => handleSetRole(u, "pending")}
                                 >
-                                  <X className="h-3.5 w-3.5" />
+                                  <X className="h-4 w-4" />
                                   Block
                                 </Button>
                               )}
@@ -459,7 +459,7 @@ export default function AccountsPage() {
                                 onClick={() => setDeleteTarget(u)}
                                 aria-label={`Remove ${u.email}`}
                               >
-                                <Trash2 className="h-3.5 w-3.5" />
+                                <Trash2 className="h-4 w-4" />
                               </Button>
                             </>
                           )}
@@ -471,10 +471,10 @@ export default function AccountsPage() {
               )}
             </tbody>
           </table>
-          <div className="border-t border-[var(--border-subtle)] bg-[var(--bg-subtle)] px-6 py-2 text-xs text-[var(--fg-muted)]">
-            {users.length} account{users.length === 1 ? "" : "s"} · {staffCount} staff
-            {pendingCount > 0 ? ` · ${pendingCount} blocked` : ""} · super admin cannot be modified
-          </div>
+        </div>
+        <div className="px-6 py-3 text-xs text-[var(--fg-muted)]">
+          {users.length} account{users.length === 1 ? "" : "s"} · {staffCount} staff
+          {pendingCount > 0 ? ` · ${pendingCount} blocked` : ""} · super admin cannot be modified
         </div>
       </Container>
 
@@ -530,7 +530,7 @@ export default function AccountsPage() {
               autoComplete="new-password"
             />
           </div>
-          {createError && <p className="text-sm text-[var(--fg-error)]">{createError}</p>}
+          {createError && <p className="text-xs text-[var(--tag-red-text)]">{createError}</p>}
         </form>
       </Modal>
 
@@ -568,7 +568,7 @@ export default function AccountsPage() {
               onChange={(e) => setEditForm({ ...editForm, email: e.target.value })}
             />
           </div>
-          {editError && <p className="text-sm text-[var(--fg-error)]">{editError}</p>}
+          {editError && <p className="text-xs text-[var(--tag-red-text)]">{editError}</p>}
         </div>
       </Modal>
 

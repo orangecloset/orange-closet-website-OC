@@ -199,14 +199,10 @@ export default function TypesPage() {
         title="Categories"
         subtitle="Manage storefront product types."
         actions={
-          <button
-            type="button"
-            onClick={openCreate}
-            className="inline-flex h-[30px] w-36 shrink-0 items-center justify-center gap-x-1.5 rounded-md bg-[var(--button-inverted)] px-3 text-[13px] font-medium text-[var(--contrast-fg-primary)] shadow-[var(--buttons-inverted)] outline-none transition-colors hover:bg-[var(--button-inverted-hover)] active:bg-[var(--button-inverted-pressed)]"
-          >
+          <Button variant="primary" size="header" className="w-36" onClick={openCreate}>
             <Plus className="h-4 w-4 shrink-0" />
             Add Category
-          </button>
+          </Button>
         }
       />
 
@@ -214,7 +210,7 @@ export default function TypesPage() {
         <div className="overflow-x-auto">
           <div className="w-full min-w-[640px] text-left">
             <div className="flex border-b border-[var(--border-subtle)] text-xs text-[var(--fg-muted)]">
-              <div className="w-10 px-6 py-2.5 font-medium"></div>
+              <div className="w-10 px-4 py-2.5 font-medium"></div>
               <div className="flex-1 px-6 py-2.5 font-medium">Type</div>
               <div className="w-40 px-6 py-2.5 font-medium">Route</div>
               <div className="w-36 px-6 py-2.5 font-medium">Sub-categories</div>
@@ -232,8 +228,8 @@ export default function TypesPage() {
                 items={types}
                 keyExtractor={(t) => t.slug}
                 renderItem={(t, _index, dragHandleProps) => (
-                  <div className="flex border-b border-[var(--border-subtle)] transition-colors hover:bg-[var(--bg-subtle-hover)]">
-                    <div className="w-10 px-6 py-3">
+                  <div className="flex border-b border-[var(--border-subtle)] transition-colors last:border-b-0 hover:bg-[var(--bg-subtle-hover)]">
+                    <div className="w-10 px-4 py-3">
                       <DragHandle handleProps={dragHandleProps} />
                     </div>
                     <div className="flex flex-1 items-center gap-3 px-6 py-3">
@@ -270,17 +266,15 @@ export default function TypesPage() {
                       <Button variant="ghost" size="small" onClick={() => openEdit(t)}>
                         <Pencil className="h-4 w-4" />
                       </Button>
-                      <button
-                        type="button"
+                      <Button
+                        variant="ghost"
+                        size="small"
                         onClick={() => setDeleteTarget(t.slug)}
                         title="Delete"
                         aria-label="Delete category"
-                        className="flex h-[26px] w-[26px] shrink-0 items-center justify-center rounded-sm outline-none transition-colors hover:bg-[var(--bg-subtle-hover)] focus-visible:shadow-[var(--borders-focus)]"
                       >
-                        <Trash2
-                          className="h-4 w-4 shrink-0 text-[var(--tag-red-text)]"
-                        />
-                      </button>
+                        <Trash2 className="h-4 w-4 shrink-0 text-[var(--tag-red-text)]" />
+                      </Button>
                     </div>
                   </div>
                 )}

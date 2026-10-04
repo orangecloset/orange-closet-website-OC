@@ -204,26 +204,21 @@ export default function ProductsPage() {
         title="Products"
         subtitle={loading ? "Loading products…" : `${totalItems} product(s)`}
         actions={
-          <div className="flex items-center gap-2">
-            <Link to="/cms-admin/products/new">
-              <button
-                type="button"
-                className="inline-flex h-[30px] w-36 shrink-0 items-center justify-center gap-x-1.5 rounded-md bg-[var(--button-inverted)] px-3 text-[13px] font-medium text-[var(--contrast-fg-primary)] shadow-[var(--buttons-inverted)] outline-none transition-colors hover:bg-[var(--button-inverted-hover)] active:bg-[var(--button-inverted-pressed)]"
-              >
-                <Plus className="h-4 w-4 shrink-0" />
-                Add Product
-              </button>
-            </Link>
-          </div>
+          <Link to="/cms-admin/products/new">
+            <Button variant="primary" size="header" className="w-36">
+              <Plus className="h-4 w-4 shrink-0" />
+              Add Product
+            </Button>
+          </Link>
         }
       />
 
       <Container>
-        <div className="flex flex-col gap-3 px-6 pt-2 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-col gap-3 px-6 pt-2 lg:flex-row lg:items-center lg:justify-between">
           <div className="min-w-0 overflow-x-auto sm:overflow-visible">
             <Tabs items={STATUS_FILTERS} active={statusFilter} onChange={(key) => { setStatusFilter(key); setPage(1); }} />
           </div>
-          <div className="w-full shrink-0 sm:w-44">
+          <div className="w-full shrink-0 lg:w-44">
             <Select
               value={availabilityFilter}
               onChange={(e) => { setAvailabilityFilter(e.target.value); setPage(1); }}
@@ -287,7 +282,7 @@ export default function ProductsPage() {
               </div>
             )}
           </div>
-          <div className="w-full lg:w-44">
+          <div className="w-full shrink-0 lg:w-44">
             <Select value={typeFilter} onChange={(e) => setTypeFilter(e.target.value)}>
               <option value="all">All types</option>
               {types.map((t) => (<option key={t.slug} value={t.slug}>{t.label}</option>))}
@@ -340,7 +335,7 @@ export default function ProductsPage() {
               )}
               {pageItems.map((p) => {
                 return (
-                  <tr key={p.id} className={`border-b border-[var(--border-subtle)] transition-colors hover:bg-[var(--bg-subtle-hover)] ${selectedIds.has(p.id) ? "bg-[var(--bg-subtle)]" : ""}`}>
+                  <tr key={p.id} className={`border-b border-[var(--border-subtle)] transition-colors last:border-b-0 hover:bg-[var(--bg-subtle-hover)] ${selectedIds.has(p.id) ? "bg-[var(--bg-subtle)]" : ""}`}>
                     <td className="w-10 px-4 py-3"><Checkbox checked={selectedIds.has(p.id)} onChange={() => toggleSelect(p.id)} /></td>
                     <td className="px-6 py-3">
                       <div className="flex items-center gap-3">
@@ -477,7 +472,7 @@ export default function ProductsPage() {
                 onChange={(e) => setStockReason(e.target.value)}
                 className={
                   reasonMissing
-                    ? "shadow-[0_0_0_1px_#ef4444,0_1px_2px_0_rgba(0,0,0,0.12)]"
+                        ? "shadow-[0_0_0_1px_var(--fg-error),0_1px_2px_0_rgba(0,0,0,0.12)]"
                     : undefined
                 }
               >
@@ -496,7 +491,7 @@ export default function ProductsPage() {
                     maxLength={200}
                     className={
                       noteMissing
-                        ? "shadow-[0_0_0_1px_#ef4444,0_1px_2px_0_rgba(0,0,0,0.12)]"
+                    ? "shadow-[0_0_0_1px_var(--fg-error),0_1px_2px_0_rgba(0,0,0,0.12)]"
                         : undefined
                     }
                   />

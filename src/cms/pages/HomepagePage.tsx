@@ -46,7 +46,7 @@ export default function HomepagePage() {
         actions={
           <Button
             variant="primary"
-            size="small"
+            size="header"
             type="button"
             onClick={handleSave}
             disabled={saving || !isDirty}
@@ -107,7 +107,7 @@ export default function HomepagePage() {
             <HeroCard key={hero.id} hero={hero} />
           ))}
           {homepage.heroes.length === 0 && (
-            <p className="px-2 py-2 text-sm text-[var(--fg-muted)]">
+            <p className="col-span-full py-2 text-sm text-[var(--fg-muted)]">
               No heroes yet — add up to {MAX_HEROES}.
             </p>
           )}

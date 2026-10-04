@@ -3,7 +3,7 @@ import { Plus, X } from "lucide-react";
 import { useCms } from "../store/cmsContext";
 import type { AboutPageConfig } from "../../data/store-types";
 import { ABOUT_KEY } from "../../data/store-defaults";
-import { Button, Container, Input, Label } from "../components/ui";
+import { Button, Container, Header, Input, Label } from "../components/ui";
 import { useToast } from "../store/toastContext";
 import { UploadButton } from "../components/UploadButton";
 import { SortableList, DragHandle } from "../components/SortableList";
@@ -66,31 +66,27 @@ export default function AboutPage() {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between gap-4">
-        <div>
-          <h1 className="text-lg font-semibold text-[var(--fg-base)]">About Page</h1>
-          <p className="mt-1 text-sm text-[var(--fg-muted)]">
-            Customize the hero and content sections on the About Us page.
-            Changes apply when you click Save.
-          </p>
-        </div>
-        <Button
-          variant="primary"
-          size="small"
-          type="button"
-          onClick={handleSave}
-          disabled={saving || !isDirty}
-          className="shrink-0"
-        >
-          {saving ? "Saving…" : "Save"}
-        </Button>
-      </div>
+    <div className="flex flex-col gap-y-3">
+      <Header
+        title="About Page"
+        subtitle="Customize the hero and content sections on the About Us page. Changes apply when you click Save."
+        actions={
+          <Button
+            variant="primary"
+            size="header"
+            type="button"
+            onClick={handleSave}
+            disabled={saving || !isDirty}
+          >
+            {saving ? "Saving…" : "Save"}
+          </Button>
+        }
+      />
 
       <Container>
-        <div className="space-y-4 px-4 py-4">
+        <div className="flex flex-col gap-4 px-6 py-4">
           <div className="flex items-center gap-2">
-            <h2 className="text-[13px] font-medium text-[var(--fg-base)]">Hero</h2>
+            <h2 className="text-sm font-medium text-[var(--fg-base)]">Hero</h2>
             <button
               type="button"
               onClick={() => handleHero({ heroTextBlack: !about.heroTextBlack })}
@@ -170,32 +166,43 @@ export default function AboutPage() {
         </div>
       </Container>
 
-      <div className="space-y-3">
-        <SortableList
-          items={about.sections}
-          onReorder={handleReorderSections}
-          keyExtractor={(s) => s.id}
-          renderItem={(section, i, dragHandleProps) => (
-            <div className="flex items-start gap-2">
-              <div className="mt-3">
-                <DragHandle handleProps={dragHandleProps} />
-              </div>
-              <div className="flex-1">
-                <SectionEditor
-                  section={section}
-                  index={i}
-                  onChange={(patch) => handleSection(i, patch)}
-                  onDelete={() => handleDeleteSection(i)}
-                />
-              </div>
-            </div>
-          )}
+      <Container>
+        <Header
+          title="Content Sections"
+          subtitle="Ordered blocks shown on the About page"
+          actions={
+            <Button variant="secondary" size="small" onClick={handleAddSection}>
+              <Plus className="h-4 w-4" />
+              Add Section
+            </Button>
+          }
         />
-        <Button variant="secondary" size="base" onClick={handleAddSection}>
-          <Plus className="h-4 w-4" />
-          Add Section
-        </Button>
-      </div>
+        <div className="flex flex-col gap-3 px-6 py-4">
+          <SortableList
+            items={about.sections}
+            onReorder={handleReorderSections}
+            keyExtractor={(s) => s.id}
+            renderItem={(section, i, dragHandleProps) => (
+              <div className="flex items-start gap-2">
+                <div className="mt-3">
+                  <DragHandle handleProps={dragHandleProps} />
+                </div>
+                <div className="flex-1">
+                  <SectionEditor
+                    section={section}
+                    index={i}
+                    onChange={(patch) => handleSection(i, patch)}
+                    onDelete={() => handleDeleteSection(i)}
+                  />
+                </div>
+              </div>
+            )}
+          />
+          {about.sections.length === 0 && (
+            <p className="text-sm text-[var(--fg-muted)]">No sections yet.</p>
+          )}
+        </div>
+      </Container>
     </div>
   );
 }

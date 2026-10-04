@@ -94,7 +94,7 @@ export default function SalesHistoryPage() {
         title="Sales History"
         subtitle={`${totalItems} sale${totalItems === 1 ? "" : "s"} recorded`}
         actions={
-          <Button variant="secondary" size="small" onClick={() => navigate("/cms-admin/inventory")}>
+          <Button variant="secondary" size="header" onClick={() => navigate("/cms-admin/inventory")}>
             Back to Inventory
           </Button>
         }

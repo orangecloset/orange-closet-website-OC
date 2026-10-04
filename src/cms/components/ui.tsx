@@ -12,7 +12,7 @@ import {
 } from "react";
 import { Link } from "react-router-dom";
 import { createPortal } from "react-dom";
-import { Check, CheckCircle2, EllipsisVertical, Eye, EyeOff, ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
+import { Check, CheckCircle2, EllipsisVertical, Eye, EyeOff, ChevronRight, Loader2 } from "lucide-react";
 import { cn } from "../lib/utils";
 import { useFocusTrap } from "../../hooks/useFocusTrap";
 import { ToastContext, type ToastType } from "../store/toastContext";
@@ -164,7 +164,7 @@ export function Tabs({
 }
 
 type ButtonVariant = "primary" | "secondary" | "danger" | "ghost" | "transparent";
-type ButtonSize = "small" | "base" | "large";
+type ButtonSize = "small" | "base" | "large" | "header";
 
 type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
   variant?: ButtonVariant;
@@ -187,6 +187,7 @@ const buttonSizes: Record<ButtonSize, string> = {
   small: "px-2 py-1 text-[13px]",
   base: "px-3 py-1.5 text-[13px]",
   large: "px-4 py-2.5 text-sm",
+  header: "h-[30px] px-3 text-[13px]",
 };
 
 export function Button({
@@ -251,51 +252,6 @@ export function Badge({
     >
       {children}
     </span>
-  );
-}
-
-export function Pagination({
-  page,
-  pageCount,
-  pageSize,
-  totalItems,
-  onPageChange,
-}: {
-  page: number;
-  pageCount: number;
-  pageSize: number;
-  totalItems: number;
-  onPageChange: (page: number) => void;
-}) {
-  if (pageCount <= 1) return null;
-  const start = totalItems === 0 ? 0 : page * pageSize + 1;
-  const end = Math.min((page + 1) * pageSize, totalItems);
-  const chevronClass =
-    "flex h-7 w-7 items-center justify-center rounded-md text-[var(--fg-muted)] transition-colors hover:bg-[var(--bg-subtle-hover)] hover:text-[var(--fg-base)] disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent";
-  return (
-    <div className="flex items-center justify-end gap-1 border-t border-[var(--border-subtle)] px-6 py-3">
-      <button
-        type="button"
-        aria-label="Previous page"
-        disabled={page === 0}
-        onClick={() => onPageChange(page - 1)}
-        className={chevronClass}
-      >
-        <ChevronLeft className="h-4 w-4" />
-      </button>
-      <span className="px-1 text-xs text-[var(--fg-muted)]">
-        {start} – {end} of {totalItems}
-      </span>
-      <button
-        type="button"
-        aria-label="Next page"
-        disabled={page >= pageCount - 1}
-        onClick={() => onPageChange(page + 1)}
-        className={chevronClass}
-      >
-        <ChevronRight className="h-4 w-4" />
-      </button>
-    </div>
   );
 }
 

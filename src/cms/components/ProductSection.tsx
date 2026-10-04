@@ -4,7 +4,7 @@ import { Check, Plus, Search, X } from "lucide-react";
 import { useCms } from "../store/cmsContext";
 import type { CmsProduct } from "../../data/store-types";
 import { api } from "../lib/api";
-import { Badge, Container, Header, Input } from "./ui";
+import { Badge, Button, Container, Header, Input } from "./ui";
 import { SortableList, DragHandle } from "./SortableList";
 
 function isSoldOutProduct(p: CmsProduct): boolean {
@@ -157,16 +157,17 @@ export function ProductSection({
               className="pl-8"
             />
           </div>
-          <button
-            type="button"
+          <Button
+            variant="primary"
+            size="header"
+            className="w-28"
             onClick={addSelected}
             disabled={selected.length === 0}
             title="Add selected products to featured"
-            className="inline-flex h-[30px] w-28 shrink-0 items-center justify-center gap-x-1.5 rounded-md bg-[var(--button-inverted)] px-3 text-[13px] font-medium text-[var(--contrast-fg-primary)] shadow-[var(--buttons-inverted)] outline-none transition-colors hover:bg-[var(--button-inverted-hover)] active:bg-[var(--button-inverted-pressed)] disabled:cursor-not-allowed disabled:bg-[var(--bg-disabled)] disabled:text-[var(--fg-disabled)] disabled:shadow-none"
           >
             <Plus className="h-4 w-4 shrink-0" />
             {selected.length > 0 ? `Add (${selected.length})` : "Add"}
-          </button>
+          </Button>
         </div>
 
         {open &&
@@ -179,7 +180,7 @@ export function ProductSection({
             >
               <div className="flex-1 overflow-y-auto divide-y divide-[var(--border-subtle)]">
                 {matches.length === 0 ? (
-                  <p className="px-3 py-3 text-xs text-[var(--fg-muted)]">
+                  <p className="px-3 py-2.5 text-sm text-[var(--fg-muted)]">
                     No matching available products.
                   </p>
                 ) : (

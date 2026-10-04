@@ -175,7 +175,7 @@ export default function SettingsPage() {
           actions={
             <Button
               variant="primary"
-              size="small"
+              size="header"
               type="submit"
               form="settings-form"
               disabled={saving || !configDirty.includes("orange-cms-settings")}
@@ -441,7 +441,7 @@ export default function SettingsPage() {
                       set({ socials: next });
                     }}
                     placeholder="https://..."
-                    className="flex-1 font-medium"
+                    className="flex-1"
                   />
                 </div>
               );
@@ -503,7 +503,7 @@ export default function SettingsPage() {
                         type="button"
                         onClick={() => copy(url, `link-${link.uid}`)}
                         aria-label="Copy link"
-                        className="text-[var(--fg-muted)] hover:text-[var(--fg-base)]"
+                        className="rounded-sm p-1 text-[var(--fg-muted)] transition-colors hover:bg-[var(--bg-subtle-hover)] hover:text-[var(--fg-base)]"
                       >
                         {copied === `link-${link.uid}` ? (
                           <Check className="h-4 w-4 text-[var(--tag-green-text)]" />
@@ -531,7 +531,7 @@ export default function SettingsPage() {
                           type="button"
                           onClick={() => setPinVisibleId(pinVisible ? null : link.uid)}
                           aria-label={pinVisible ? "Hide PIN" : "Show PIN"}
-                          className="text-[var(--fg-muted)] hover:text-[var(--fg-base)]"
+                          className="rounded-sm p-1 text-[var(--fg-muted)] transition-colors hover:bg-[var(--bg-subtle-hover)] hover:text-[var(--fg-base)]"
                         >
                           {pinVisible ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                         </button>
@@ -542,7 +542,7 @@ export default function SettingsPage() {
                             if (pin) copy(pin, `pin-${link.uid}`);
                           }}
                           aria-label="Copy PIN"
-                          className="text-[var(--fg-muted)] hover:text-[var(--fg-base)]"
+                          className="rounded-sm p-1 text-[var(--fg-muted)] transition-colors hover:bg-[var(--bg-subtle-hover)] hover:text-[var(--fg-base)]"
                         >
                           {copied === `pin-${link.uid}` ? (
                             <Check className="h-4 w-4 text-[var(--tag-green-text)]" />

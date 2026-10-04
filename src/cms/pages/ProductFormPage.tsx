@@ -35,7 +35,7 @@ export default function ProductFormPage() {
   if (productId && state === "loading") {
     return (
       <div className="flex min-h-[50vh] items-center justify-center">
-        <Loader2 className="h-6 w-6 animate-spin text-[var(--fg-muted)]" />
+        <Loader2 className="h-5 w-5 animate-spin text-[var(--fg-muted)]" />
       </div>
     );
   }

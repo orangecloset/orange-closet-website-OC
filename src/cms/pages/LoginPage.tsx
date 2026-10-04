@@ -143,7 +143,7 @@ export default function LoginPage({ onSuccess }: { onSuccess: () => void }) {
               />
             </div>
 
-            {error && <p className="text-sm text-[var(--fg-error)]">{error}</p>}
+            {error && <p className="text-xs text-[var(--tag-red-text)]">{error}</p>}
 
             <Button type="submit" variant="primary" size="base" disabled={busy}>
               {busy && <Loader2 className="h-4 w-4 animate-spin" />}

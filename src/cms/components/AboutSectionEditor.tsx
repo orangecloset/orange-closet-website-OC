@@ -35,7 +35,7 @@ function ArrayInput({
             <button
               type="button"
               onClick={() => onChange(values.filter((_, idx) => idx !== i))}
-              className="mt-0.5 text-[var(--fg-muted)] transition-colors hover:text-red-500"
+              className="mt-0.5 rounded-sm p-1 text-[var(--fg-muted)] transition-colors hover:bg-[var(--bg-subtle-hover)] hover:text-[var(--tag-red-text)]"
             >
               <Trash2 className="h-4 w-4" />
             </button>
@@ -70,13 +70,13 @@ function CardListInput({
         {cards.map((c, i) => (
           <div key={i} className="rounded-md border border-[var(--border-subtle)] p-3 space-y-2">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-medium text-[var(--fg-muted)]">Card {i + 1}</span>
+              <span className="text-sm font-medium text-[var(--fg-muted)]">Card {i + 1}</span>
               <button
                 type="button"
                 onClick={() => onChange(cards.filter((_, idx) => idx !== i))}
-                className="text-[var(--fg-muted)] transition-colors hover:text-red-500"
+                className="rounded-sm p-1 text-[var(--fg-muted)] transition-colors hover:bg-[var(--bg-subtle-hover)] hover:text-[var(--tag-red-text)]"
               >
-                <Trash2 className="h-3.5 w-3.5" />
+                <Trash2 className="h-4 w-4" />
               </button>
             </div>
             <Input
@@ -159,7 +159,7 @@ export function SectionEditor({
   const [open, setOpen] = useState(true);
 
   return (
-    <div className="rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-base)]">
+    <div className="rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-subtle)]">
       <button
         type="button"
         onClick={() => setOpen(!open)}
@@ -172,7 +172,7 @@ export function SectionEditor({
         )}
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2">
-            <span className="text-[13px] font-medium text-[var(--fg-base)]">
+            <span className="text-sm font-medium text-[var(--fg-base)]">
               Section {index + 1}
             </span>
             {!section.enabled && (

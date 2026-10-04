@@ -5,7 +5,7 @@ import { useToast } from "../store/toastContext";
 import { useCms } from "../store/cmsContext";
 import type { CmsProduct, ProductStatus } from "../../data/store-types";
 import { colorSwatchCss } from "../../data/products";
-import { Button, Container, Header, Input, Label, Select, Tabs, Textarea } from "./ui";
+import { Button, Container, Header, Input, Label, Select, Switch, Tabs, Textarea } from "./ui";
 import { UploadButton } from "./UploadButton";
 import { SortableList, DndContainer, SortableItems, DragHandle } from "./SortableList";
 
@@ -270,8 +270,8 @@ export function ProductFormInner({ editing }: { editing?: CmsProduct }) {
         subtitle={isEditing ? editing?.id : "Create a new product"}
         actions={
           <>
-            <Link to="/cms-admin/products"><Button variant="secondary" size="small">Cancel</Button></Link>
-            <Button variant="primary" size="small" form="product-form" type="submit" disabled={saving}>
+            <Link to="/cms-admin/products"><Button variant="secondary" size="header">Cancel</Button></Link>
+            <Button variant="primary" size="header" form="product-form" type="submit" disabled={saving}>
               {saving ? "Saving…" : "Save"}
             </Button>
           </>
@@ -331,13 +331,7 @@ export function ProductFormInner({ editing }: { editing?: CmsProduct }) {
                 <div className="flex items-center justify-between">
                   <Label>Content Sections</Label>
                   <div className="flex items-center gap-2">
-                    <button
-                      type="button"
-                      onClick={() => setSectionsOpen((prev) => !prev)}
-                      className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer items-center rounded-full transition-colors ${sectionsOpen ? "bg-[var(--bg-interactive)]" : "bg-[var(--bg-disabled)]"}`}
-                    >
-                      <span className={`inline-block h-3.5 w-3.5 rounded-full bg-white shadow transition-transform ${sectionsOpen ? "translate-x-4" : "translate-x-0.5"}`} />
-                    </button>
+                    <Switch checked={sectionsOpen} onCheckedChange={setSectionsOpen} />
                     <span className="text-xs text-[var(--fg-muted)]">Open by default</span>
                     <Button
                       variant="secondary"
@@ -483,7 +477,7 @@ export function ProductFormInner({ editing }: { editing?: CmsProduct }) {
                           <div className="flex items-center justify-between">
                             <Label htmlFor={`color-hex-${index}`}>Color(s)</Label>
                             {c.hexes.length < 3 && (
-                              <Button variant="ghost" size="small" type="button" onClick={() => addColorToVariant(index)} className="h-6 text-xs">
+                              <Button variant="ghost" size="small" type="button" onClick={() => addColorToVariant(index)} className="h-6">
                                 <Plus className="h-3 w-3" /> Add color
                               </Button>
                             )}

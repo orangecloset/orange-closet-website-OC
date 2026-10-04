@@ -59,18 +59,22 @@ export default function LegalEditorPage() {
 
   return (
     <div className="flex min-h-0 flex-col overflow-hidden" style={{ height: "calc(100dvh - 5.5rem)" }}>
-      <div className="flex items-center justify-between pb-3">
-        <button
-          type="button"
-          onClick={() => navigate("/cms-admin/settings")}
-          className="inline-flex items-center gap-1.5 text-sm text-[var(--fg-muted)] hover:text-[var(--fg-base)] transition-colors"
-        >
-          <ArrowLeft className="h-4 w-4" />
-          Back to Settings
-        </button>
-        <Button variant="primary" size="small" onClick={handleSave} disabled={saving}>
-          {saving ? "Saving…" : "Save"}
-        </Button>
+      <div className="flex items-center justify-between gap-4 pb-3">
+        <div className="flex min-w-0 flex-col gap-0.5">
+          <h2 className="text-base font-medium text-[var(--fg-base)]">{page.label}</h2>
+          <p className="hidden text-sm text-[var(--fg-subtle)] sm:block">
+            Markdown content shown at /legal/{slug}
+          </p>
+        </div>
+        <div className="flex shrink-0 items-center gap-2">
+          <Button variant="secondary" size="header" onClick={() => navigate("/cms-admin/settings")}>
+            <ArrowLeft className="h-4 w-4" />
+            Back to Settings
+          </Button>
+          <Button variant="primary" size="header" onClick={handleSave} disabled={saving}>
+            {saving ? "Saving…" : "Save"}
+          </Button>
+        </div>
       </div>
 
       <div className="flex flex-1 flex-col gap-2 overflow-hidden">

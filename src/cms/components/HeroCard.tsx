@@ -21,7 +21,7 @@ export function HeroCard({ hero }: { hero: HomepageHero }) {
   return (
     <div className="rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-subtle)] p-4">
       <div className="mb-3 flex items-center gap-2">
-        <span className="flex-1 text-[13px] font-medium text-[var(--fg-base)]">
+        <span className="flex-1 text-sm font-medium text-[var(--fg-base)]">
           Hero {index + 1}
         </span>
         <button
@@ -146,13 +146,14 @@ export function HeroCard({ hero }: { hero: HomepageHero }) {
               {hero.wide ? "Wide" : "Half"}
             </Badge>
           </div>
-          <button
+          <Button
+            variant="ghost"
+            size="small"
             type="button"
             onClick={() => patchHero({ wide: !hero.wide })}
-            className="rounded-md px-2 py-1 text-xs text-[var(--fg-subtle)] transition-colors hover:bg-[var(--bg-subtle-hover)] hover:text-[var(--fg-base)]"
           >
             Toggle
-          </button>
+          </Button>
         </div>
       </div>
     </div>

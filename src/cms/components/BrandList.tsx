@@ -35,7 +35,7 @@ export function BrandList() {
             }}
             placeholder="Add a brand..."
           />
-          <Button variant="secondary" size="base" onClick={addBrand}>
+          <Button variant="secondary" size="small" onClick={addBrand}>
             <Plus className="h-4 w-4" />
             Add
           </Button>
