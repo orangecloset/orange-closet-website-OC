@@ -565,20 +565,23 @@ export function ProductFormInner({ editing }: { editing?: CmsProduct }) {
                         <div className="flex flex-col gap-2">
                           <Label>Stock by Size</Label>
                           <div className="overflow-x-auto rounded-md border border-[var(--border-subtle)]">
-                            <table className="w-full text-left text-sm">
+                            <table className="w-full text-left">
                               <thead>
-                                <tr className="border-b border-[var(--border-subtle)] bg-[var(--bg-subtle)] text-xs text-[var(--fg-muted)]">
-                                  <th className="px-3 py-2 font-medium">Size</th>
-                                  <th className="px-3 py-2 font-medium">Stock</th>
+                                <tr className="border-b border-[var(--border-subtle)] text-xs text-[var(--fg-muted)]">
+                                  <th className="px-6 py-2.5 font-medium">Size</th>
+                                  <th className="px-6 py-2.5 font-medium">Stock</th>
                                 </tr>
                               </thead>
-                              <tbody className="divide-y divide-[var(--border-subtle)] bg-[var(--bg-base)]">
+                              <tbody>
                                 {sizes.map((s) => {
                                   const val = c.stockBySize[s] ?? "";
                                   return (
-                                    <tr key={s}>
-                                      <td className="px-3 py-1.5 text-sm font-medium text-[var(--fg-base)]">{s}</td>
-                                      <td className="px-3 py-1.5">
+                                    <tr
+                                      key={s}
+                                      className="border-b border-[var(--border-subtle)] transition-colors last:border-b-0 hover:bg-[var(--bg-subtle-hover)]"
+                                    >
+                                      <td className="px-6 py-3 text-sm text-[var(--fg-base)]">{s}</td>
+                                      <td className="px-6 py-3 text-sm">
                                         <Input type="number" min={0} value={val} onChange={(e) => setStockBySize(index, s, e.target.value)} placeholder="0" className="h-8 w-24" />
                                       </td>
                                     </tr>

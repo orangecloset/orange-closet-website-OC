@@ -137,7 +137,7 @@ export default function SalesHistoryPage() {
                       onClick={() => handleOpenReceipt(s)}
                       className="cursor-pointer border-b border-[var(--border-subtle)] transition-colors last:border-b-0 hover:bg-[var(--bg-subtle-hover)]"
                     >
-                      <td className="whitespace-nowrap px-6 py-3 text-xs font-medium text-[var(--fg-base)]">
+                      <td className="whitespace-nowrap px-6 py-3 text-sm">
                         {s.receiptNo ? <Badge color="grey">{s.receiptNo}</Badge> : <span className="text-[var(--fg-muted)]">—</span>}
                       </td>
                       <td className="px-6 py-3">
@@ -153,7 +153,7 @@ export default function SalesHistoryPage() {
                               <ShoppingBag className="h-4 w-4 text-[var(--fg-disabled)]" />
                             </div>
                           )}
-                          <p className="truncate text-sm font-medium text-[var(--fg-base)]">{s.productName}</p>
+                          <p className="truncate text-sm text-[var(--fg-base)]">{s.productName}</p>
                         </div>
                       </td>
                       <td className="whitespace-nowrap px-6 py-3 text-sm text-[var(--fg-base)]">

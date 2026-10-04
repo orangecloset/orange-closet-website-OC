@@ -325,7 +325,7 @@ export default function SoldPage() {
                                   <ShoppingBag className="h-4 w-4 text-[var(--fg-disabled)]" />
                                 </div>
                               )}
-                              <p className="truncate text-sm font-medium text-[var(--fg-base)]">{p.name}</p>
+                              <p className="truncate text-sm text-[var(--fg-base)]">{p.name}</p>
                             </div>
                           </td>
                           <td className="whitespace-nowrap px-6 py-3 text-sm text-[var(--fg-base)]">{p.price}</td>

@@ -377,23 +377,23 @@ export default function AccountsPage() {
           <table className="w-full min-w-[560px] text-left">
             <thead>
               <tr className="border-b border-[var(--border-subtle)] text-xs text-[var(--fg-muted)]">
-                <th className="px-4 py-2.5 font-medium">Name</th>
-                <th className="px-4 py-2.5 font-medium">Email</th>
-                <th className="w-36 px-4 py-2.5 font-medium">Role</th>
-                <th className="w-32 px-4 py-2.5 font-medium">Joined</th>
-                <th className="w-44 px-4 py-2.5 font-medium text-right">Actions</th>
+                <th className="px-6 py-2.5 font-medium">Name</th>
+                <th className="px-6 py-2.5 font-medium">Email</th>
+                <th className="w-36 px-6 py-2.5 font-medium">Role</th>
+                <th className="w-32 px-6 py-2.5 font-medium">Joined</th>
+                <th className="w-44 px-6 py-2.5 font-medium text-right">Actions</th>
               </tr>
             </thead>
             <tbody>
               {loading ? (
                 <tr>
-                  <td colSpan={5} className="px-4 py-6 text-center text-sm text-[var(--fg-muted)]">
+                  <td colSpan={5} className="px-6 py-12 text-center text-sm text-[var(--fg-muted)]">
                     Loading…
                   </td>
                 </tr>
               ) : users.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="px-4 py-6 text-center text-sm text-[var(--fg-muted)]">
+                  <td colSpan={5} className="px-6 py-12 text-center text-sm text-[var(--fg-muted)]">
                     No accounts yet.
                   </td>
                 </tr>
@@ -403,20 +403,20 @@ export default function AccountsPage() {
                   const isSuper = u.role === "super_admin";
                   return (
                     <tr key={u.id} className="border-b border-[var(--border-subtle)] last:border-b-0">
-                      <td className="max-w-[180px] truncate px-4 py-3 text-sm text-[var(--fg-base)]">
+                      <td className="max-w-[180px] truncate px-6 py-3 text-sm text-[var(--fg-base)]">
                         {u.name}
                         {isMe && (
                           <span className="ml-1.5 text-xs text-[var(--fg-muted)]">(you)</span>
                         )}
                       </td>
-                      <td className="max-w-[220px] truncate px-4 py-3 text-sm text-[var(--fg-base)]">
+                      <td className="max-w-[220px] truncate px-6 py-3 text-sm text-[var(--fg-base)]">
                         {u.email}
                       </td>
-                      <td className="px-4 py-3">{roleBadge(u.role)}</td>
-                      <td className="whitespace-nowrap px-4 py-3 text-sm text-[var(--fg-muted)]">
+                      <td className="px-6 py-3">{roleBadge(u.role)}</td>
+                      <td className="whitespace-nowrap px-6 py-3 text-sm text-[var(--fg-muted)]">
                         {formatDate(u.createdAt)}
                       </td>
-                      <td className="px-4 py-3">
+                      <td className="px-6 py-3">
                         <div className="flex items-center justify-end gap-1.5">
                           {!isSuper && (
                             <>
@@ -471,7 +471,7 @@ export default function AccountsPage() {
               )}
             </tbody>
           </table>
-          <div className="border-t border-[var(--border-subtle)] bg-[var(--bg-subtle)] px-4 py-2 text-xs text-[var(--fg-muted)]">
+          <div className="border-t border-[var(--border-subtle)] bg-[var(--bg-subtle)] px-6 py-2 text-xs text-[var(--fg-muted)]">
             {users.length} account{users.length === 1 ? "" : "s"} · {staffCount} staff
             {pendingCount > 0 ? ` · ${pendingCount} blocked` : ""} · super admin cannot be modified
           </div>

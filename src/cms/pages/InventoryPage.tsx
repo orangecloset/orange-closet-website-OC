@@ -228,7 +228,7 @@ export default function InventoryPage() {
                       <td className="whitespace-nowrap px-6 py-3 text-sm text-[var(--fg-muted)]">
                         {formatDateTime(m.createdAt)}
                       </td>
-                      <td className="px-6 py-3 text-sm font-medium text-[var(--fg-base)]">
+                      <td className="px-6 py-3 text-sm text-[var(--fg-base)]">
                         <span className="block max-w-[240px] truncate">{m.productName}</span>
                       </td>
                       <td className="whitespace-nowrap px-6 py-3 text-sm text-[var(--fg-muted)]">
@@ -246,7 +246,7 @@ export default function InventoryPage() {
                       <td className="px-6 py-3 text-sm text-[var(--fg-muted)]">
                         {m.changedBy || "—"}
                       </td>
-                      <td className="whitespace-nowrap px-6 py-3 text-xs text-[var(--fg-muted)]">
+                      <td className="whitespace-nowrap px-6 py-3 text-sm text-[var(--fg-muted)]">
                         {m.ref ? (
                           m.kind === "sale" ? (
                             <button
