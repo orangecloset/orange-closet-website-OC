@@ -6,14 +6,14 @@ type SignedUpload = {
   apiKey: string;
   timestamp: number;
   publicId: string;
-  folder: string;
   signature: string;
 };
 
-async function getSignedParams(): Promise<SignedUpload> {
+async function getSignedParams(folder: string): Promise<SignedUpload> {
   const res = await fetch("/api/upload/sign", {
     method: "POST",
     headers: { "Content-Type": "application/json", ...authHeaders() },
+    body: JSON.stringify({ folder }),
   });
   if (!res.ok) throw new Error(`Failed to sign upload (${res.status})`);
   return res.json() as Promise<SignedUpload>;
@@ -25,6 +25,12 @@ const PRESETS: Record<UploadPreset, { maxWidthOrHeight: number; initialQuality: 
   product: { maxWidthOrHeight: 1200, initialQuality: 0.8 },
   hero: { maxWidthOrHeight: 1750, initialQuality: 0.9 },
   raw: null,
+};
+
+const PRESET_FOLDERS: Record<UploadPreset, string> = {
+  product: "orange-closet",
+  hero: "orange-closet/hero",
+  raw: "orange-closet/settings",
 };
 
 const MAX_SIZE_BYTES = 500 * 1024;
@@ -49,14 +55,16 @@ async function compress(file: File, preset: UploadPreset): Promise<File> {
 }
 
 export async function uploadImage(file: File, preset: UploadPreset = "product"): Promise<string> {
-  const [compressed, params] = await Promise.all([compress(file, preset), getSignedParams()]);
+  const [compressed, params] = await Promise.all([
+    compress(file, preset),
+    getSignedParams(PRESET_FOLDERS[preset]),
+  ]);
 
   const form = new FormData();
   form.append("file", compressed);
   form.append("api_key", params.apiKey);
   form.append("timestamp", String(params.timestamp));
   form.append("public_id", params.publicId);
-  form.append("folder", params.folder);
   form.append("signature", params.signature);
 
   const res = await fetch(
