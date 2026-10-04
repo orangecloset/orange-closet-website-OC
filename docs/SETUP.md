@@ -10,7 +10,8 @@ production database without forgetting a step.
 - Node.js 22+
 - A [Neon](https://neon.tech) Postgres database
 - A [Cloudinary](https://cloudinary.com) account (product image uploads)
-- A [Vercel](https://vercel.com) account (hosting + serverless API)
+- A [Cloudflare](https://dash.cloudflare.com) account (Workers hosting the
+  site + API) and the Wrangler CLI (`npx wrangler`, no global install needed)
 
 ---
 
@@ -24,20 +25,21 @@ cp .env.example .env.local
 
 | Variable | Where it's used | Notes |
 | --- | --- | --- |
-| `DATABASE_URL` | Serverless API only | Neon connection string. **Never** prefix with `VITE_`. |
-| `CMS_API_SECRET` | Serverless API only | HMAC secret for admin tokens & catalog tokens. Generate: `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"` |
-| `CLOUDINARY_CLOUD_NAME` | Serverless API only | From Cloudinary dashboard home |
-| `CLOUDINARY_API_KEY` | Serverless API only | Cloudinary Settings > Access Keys |
-| `CLOUDINARY_API_SECRET` | Serverless API only | Same page. Keep server-side. |
-| `CRON_SECRET` | Serverless API only | Protects the Cloudinary cleanup cron (`/api/cron/cloudinary-gc`). Vercel Cron sends it as a bearer token automatically. Generate: `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"` |
+| `DATABASE_URL` | Worker only | Neon connection string. **Never** prefix with `VITE_`. |
+| `CMS_API_SECRET` | Worker only | HMAC secret for admin tokens & catalog tokens. Generate: `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"` |
+| `CLOUDINARY_CLOUD_NAME` | Worker only | From Cloudinary dashboard home |
+| `CLOUDINARY_API_KEY` | Worker only | Cloudinary Settings > Access Keys |
+| `CLOUDINARY_API_SECRET` | Worker only | Same page. Keep server-side. |
+| `CRON_SECRET` | Worker only | Bearer token for manually hitting the Cloudinary cleanup endpoint (`/api/cron/cloudinary-gc`). The scheduled Monday run calls `runCloudinaryGC()` directly and does **not** need it. Generate: `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"` |
 | `VITE_NEON_AUTH_URL` | Client bundle | Neon Auth base URL. Public by design. |
 | `VITE_CLOUDINARY_CLOUD_NAME` | Client bundle | Cloud name is public; secrets are not. |
 
 Rules:
 
 - Anything with `VITE_` gets bundled into the browser — **no secrets there, ever**.
-- `.env.local` is gitignored; mirror all values in Vercel's dashboard
-  (Project > Settings > Environment Variables) for deploys.
+- `.env.local` is gitignored. Locally, `wrangler dev` reads it automatically
+  (it prints `Using secrets defined in .env.local`). For the deployed Worker
+  you must set the same values explicitly — see section 5.
 
 ---
 
@@ -58,8 +60,8 @@ What it does: reads `DATABASE_URL` from `.env.local`, compares it with
 `db/schema.ts`, and creates/alters only what's missing. It will show you a
 preview before applying.
 
-Tables managed this way: `products`, `sales`, `settings`, `catalog_links`,
-`users`, `rate_limits`.
+Tables managed this way: `products`, `sales`, `stock_movements`, `settings`,
+`catalog_links`, `users`, `rate_limits`.
 
 Note: the API **fails open** if `rate_limits` is missing — nothing crashes,
 but rate limiting silently stops being enforced. If you see a fresh database,
@@ -72,45 +74,94 @@ run push first.
 ```
 npm install          # install dependencies
 npx drizzle-kit push # create/sync tables on the DB from step 3
-npm run dev          # start Vite dev server
 ```
+
+Two ways to run:
+
+```
+npm run dev        # Vite dev server (frontend only, hot reload)
+npm run dev:worker # the Worker: API + built dist/ on http://127.0.0.1:8787
+```
+
+`npm run dev` serves only the frontend — `vite.config.ts` has no `/api` proxy,
+so requests to `/api/*` never reach the Worker. For a full local app use:
+
+```
+npm run build && npm run dev:worker
+```
+
+Wrangler serves `dist/` as-is (no watch on Vite's output), so run the build
+again after frontend edits. It also auto-loads every value from `.env.local`
+as a local binding — prints `Using secrets defined in .env.local` — so no
+secrets need configuring for local work.
 
 Other commands:
 
 ```
 npm run typecheck       # tsc --noEmit
 npm run lint            # eslint
-npm run build           # production build
+npm run build           # production build -> dist/
+npm run deploy          # wrangler deploy (Worker + dist/ assets)
 npm run test:ratelimit  # integration test for the rate limiter (hits real DB)
 ```
 
-The API functions live in `api/` and are served by Vercel in production.
-To test them locally use `vercel dev` (requires the Vercel CLI).
+The API lives in `src/routes/*`, mounted by the Hono app in `src/index.ts`,
+and runs inside the Worker — there is no separate serverless folder.
 
-> **Vercel Hobby plan limit:** max **12 serverless functions** per deployment
-> (each routed file in `api/` counts once; `_lib/` helpers don't). The project
-> currently uses **11** by merging `/api/account/*` into one catch-all
-> (`api/account/[[...action]].ts`). If you need more endpoints later, either
-> merge related routes into catch-alls the same way or upgrade the plan.
+To exercise the cron locally (scheduled events don't fire on their own in
+`wrangler dev`):
+
+```
+curl "http://127.0.0.1:8787/cdn-cgi/local/scheduled"
+```
 
 ---
 
-## 5. Deploying to Vercel
+## 5. Deploying to Cloudflare Workers
 
-1. Push the repo to GitHub and import it in Vercel.
-2. Add **all** environment variables from section 2 in
-   Project > Settings > Environment Variables.
-3. Run `npx drizzle-kit push` against the production `DATABASE_URL` once.
-4. Deploy. CI (`.github/workflows/ci.yml`) runs typecheck + lint + build on
-   every PR and push to `main`.
+One `wrangler deploy` ships both the Worker code and the static site — the
+`[assets]` block in `wrangler.toml` attaches `dist/` to the same Worker.
+
+1. Push the repo to GitHub. CI (`.github/workflows/ci.yml`) runs typecheck +
+   lint + build on every PR and push to `main`.
+2. Run `npx drizzle-kit push` against the production `DATABASE_URL` once.
+3. Set every server-side value as a Worker secret (one-time, or again whenever
+   a value changes):
+
+   ```
+   npx wrangler secret put DATABASE_URL
+   npx wrangler secret put CMS_API_SECRET
+   npx wrangler secret put CRON_SECRET
+   npx wrangler secret put CLOUDINARY_CLOUD_NAME
+   npx wrangler secret put CLOUDINARY_API_KEY
+   npx wrangler secret put CLOUDINARY_API_SECRET
+   npx wrangler secret put VITE_CLOUDINARY_CLOUD_NAME
+   npx wrangler secret put VITE_NEON_AUTH_URL
+   ```
+
+   Confirm with `npx wrangler secret list`. `VITE_*` secrets are read by the
+   Worker at runtime (e.g. `src/routes/upload.ts`); the browser copy still
+   comes from `.env.local` at `npm run build` time.
+4. Build, then deploy:
+
+   ```
+   npm run build
+   npm run deploy
+   ```
+
+   `npm run deploy` is just `wrangler deploy`, which uploads `dist/` —
+   skipping the build ships a stale site.
+5. The cron trigger ships with the deploy (`crons = ["0 3 * * 1"]` in
+   `wrangler.toml`). Confirm it under Workers > `orange` > Triggers.
 
 ### Pre-deploy checklist
 
-- [ ] `.env.local` values mirrored into Vercel env vars
-- [ ] `CRON_SECRET` set in Vercel (required — the GC endpoint refuses to run without it)
+- [ ] `npx wrangler secret list` shows every value from section 2
+- [ ] `CRON_SECRET` set (only needed for manually hitting the GC endpoint)
 - [ ] `npx drizzle-kit push` run against the target database
 - [ ] `CMS_API_SECRET` regenerated for production (don't reuse the test value)
 - [ ] `npm run typecheck && npm run lint && npm run build` pass locally
+- [ ] `npm run build` run immediately before `npm run deploy`
 - [ ] `npm run test:ratelimit` passes against the target database
 
 ---
@@ -151,6 +202,9 @@ curl -H "Authorization: Bearer $CRON_SECRET" \
 # Actually delete orphans:
 curl -X POST -H "Authorization: Bearer $CRON_SECRET" \
   https://<your-worker>.workers.dev/api/cron/cloudinary-gc
+
+# Local only — fire the scheduled event without deploying:
+curl "http://127.0.0.1:8787/cdn-cgi/local/scheduled"
 ```
 
 > After first deploying this, run the dry-run once and sanity-check that it
@@ -164,11 +218,12 @@ When moving off the testing phase:
 
 1. Get the new Neon connection string from the client's Neon console.
 2. Update `DATABASE_URL` in `.env.local`.
-3. Run `npx drizzle-kit push` — creates all six tables on the fresh DB.
+3. Run `npx drizzle-kit push` — creates all seven tables on the fresh DB.
 4. Run `npm run test:ratelimit` to confirm the DB works end-to-end.
-5. Update `DATABASE_URL` (and any other changed vars) in Vercel's environment
-   variables.
-6. Redeploy so the functions pick up the new values.
+5. Update the Worker secret: `npx wrangler secret put DATABASE_URL` (and any
+   other changed values).
+6. `npm run build && npm run deploy` so the Worker and site pick up the new
+   values.
 7. Log into the CMS and re-create content/users on the new DB (data does NOT
    migrate automatically — export/import separately if the old data is needed).
 
@@ -182,13 +237,15 @@ When moving off the testing phase:
 
 ## 7. Security notes
 
-- Auth: HMAC-signed bearer tokens (`api/_lib/auth.ts`) checked against live
+- Auth: HMAC-signed bearer tokens (`src/lib/auth.ts`) checked against live
   Neon sessions; roles enforced per endpoint (`staff` vs `super_admin`).
-- Rate limiting: Postgres-backed atomic upsert (`rate_limits` table),
-  shared across all serverless instances. IP comes from the right-most
-  `x-forwarded-for` entry set by Vercel's edge. Per-link PIN lockout:
-  10 wrong unlocks on a catalog link blocks it for 15 minutes
+- Rate limiting: Postgres-backed atomic upsert (`rate_limits` table), shared
+  across requests. IP comes from Cloudflare's `cf-connecting-ip` header,
+  falling back to the right-most `x-forwarded-for` entry. Per-link PIN
+  lockout: 10 wrong unlocks on a catalog link blocks it for 15 minutes
   (`catalog-fail:<uid>` rows in the same table).
-- Known remaining hardening items: add a Content-Security-Policy and HSTS
-  header in `vercel.json`; consider shortening catalog grant token TTL;
-  gate first-user bootstrap behind an `ADMIN_EMAILS` allowlist.
+- Security headers (HSTS, `X-Frame-Options`, `X-Content-Type-Options`,
+  `Referrer-Policy`, `Permissions-Policy`) are applied in `src/index.ts`.
+- Known remaining hardening items: add a Content-Security-Policy header;
+  consider shortening catalog grant token TTL; gate first-user bootstrap
+  behind an `ADMIN_EMAILS` allowlist.
