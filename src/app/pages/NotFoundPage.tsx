@@ -5,8 +5,8 @@ export default function NotFoundPage() {
   usePageTitle("Page Not Found");
   return (
     <section className="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 py-24 min-h-full flex flex-col items-center justify-center text-center">
-      <h1 className="text-xl sm:text-2xl lg:text-3xl font-semibold mb-3">404</h1>
-      <p className="text-sm text-gray-500 mb-8">
+      <h1 className="text-2xl sm:text-3xl lg:text-4xl font-semibold mb-3">404</h1>
+      <p className="text-sm sm:text-base text-gray-500 mb-8">
         The page you are looking for could not be found.
       </p>
       <Link
