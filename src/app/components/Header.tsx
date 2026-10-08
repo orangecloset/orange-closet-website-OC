@@ -197,6 +197,11 @@ export default function Header({ onShare, showShare = true }: HeaderProps) {
   const handleMegaEnter = (slug: string) => {
     if (megaEnterRef.current) clearTimeout(megaEnterRef.current);
     if (megaTimeoutRef.current) clearTimeout(megaTimeoutRef.current);
+    if (moreEnterRef.current) clearTimeout(moreEnterRef.current);
+    if (moreTimeoutRef.current) clearTimeout(moreTimeoutRef.current);
+    setMoreOpen(false);
+    setMoreActiveType(null);
+    setMoreCategory("");
     megaEnterRef.current = setTimeout(() => {
       setMegaType(slug);
       const cats = getCATEGORIES[slug];
@@ -219,6 +224,10 @@ export default function Header({ onShare, showShare = true }: HeaderProps) {
   const handleMoreEnter = () => {
     if (moreEnterRef.current) clearTimeout(moreEnterRef.current);
     if (moreTimeoutRef.current) clearTimeout(moreTimeoutRef.current);
+    if (megaEnterRef.current) clearTimeout(megaEnterRef.current);
+    if (megaTimeoutRef.current) clearTimeout(megaTimeoutRef.current);
+    setMegaType(null);
+    setMegaCategory("");
     moreEnterRef.current = setTimeout(() => {
       setMoreOpen(true);
       const firstSlug = moreNavItems[0]?.href.slice(1) ?? null;
