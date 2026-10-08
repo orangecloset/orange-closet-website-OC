@@ -194,61 +194,41 @@ export default function Header({ onShare, showShare = true }: HeaderProps) {
     return moreTypeHero;
   }, [moreActiveType, moreCategory, getCATEGORIES, moreTypeHero]);
 
-  const clearMenuTimers = () => {
+  const handleMegaEnter = (slug: string) => {
     if (megaEnterRef.current) clearTimeout(megaEnterRef.current);
     if (megaTimeoutRef.current) clearTimeout(megaTimeoutRef.current);
     if (moreEnterRef.current) clearTimeout(moreEnterRef.current);
     if (moreTimeoutRef.current) clearTimeout(moreTimeoutRef.current);
-  };
-
-  const closeMenus = () => {
-    clearMenuTimers();
-    setMegaType(null);
-    setMegaCategory("");
     setMoreOpen(false);
     setMoreActiveType(null);
     setMoreCategory("");
+    megaEnterRef.current = setTimeout(() => {
+      setMegaType(slug);
+      const cats = getCATEGORIES[slug];
+      setMegaCategory(cats && cats.length > 0 ? cats[0].slug : "");
+    }, 60);
   };
 
-  const handleHeaderEnter = () => {
-    if (megaTimeoutRef.current) clearTimeout(megaTimeoutRef.current);
-    if (moreTimeoutRef.current) clearTimeout(moreTimeoutRef.current);
-  };
-
-  const handleHeaderLeave = () => {
-    clearMenuTimers();
+  const handleMegaLeave = () => {
+    if (megaEnterRef.current) clearTimeout(megaEnterRef.current);
     megaTimeoutRef.current = setTimeout(() => {
       setMegaType(null);
       setMegaCategory("");
     }, 120);
-    moreTimeoutRef.current = setTimeout(() => {
-      setMoreOpen(false);
-      setMoreActiveType(null);
-      setMoreCategory("");
-    }, 120);
   };
 
-  const handleMegaEnter = (slug: string) => {
-    const menuVisible = megaType !== null || moreOpen;
-    clearMenuTimers();
-    setMoreOpen(false);
-    setMoreActiveType(null);
-    setMoreCategory("");
-    const openMega = () => {
-      setMegaType(slug);
-      const cats = getCATEGORIES[slug];
-      setMegaCategory(cats && cats.length > 0 ? cats[0].slug : "");
-    };
-    if (menuVisible) openMega();
-    else megaEnterRef.current = setTimeout(openMega, 60);
+  const handleMegaDropdownEnter = () => {
+    if (megaTimeoutRef.current) clearTimeout(megaTimeoutRef.current);
   };
 
   const handleMoreEnter = () => {
-    const menuVisible = megaType !== null || moreOpen;
-    clearMenuTimers();
+    if (moreEnterRef.current) clearTimeout(moreEnterRef.current);
+    if (moreTimeoutRef.current) clearTimeout(moreTimeoutRef.current);
+    if (megaEnterRef.current) clearTimeout(megaEnterRef.current);
+    if (megaTimeoutRef.current) clearTimeout(megaTimeoutRef.current);
     setMegaType(null);
     setMegaCategory("");
-    const openMore = () => {
+    moreEnterRef.current = setTimeout(() => {
       setMoreOpen(true);
       const firstSlug = moreNavItems[0]?.href.slice(1) ?? null;
       setMoreActiveType(firstSlug);
@@ -256,9 +236,20 @@ export default function Header({ onShare, showShare = true }: HeaderProps) {
         const cats = getCATEGORIES[firstSlug];
         setMoreCategory(cats && cats.length > 0 ? cats[0].slug : "");
       }
-    };
-    if (menuVisible) openMore();
-    else moreEnterRef.current = setTimeout(openMore, 60);
+    }, 60);
+  };
+
+  const handleMoreLeave = () => {
+    if (moreEnterRef.current) clearTimeout(moreEnterRef.current);
+    moreTimeoutRef.current = setTimeout(() => {
+      setMoreOpen(false);
+      setMoreActiveType(null);
+      setMoreCategory("");
+    }, 120);
+  };
+
+  const handleMorePanelEnter = () => {
+    if (moreTimeoutRef.current) clearTimeout(moreTimeoutRef.current);
   };
 
   const handleMoreTypeEnter = (slug: string) => {
@@ -287,11 +278,7 @@ export default function Header({ onShare, showShare = true }: HeaderProps) {
   };
 
   return (
-    <header
-      className={`sticky top-0 bg-white shadow-sm border-b border-gray-100 ${mobileMenuOpen ? 'z-[100]' : 'z-50'}`}
-      onMouseEnter={handleHeaderEnter}
-      onMouseLeave={handleHeaderLeave}
-    >
+    <header className={`sticky top-0 bg-white shadow-sm border-b border-gray-100 ${mobileMenuOpen ? 'z-[100]' : 'z-50'}`}>
       <div className="px-2.5 sm:px-3.5 lg:px-16.5">
         <div className={`relative flex items-center ${headerSubtitle ? "h-17" : "h-14"} gap-4`}>
 
@@ -320,6 +307,7 @@ export default function Header({ onShare, showShare = true }: HeaderProps) {
                     key={item.label}
                     className="relative px-[10px] first:pl-0"
                     onMouseEnter={() => hasDropdown && handleMegaEnter(slug)}
+                    onMouseLeave={() => hasDropdown && handleMegaLeave()}
                   >
                     <Link
                       to={item.href}
@@ -335,6 +323,7 @@ export default function Header({ onShare, showShare = true }: HeaderProps) {
                 <div
                   className="relative px-[10px]"
                   onMouseEnter={handleMoreEnter}
+                  onMouseLeave={handleMoreLeave}
                 >
                   <button
                     type="button"
@@ -368,7 +357,7 @@ export default function Header({ onShare, showShare = true }: HeaderProps) {
               <button
                 aria-label="Search"
                 aria-expanded={searchOpen}
-                onClick={() => { closeMenus(); setSearchOpen(true); }}
+                onClick={() => setSearchOpen(true)}
                 className="text-gray-500 hover:text-black transition-colors"
               >
                 <Search className="w-5 h-5" />
@@ -460,6 +449,8 @@ export default function Header({ onShare, showShare = true }: HeaderProps) {
       {megaType && megaCats.length > 0 && (
         <div
           className="hidden lg:block absolute left-0 right-0 top-full bg-white border-t border-gray-100 shadow-lg z-50"
+          onMouseEnter={handleMegaDropdownEnter}
+          onMouseLeave={handleMegaLeave}
         >
           <div className="h-3 w-full" />
           <div className="px-2.5 sm:px-3.5 lg:px-16.5 flex">
@@ -497,6 +488,8 @@ export default function Header({ onShare, showShare = true }: HeaderProps) {
       {moreOpen && moreNavItems.length > 0 && (
         <div
           className="hidden lg:block absolute left-0 right-0 top-full bg-white border-t border-gray-100 shadow-lg z-50"
+          onMouseEnter={handleMorePanelEnter}
+          onMouseLeave={handleMoreLeave}
         >
           <div className="h-3 w-full" />
           <div className="px-2.5 sm:px-3.5 lg:px-16.5 flex">
