@@ -27,12 +27,12 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-screen bg-white text-black">
+    <div className="min-h-screen flex flex-col bg-white text-black">
       <Header
         onShare={() => setShareOpen(true)}
         showShare={settings.showShareButton && getCatalogMode() === "grant"}
       />
-      <main>
+      <main className="flex-1">
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/products/:productId" element={<ProductDetailPage />} />

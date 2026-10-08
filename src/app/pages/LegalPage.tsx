@@ -21,7 +21,7 @@ export default function LegalPage() {
 
   if (!page || !page.body?.trim()) {
     return (
-      <section className="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 py-24 text-center">
+      <section className="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 py-24 min-h-full flex flex-col items-center justify-center text-center">
         <h1 className="text-3xl sm:text-5xl font-semibold mb-3">Page Not Found</h1>
         <p className="text-sm text-gray-500 mb-8">
           The page you are looking for could not be found.

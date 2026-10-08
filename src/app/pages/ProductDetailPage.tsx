@@ -477,7 +477,7 @@ export default function ProductDetailPage() {
 
   if (!product) {
     return (
-      <section className="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 py-24 text-center">
+      <section className="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 py-24 min-h-full flex flex-col items-center justify-center text-center">
         <h1 className="text-xl font-semibold mb-3">Product not found</h1>
         <p className="text-sm text-gray-500 mb-6">
           We could not find the product you are looking for.
