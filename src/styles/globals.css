@@ -1,17 +1,17 @@
 @font-face {
-font-display: block;
+font-display: swap;
 font-family: 'Poppins';
 font-style: normal;
 font-weight: 400;
-src: url('../assets/fonts/Poppins-Regular.ttf') format('truetype');
+src: url('/fonts/Poppins-Regular.ttf') format('truetype');
 }
 
 @font-face {
-font-display: block;
+font-display: swap;
 font-family: 'Cinzel';
 font-style: normal;
 font-weight: 600;
-src: url('../assets/fonts/Cinzel-SemiBold.ttf') format('truetype');
+src: url('/fonts/Cinzel-SemiBold.ttf') format('truetype');
 }
 
 @font-face {

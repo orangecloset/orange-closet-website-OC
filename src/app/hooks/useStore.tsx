@@ -1,4 +1,5 @@
 /* eslint-disable react-refresh/only-export-components */
+// Storefront hook (src/app). If the CMS also needs it, move it to src/hooks/.
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import type { ReactNode } from "react";
 

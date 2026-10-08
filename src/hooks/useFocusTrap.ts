@@ -1,3 +1,4 @@
+// Shared hook: used by both the storefront (src/app) and the CMS (src/cms) — cross-cutting hooks belong in src/hooks/.
 import { useEffect, useRef } from "react";
 import type { RefObject } from "react";
 

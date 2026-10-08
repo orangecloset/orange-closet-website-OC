@@ -1,3 +1,4 @@
+// Storefront hook (src/app). If the CMS also needs it, move it to src/hooks/.
 import { useEffect, useLayoutEffect, useRef } from "react";
 import { useLocation, useNavigationType } from "react-router-dom";
 

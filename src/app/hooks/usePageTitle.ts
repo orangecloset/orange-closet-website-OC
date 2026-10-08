@@ -1,3 +1,4 @@
+// Storefront hook (src/app). If the CMS also needs it, move it to src/hooks/.
 import { useEffect } from "react";
 import { useCatalog } from "../context/CatalogContext";
 

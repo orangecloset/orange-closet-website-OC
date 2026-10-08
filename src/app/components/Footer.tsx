@@ -1,10 +1,10 @@
-import { useEffect, useRef } from "react";
+import { useRef } from "react";
 import { Link } from "react-router-dom";
-import QRCodeStyling from "qr-code-styling";
 import {
   Facebook, Instagram, Youtube, Twitter, type LucideIcon,
 } from "lucide-react";
 import { useCatalog } from "../context/CatalogContext";
+import { useQrCode } from "../hooks/useQrCode";
 
 const SOCIAL_ICONS = [
   { label: "Facebook", Icon: Facebook },
@@ -25,34 +25,23 @@ export default function Footer() {
     .map((s) => ({ label: s.label, to: `/about#${s.id}` }));
   const aboutTitle = about.heroSubtitle?.trim() || "";
 
-  useEffect(() => {
-    const el = facebookQrContainerRef.current;
-    if (!el || !facebookUrl) return;
-    const qr = new QRCodeStyling({
-      width: 120,
-      height: 120,
-      margin: 0,
-      data: facebookUrl,
-      imageOptions: { hideBackgroundDots: false, imageSize: 0, margin: 0 },
-      dotsOptions: {
-        type: "dots",
-        color: "#1a1a1a",
-      },
-      cornersSquareOptions: {
-        type: "extra-rounded",
-        color: "#1a1a1a",
-      },
-      cornersDotOptions: {
-        type: "dot",
-        color: "#1a1a1a",
-      },
-      backgroundOptions: {
-        color: "white",
-      },
-    });
-    el.innerHTML = "";
-    qr.append(el);
-  }, [facebookUrl]);
+  useQrCode(
+    facebookQrContainerRef,
+    facebookUrl
+      ? {
+          width: 120,
+          height: 120,
+          margin: 0,
+          data: facebookUrl,
+          imageOptions: { hideBackgroundDots: false, imageSize: 0, margin: 0 },
+          dotsOptions: { type: "dots", color: "#1a1a1a" },
+          cornersSquareOptions: { type: "extra-rounded", color: "#1a1a1a" },
+          cornersDotOptions: { type: "dot", color: "#1a1a1a" },
+          backgroundOptions: { color: "white" },
+        }
+      : null,
+    [facebookUrl]
+  );
 
   const activeSocials = (settings.socials ?? [])
     .map((s) => {

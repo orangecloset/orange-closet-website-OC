@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Loader2, X } from "lucide-react";
-import QRCodeStyling from "qr-code-styling";
 import { useFocusTrap } from "../../hooks/useFocusTrap";
+import { useQrCode } from "../hooks/useQrCode";
 import { getCatalogToken, getCatalogUid } from "../lib/access";
 import { useCatalog } from "../context/CatalogContext";
 
@@ -55,24 +55,24 @@ export default function ShareModal({ onClose }: ShareModalProps) {
     };
   }, []);
 
-  useEffect(() => {
-    if (!shareUrl || !qrContainerRef.current) return;
-    const container = qrContainerRef.current;
-    container.innerHTML = "";
-    const qr = new QRCodeStyling({
-      width: 200,
-      height: 200,
-      margin: 0,
-      data: shareUrl,
-      image: faviconUrl,
-      imageOptions: { hideBackgroundDots: true, imageSize: 0.4, margin: 4 },
-      dotsOptions: { type: "dots", color: "#1a1a1a" },
-      cornersSquareOptions: { type: "extra-rounded", color: "#1a1a1a" },
-      cornersDotOptions: { type: "dot", color: "#1a1a1a" },
-      backgroundOptions: { color: "white" },
-    });
-    qr.append(container);
-  }, [shareUrl, faviconUrl]);
+  useQrCode(
+    qrContainerRef,
+    shareUrl
+      ? {
+          width: 200,
+          height: 200,
+          margin: 0,
+          data: shareUrl,
+          image: faviconUrl,
+          imageOptions: { hideBackgroundDots: true, imageSize: 0.4, margin: 4 },
+          dotsOptions: { type: "dots", color: "#1a1a1a" },
+          cornersSquareOptions: { type: "extra-rounded", color: "#1a1a1a" },
+          cornersDotOptions: { type: "dot", color: "#1a1a1a" },
+          backgroundOptions: { color: "white" },
+        }
+      : null,
+    [shareUrl, faviconUrl]
+  );
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50" onClick={onClose}>

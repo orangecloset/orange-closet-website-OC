@@ -19,7 +19,7 @@ import { getCatalogToken, getCatalogMode } from "./lib/access";
 
 export default function App() {
   const [shareOpen, setShareOpen] = useState(false);
-  const { newArrivals, bestSellerProducts, onSaleProducts, settings, locked, loading } = useCatalog();
+  const { newArrivals, bestSellerProducts, onSaleProducts, settings, locked } = useCatalog();
   useScrollRestoration();
 
   if (locked || !getCatalogToken()) {
@@ -55,10 +55,10 @@ export default function App() {
           <Route path="*" element={<NotFoundPage />} />
         </Routes>
       </main>
-      {!loading && <Footer />}
+      <Footer />
       {shareOpen && <ShareModal onClose={() => setShareOpen(false)} />}
-      {!loading && <ScrollToTopButton />}
-      {!loading && <ScrollHint />}
+      <ScrollToTopButton />
+      <ScrollHint />
     </div>
   );
 }
