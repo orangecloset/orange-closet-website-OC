@@ -51,7 +51,6 @@ export function ProductFormInner({ editing }: { editing?: CmsProduct }) {
     ...(editing?.sections ?? []).map((s, i) => ({ id: `sec-${Date.now()}-${i}`, title: s.title, body: s.body })),
   ]);
   const [sectionsOpen, setSectionsOpen] = useState(editing?.sectionsOpen ?? true);
-  const [image, setImage] = useState(editing?.colors[0]?.images[0] ?? "");
   const [sizes, setSizes] = useState<string[]>(editing?.sizes ?? []);
   const [newSize, setNewSize] = useState("");
   const [status, setStatus] = useState<ProductStatus>(editing?.status ?? "active");
@@ -116,9 +115,7 @@ export function ProductFormInner({ editing }: { editing?: CmsProduct }) {
 
   const removeColor = (index: number) => {
     if (colors.length <= 1) return;
-    const next = colors.filter((_, i) => i !== index);
-    setColors(next);
-    if (index === 0) setImage(next[0]?.images[0] ?? "");
+    setColors(colors.filter((_, i) => i !== index));
   };
 
   const removeImageFromColor = (colorIndex: number, imageIndex: number) => {
@@ -134,14 +131,8 @@ export function ProductFormInner({ editing }: { editing?: CmsProduct }) {
       if (i !== colorIndex) return c;
       const images = [...c.images];
       images[imageIndex] = value;
-      if (colorIndex === 0 && imageIndex === 0) setImage(value);
       return { ...c, images };
     }));
-  };
-
-  const updateMainImage = (value: string) => {
-    setImage(value);
-    setColors((prev) => prev.map((c, i) => i === 0 ? { ...c, images: [value, ...c.images.slice(1)] } : c));
   };
 
   const addSize = () => {
@@ -194,7 +185,7 @@ export function ProductFormInner({ editing }: { editing?: CmsProduct }) {
     const hasAny = colors.some((c) => c.name.trim() || c.hexes.some((h) => h.trim()) || c.images.some((img) => img.trim()));
     const variants = hasAny
       ? colors
-      : [{ name: "Default", hexes: ["#e5e7eb"], images: [image], stockBySize: {} }];
+      : [{ name: "Default", hexes: ["#e5e7eb"], images: [colors[0]?.images[0] ?? ""], stockBySize: {} }];
 
     const parseStock = parseStockValue;
 
@@ -319,13 +310,6 @@ export function ProductFormInner({ editing }: { editing?: CmsProduct }) {
               <div className="flex flex-col gap-2">
                 <Label htmlFor="compareAtPrice">Compare-at Price</Label>
                 <Input id="compareAtPrice" value={compareAtPrice} onChange={(e) => setCompareAtPrice(e.target.value)} placeholder="Optional" />
-              </div>
-              <div className="flex flex-col gap-2">
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="image">Main Image</Label>
-                </div>
-                <Input id="image" value={image} onChange={(e) => updateMainImage(e.target.value)} placeholder="https://... (or upload below)" />
-                <UploadButton label="Upload Main Image" onUploaded={updateMainImage} />
               </div>
               <div className="flex flex-col gap-2 lg:col-span-2">
                 <div className="flex items-center justify-between">
@@ -519,21 +503,26 @@ export function ProductFormInner({ editing }: { editing?: CmsProduct }) {
                         </div>
                       </div>
 
-                      <div className="flex flex-col gap-2">
-                        <div className="flex items-center justify-between">
-                          <Label>Images</Label>
-                          <div className="flex items-center gap-1">
-                            <UploadButton
-                              label="Upload"
-                              onUploaded={(url) => {
-                                setColors((prev) =>
-                                  prev.map((c, i) => (i === index ? { ...c, images: [...c.images, url] } : c))
-                                );
-                              }}
-                            />
+                        <div className="flex flex-col gap-2">
+                          <div className="flex items-center justify-between">
+                            <Label>Images</Label>
+                            <div className="flex items-center gap-1">
+                              <UploadButton
+                                label="Upload"
+                                onUploaded={(url) => {
+                                  setColors((prev) =>
+                                    prev.map((c, i) => (i === index ? { ...c, images: [...c.images, url] } : c))
+                                  );
+                                }}
+                              />
 
+                            </div>
                           </div>
-                        </div>
+                          {index === 0 && (
+                            <p className="text-xs text-[var(--fg-muted)]">
+                              The first image of the primary color is used as the main image. Drag to reorder.
+                            </p>
+                          )}
                         <div className="flex flex-col gap-2">
                           <SortableItems
                             items={c.images}
