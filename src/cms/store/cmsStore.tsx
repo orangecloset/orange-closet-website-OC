@@ -17,6 +17,7 @@ import {
   TYPES_KEY,
   applyBranding,
   normalizeAbout,
+  normalizeHomepage,
   seedAbout,
   seedHomepage,
   seedSettings,
@@ -74,7 +75,7 @@ export function CmsProvider({ children }: { children: ReactNode }) {
         }
         const storedHomepage = all[HOMEPAGE_KEY];
         if (storedHomepage && typeof storedHomepage === "object") {
-          setHomepage({ ...seedHomepage(), ...(storedHomepage as HomepageConfig) });
+          setHomepage(normalizeHomepage(storedHomepage));
         }
         const storedTypes = all[TYPES_KEY];
         if (Array.isArray(storedTypes)) {
@@ -86,7 +87,7 @@ export function CmsProvider({ children }: { children: ReactNode }) {
         }
         savedSnapshotRef.current = {
           [SETTINGS_KEY]: storedSettings && typeof storedSettings === "object" ? { ...seedSettings(), ...(storedSettings as SettingsConfig) } : undefined,
-          [HOMEPAGE_KEY]: storedHomepage && typeof storedHomepage === "object" ? { ...seedHomepage(), ...(storedHomepage as HomepageConfig) } : undefined,
+          [HOMEPAGE_KEY]: storedHomepage && typeof storedHomepage === "object" ? normalizeHomepage(storedHomepage) : undefined,
           [TYPES_KEY]: Array.isArray(storedTypes) ? storedTypes : undefined,
           [ABOUT_KEY]: storedAbout && typeof storedAbout === "object" ? normalizeAbout(storedAbout) : undefined,
         };

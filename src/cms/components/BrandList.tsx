@@ -8,15 +8,19 @@ export function BrandList() {
   const { homepage, updateHomepage } = useCms();
   const [value, setValue] = useState("");
 
+  const trimmed = value.trim();
+  const isDuplicate = (name: string) =>
+    homepage.brands.some((b) => b.trim().toLowerCase() === name.toLowerCase());
+  const canAdd = trimmed.length > 0 && !isDuplicate(trimmed);
+
   const addBrand = () => {
-    const trimmed = value.trim();
-    if (!trimmed) return;
+    if (!canAdd) return;
     updateHomepage({ brands: [...homepage.brands, trimmed] });
     setValue("");
   };
 
-  const removeBrand = (brand: string) => {
-    updateHomepage({ brands: homepage.brands.filter((b) => b !== brand) });
+  const removeBrand = (index: number) => {
+    updateHomepage({ brands: homepage.brands.filter((_, i) => i !== index) });
   };
 
   return (
@@ -35,7 +39,7 @@ export function BrandList() {
             }}
             placeholder="Add a brand..."
           />
-          <Button variant="secondary" size="small" onClick={addBrand}>
+          <Button variant="secondary" size="small" onClick={addBrand} disabled={!canAdd}>
             <Plus className="h-4 w-4" />
             Add
           </Button>
@@ -44,9 +48,9 @@ export function BrandList() {
           <SortableList
             items={homepage.brands}
             onReorder={(next) => updateHomepage({ brands: next })}
-            keyExtractor={(b) => b}
+            keyExtractor={(b, i) => `${i}-${b}`}
             layout="horizontal"
-            renderItem={(brand, _index, dragHandleProps) => (
+            renderItem={(brand, index, dragHandleProps) => (
               <span
                 className="inline-flex items-center gap-1.5 rounded-md border border-[var(--border-subtle)] bg-[var(--bg-subtle)] px-2.5 py-1 text-[13px] text-[var(--fg-base)]"
               >
@@ -56,7 +60,7 @@ export function BrandList() {
                 {brand}
                 <button
                   type="button"
-                  onClick={() => removeBrand(brand)}
+                  onClick={() => removeBrand(index)}
                   aria-label={`Remove ${brand}`}
                   className="text-[var(--fg-muted)] hover:text-[var(--tag-red-text)]"
                 >

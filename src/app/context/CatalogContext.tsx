@@ -10,7 +10,7 @@ import {
 } from "react";
 import type { Product, ProductType } from "../../data/products";
 import { getSaleInfo } from "../../data/types";
-import { seedHomepage, seedSettings, seedAbout, normalizeAbout, TYPES_KEY } from "../../data/store-defaults";
+import { normalizeHomepage, seedSettings, seedAbout, normalizeAbout, TYPES_KEY } from "../../data/store-defaults";
 import { getCatalogToken, clearCatalogToken } from "../lib/access";
 import type {
   AboutPageConfig,
@@ -81,10 +81,9 @@ export function CatalogProvider({ children }: { children: ReactNode }) {
     ...seedSettings(),
     ...(cached.settings ?? {}),
   }));
-  const [homepage, setHomepage] = useState<HomepageConfig>(() => ({
-    ...seedHomepage(),
-    ...(cached.homepage ?? {}),
-  }));
+  const [homepage, setHomepage] = useState<HomepageConfig>(() =>
+    normalizeHomepage(cached.homepage)
+  );
   const [about, setAbout] = useState<AboutPageConfig>(() =>
     normalizeAbout({ ...seedAbout(), ...(cached.about ?? {}) })
   );
@@ -137,7 +136,7 @@ export function CatalogProvider({ children }: { children: ReactNode }) {
         }
         const h = all["orange-cms-homepage"];
         if (h && typeof h === "object") {
-          setHomepage({ ...seedHomepage(), ...(h as HomepageConfig) });
+          setHomepage(normalizeHomepage(h));
         }
         const a = all["orange-cms-about"];
         if (a && typeof a === "object") {

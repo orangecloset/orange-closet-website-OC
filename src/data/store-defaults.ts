@@ -20,6 +20,25 @@ export function seedHomepage(): HomepageConfig {
   return { heroes: [], brands: [], featuredIds: [], bestSellerIds: [], heroImageClickable: false, showOnSale: true, showNewArrivals: true };
 }
 
+/** Merge raw homepage config with defaults and drop duplicate/blank brand names. */
+export function normalizeHomepage(raw: unknown): HomepageConfig {
+  const merged: Partial<HomepageConfig> =
+    typeof raw === "object" && raw !== null ? (raw as Partial<HomepageConfig>) : {};
+  const brandsRaw = Array.isArray(merged.brands) ? merged.brands : [];
+  const seen = new Set<string>();
+  const brands: string[] = [];
+  for (const b of brandsRaw) {
+    if (typeof b !== "string") continue;
+    const trimmed = b.trim();
+    if (!trimmed) continue;
+    const key = trimmed.toLowerCase();
+    if (seen.has(key)) continue;
+    seen.add(key);
+    brands.push(trimmed);
+  }
+  return { ...seedHomepage(), ...merged, brands };
+}
+
 export function seedSettings(): SettingsConfig {
   return {
     storeName: "",
