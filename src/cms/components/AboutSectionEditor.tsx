@@ -229,26 +229,30 @@ export function SectionEditor({
           <div>
             <Label>Images</Label>
             <div className="flex flex-wrap items-center gap-2">
-              {section.images.map((img, i) => (
-                <div key={i} className="relative">
-                  <img
-                    src={img}
-                    alt=""
-                    className="h-12 w-12 rounded object-cover bg-[var(--bg-subtle)]"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => onChange({ images: section.images.filter((_, j) => j !== i) })}
-                    aria-label={`Remove image ${i + 1}`}
-                    className="absolute -right-1.5 -top-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-[var(--bg-base)] text-[var(--fg-muted)] shadow-[var(--borders-base)] hover:text-[var(--tag-red-text)]"
-                  >
-                    <X className="h-3 w-3" />
-                  </button>
-                </div>
-              ))}
+              {section.images.map((img, i) =>
+                img.trim() ? (
+                  <div key={i} className="relative">
+                    <img
+                      src={img}
+                      alt=""
+                      className="h-12 w-12 rounded object-cover bg-[var(--bg-subtle)]"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => onChange({ images: section.images.filter((_, j) => j !== i) })}
+                      aria-label={`Remove image ${i + 1}`}
+                      className="absolute -right-1.5 -top-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-[var(--bg-base)] text-[var(--fg-muted)] shadow-[var(--borders-base)] hover:text-[var(--tag-red-text)]"
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  </div>
+                ) : null
+              )}
               <UploadButton
-                onUploaded={(url) => onChange({ images: [...section.images, url] })}
-                label={section.images.length ? "Add Image" : "Upload"}
+                onUploaded={(url) =>
+                  onChange({ images: [...section.images.filter((img) => img.trim()), url] })
+                }
+                label={section.images.some((img) => img.trim()) ? "Add Image" : "Upload"}
               />
             </div>
           </div>

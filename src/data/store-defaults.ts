@@ -95,7 +95,9 @@ export function normalizeAbout(raw: unknown): AboutPageConfig {
         enabled: sec.enabled ?? true,
         heading: sec.heading ?? "",
         body: Array.isArray(sec.body) ? sec.body : [],
-        images: Array.isArray(sec.images) ? sec.images : [],
+        images: (Array.isArray(sec.images) ? sec.images : []).filter(
+          (img): img is string => typeof img === "string" && img.trim() !== ""
+        ),
         cards: (Array.isArray(sec.cards) ? sec.cards : []).map((c) => ({
           title: c?.title ?? "",
           description: c?.description ?? "",

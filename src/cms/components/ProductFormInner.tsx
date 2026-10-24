@@ -67,7 +67,8 @@ export function ProductFormInner({ editing }: { editing?: CmsProduct }) {
           });
           const hexes =
             c.hexes && c.hexes.length > 0 ? [...c.hexes] : [c.hex];
-          return { name: c.name, hexes, images: c.images.length > 0 ? [...c.images] : [""], stockBySize };
+          const images = c.images.filter((img) => img.trim());
+          return { name: c.name, hexes, images: images.length > 0 ? images : [""], stockBySize };
         })
       : [{ name: "Default", hexes: ["#e5e7eb"], images: [""], stockBySize: {} }]
   );
@@ -121,8 +122,8 @@ export function ProductFormInner({ editing }: { editing?: CmsProduct }) {
   const removeImageFromColor = (colorIndex: number, imageIndex: number) => {
     setColors((prev) => prev.map((c, i) => {
       if (i !== colorIndex) return c;
-      if (c.images.length <= 1) return c;
-      return { ...c, images: c.images.filter((_, j) => j !== imageIndex) };
+      const images = c.images.filter((_, j) => j !== imageIndex);
+      return { ...c, images: images.length > 0 ? images : [""] };
     }));
   };
 
@@ -511,7 +512,11 @@ export function ProductFormInner({ editing }: { editing?: CmsProduct }) {
                                 label="Upload"
                                 onUploaded={(url) => {
                                   setColors((prev) =>
-                                    prev.map((c, i) => (i === index ? { ...c, images: [...c.images, url] } : c))
+                                    prev.map((c, i) =>
+                                      i === index
+                                        ? { ...c, images: [...c.images.filter((img) => img.trim()), url] }
+                                        : c
+                                    )
                                   );
                                 }}
                               />
@@ -533,7 +538,7 @@ export function ProductFormInner({ editing }: { editing?: CmsProduct }) {
                                 <Input value={img} onChange={(e) => updateColorImage(index, imgIdx, e.target.value)} placeholder={`Image URL ${imgIdx + 1}${imgIdx === 0 ? " (main)" : ""}`} className="flex-1" />
                                 {img && <img src={img} alt="" className="h-8 w-8 shrink-0 rounded object-cover bg-[var(--bg-base)]" />}
 
-                                {c.images.length > 1 && (
+                                {(c.images.length > 1 || img.trim() !== "") && (
                                   <Button variant="ghost" size="small" type="button" onClick={() => removeImageFromColor(index, imgIdx)} aria-label="Remove image">
                                     <X className="h-3 w-3" />
                                   </Button>
