@@ -5,9 +5,9 @@ import { useToast } from "../store/toastContext";
 import { useCms } from "../store/cmsContext";
 import { invalidateProducts, usePagedProducts, useProductSuggestions } from "../lib/queries";
 import { isNewProduct, type CmsProduct, type ProductStatus } from "../../data/store-types";
-import { ActionMenu, Badge, Button, Checkbox, ConfirmDialog, Container, Header, Input, Modal, Select, Tabs } from "../components/ui";
+import { ActionMenu, Badge, Button, Checkbox, ConfirmDialog, Container, Header, Input, Select, Tabs } from "../components/ui";
+import { StockAdjustModal } from "../components/StockAdjustModal";
 import { formatDate } from "../lib/utils";
-import { productColorCss } from "../../data/products";
 
 const PAGE_SIZE = 30;
 const SEARCH_DEBOUNCE_MS = 350;
@@ -41,7 +41,7 @@ function statusBadge(p: CmsProduct, isNew: boolean) {
 }
 
 export default function ProductsPage() {
-  const { types, settings, deleteProduct, updateProduct, bulkDeleteProducts, bulkUpdateStatus } = useCms();
+  const { types, settings, deleteProduct, bulkDeleteProducts, bulkUpdateStatus } = useCms();
   const { showToast } = useToast();
   const navigate = useNavigate();
 
@@ -95,11 +95,6 @@ export default function ProductsPage() {
 
   const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
   const [stocksTarget, setStocksTarget] = useState<CmsProduct | null>(null);
-  const [stockValues, setStockValues] = useState<Record<string, string>>({});
-  const [initialStockValues, setInitialStockValues] = useState<Record<string, string>>({});
-  const [stockReason, setStockReason] = useState("");
-  const [stockReasonNote, setStockReasonNote] = useState("");
-  const [savingStocks, setSavingStocks] = useState(false);
 
   const [bulkAction, setBulkAction] = useState<string | null>(null);
   const [bulkStatusTarget, setBulkStatusTarget] = useState<ProductStatus>("active");
@@ -122,66 +117,7 @@ export default function ProductsPage() {
   };
 
   const openStocks = (product: CmsProduct) => {
-    const values: Record<string, string> = {};
-    product.colors.forEach((c) => {
-      (c.sizes ?? []).forEach((vs) => {
-        values[`${c.name}::${vs.size}`] = vs.stock === 0 ? "" : String(vs.stock);
-      });
-    });
-    setStockValues(values);
-    setInitialStockValues(values);
-    setStockReason("");
-    setStockReasonNote("");
     setStocksTarget(product);
-  };
-
-  const stocksChanged = useMemo(
-    () =>
-      stocksTarget !== null &&
-      Object.keys({ ...initialStockValues, ...stockValues }).some(
-        (k) => (stockValues[k] ?? "") !== (initialStockValues[k] ?? "")
-      ),
-    [stocksTarget, stockValues, initialStockValues]
-  );
-
-  const stockReasonValid =
-    !stocksChanged ||
-    (stockReason !== "" && (stockReason !== "Others" || stockReasonNote.trim().length > 0));
-
-  const reasonMissing = stocksChanged && !stockReason;
-  const noteMissing = stocksChanged && stockReason === "Others" && !stockReasonNote.trim();
-
-  const saveStocks = async () => {
-    if (!stocksTarget || !stockReasonValid) return;
-    const colors = stocksTarget.colors.map((c) => ({
-      name: c.name,
-      hex: c.hex,
-      hexes: c.hexes,
-      images: c.images,
-      stockBySize: Object.fromEntries(
-        (c.sizes ?? []).map((vs) => {
-          const raw = (stockValues[`${c.name}::${vs.size}`] ?? "").trim();
-          const parsed = Number(raw);
-          return [
-            vs.size,
-            raw === "" || Number.isNaN(parsed) ? 0 : Math.max(0, Math.floor(parsed)),
-          ];
-        })
-      ),
-    }));
-    setSavingStocks(true);
-    try {
-      const reasonText =
-        stockReason === "Others" ? stockReasonNote.trim() : stockReason;
-      await updateProduct(stocksTarget.id, { colors, stockReason: reasonText });
-      showToast("Stock updated.");
-      setStocksTarget(null);
-      reload();
-    } catch {
-      showToast("Couldn't update the stock. Please try again.");
-    } finally {
-      setSavingStocks(false);
-    }
   };
 
   const handleBulkAction = async () => {
@@ -356,7 +292,7 @@ export default function ProductsPage() {
                       <button
                         type="button"
                         onClick={() => openStocks(p)}
-                        aria-label={`Edit stock for ${p.name}`}
+                        aria-label={`Adjust stock for ${p.name}`}
                         className="relative inline-flex h-[30px] w-20 shrink-0 items-center justify-center rounded-md bg-[var(--button-neutral)] text-[13px] font-medium text-[var(--fg-base)] shadow-[var(--buttons-neutral)] outline-none transition-colors hover:bg-[var(--button-neutral-hover)] active:bg-[var(--button-neutral-pressed)]"
                       >
                         <SwatchBook className="absolute left-2 h-4 w-4 shrink-0" />
@@ -367,6 +303,7 @@ export default function ProductsPage() {
                     <td className="px-6 py-3 text-right">
                       <ActionMenu items={[
                         { label: "Edit", icon: <Pencil className="h-4 w-4" />, to: `/cms-admin/products/${p.id}/edit` },
+                        { label: "Adjust Stock", icon: <SwatchBook className="h-4 w-4" />, onClick: () => openStocks(p) },
                         { label: "Delete", icon: <Trash2 className="h-4 w-4" />, danger: true, onClick: () => setDeleteTarget(p.id) },
                       ]} />
                     </td>
@@ -410,100 +347,12 @@ export default function ProductsPage() {
 
       <ConfirmDialog open={deleteTarget !== null} onClose={() => setDeleteTarget(null)} onConfirm={async () => { const id = deleteTarget; if (!id) return; setDeleteTarget(null); try { await deleteProduct(id); showToast("Product deleted."); reload(); } catch { showToast("Couldn't delete the product. Please try again."); } }} title="Delete product" description="This permanently removes the product from the CMS. This cannot be undone." confirmLabel="Delete" />
 
-      <Modal
+      <StockAdjustModal
+        product={stocksTarget}
         open={stocksTarget !== null}
-        onClose={() => { if (!savingStocks) setStocksTarget(null); }}
-        title="Edit Stock"
-        description={stocksTarget ? `${stocksTarget.name} — per colour stock` : undefined}
-        footer={
-          <>
-            <Button variant="secondary" size="small" onClick={() => setStocksTarget(null)} disabled={savingStocks}>Cancel</Button>
-            <Button variant="primary" size="small" onClick={saveStocks} disabled={savingStocks || !stockReasonValid}>
-              {savingStocks ? "Saving…" : "Save"}
-            </Button>
-          </>
-        }
-      >
-        {stocksTarget && (
-          <div className="flex flex-col gap-4">
-            {stocksTarget.colors.map((c) => {
-              const sizes = c.sizes ?? [];
-              const total = sizes.reduce((s, vs) => s + vs.stock, 0);
-              return (
-                <div key={c.name} className="rounded-md border border-[var(--border-subtle)] bg-[var(--bg-subtle)] p-3">
-                  <div className="mb-2 flex items-center gap-3">
-                    <span
-                      className="h-5 w-5 shrink-0 rounded-full border border-[var(--border-base)]"
-                      style={{ background: productColorCss(c) }}
-                    />
-                    <p className="min-w-0 flex-1 truncate text-sm font-medium text-[var(--fg-base)]">{c.name}</p>
-                    <span className="text-xs text-[var(--fg-muted)]">
-                      {total <= 0 ? "Sold out" : `${total} in stock`}
-                    </span>
-                  </div>
-                  <div className="grid grid-cols-[minmax(0,1fr)_12rem] items-center gap-x-4 gap-y-2">
-                    {sizes.map((vs) => (
-                      <div key={vs.size} className="contents">
-                        <p className="truncate text-sm text-[var(--fg-base)]">{vs.size}</p>
-                        <Input
-                          type="number"
-                          min={0}
-                          value={stockValues[`${c.name}::${vs.size}`] ?? ""}
-                          onChange={(e) =>
-                            setStockValues(
-                              (prev) => ({ ...prev, [`${c.name}::${vs.size}`]: e.target.value })
-                            )
-                          }
-                          placeholder="0"
-                        />
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              );
-            })}
-            <div className="rounded-md border border-[var(--border-subtle)] bg-[var(--bg-subtle)] p-3">
-              <label htmlFor="stock-reason" className="mb-1.5 block text-sm font-medium text-[var(--fg-base)]">
-                Reason <span className="text-[var(--fg-muted)]">(required when stock changes)</span>
-              </label>
-              <Select
-                id="stock-reason"
-                value={stockReason}
-                onChange={(e) => setStockReason(e.target.value)}
-                className={
-                  reasonMissing
-                        ? "shadow-[0_0_0_1px_var(--fg-error),0_1px_2px_0_rgba(0,0,0,0.12)]"
-                    : undefined
-                }
-              >
-                <option value="">Select a reason…</option>
-                <option value="New Arrival">New Arrival</option>
-                <option value="Restock">Restock</option>
-                <option value="Correction">Correction</option>
-                <option value="Others">Others</option>
-              </Select>
-              {stockReason === "Others" && (
-                <div className="mt-2">
-                  <Input
-                    value={stockReasonNote}
-                    onChange={(e) => setStockReasonNote(e.target.value)}
-                    placeholder="Type the reason…"
-                    maxLength={200}
-                    className={
-                      noteMissing
-                    ? "shadow-[0_0_0_1px_var(--fg-error),0_1px_2px_0_rgba(0,0,0,0.12)]"
-                        : undefined
-                    }
-                  />
-                </div>
-              )}
-            </div>
-            <p className="text-xs text-[var(--fg-muted)]">
-              Sales deduct automatically on the Sell page.
-            </p>
-          </div>
-        )}
-      </Modal>
+        onClose={() => setStocksTarget(null)}
+        onSaved={() => reload()}
+      />
 
       <ConfirmDialog open={confirmBulkDelete} onClose={() => setConfirmBulkDelete(false)} onConfirm={async () => { const n = selectedIds.size; await bulkDeleteProducts(Array.from(selectedIds)); setSelectedIds(new Set()); setBulkAction(null); setConfirmBulkDelete(false); showToast(`${n} product(s) deleted.`); reload(); }} title={`Delete ${selectedIds.size} product(s)`} description="This permanently removes the selected products. This cannot be undone." confirmLabel="Delete All" />
     </div>

@@ -5,10 +5,29 @@ import { getAuthUser, isAuthorized } from "../lib/auth.js";
 import { rateLimit } from "../lib/ratelimit.js";
 import { getCatalogAccess } from "../lib/catalog.js";
 import { cmsProductToRow, rowToCmsProduct } from "../lib/products.js";
-import { flattenStock, logStockDiff, resolveChangedBy } from "../lib/stock-movements.js";
+import {
+  applyStockChanges,
+  buildStockDiffMovements,
+  flattenStock,
+  logStockDiff,
+  mergePreservedStock,
+  resolveChangedBy,
+  toMovementValues,
+  type StockChange,
+} from "../lib/stock-movements.js";
 import type { Env } from "../env.js";
 
 const MAX_PAGE_SIZE = 30;
+const MAX_STOCK = 500_000;
+
+function hasInvalidStock(colors: unknown): boolean {
+  for (const stock of flattenStock(colors).values()) {
+    if (!Number.isSafeInteger(stock) || stock < 0 || stock > MAX_STOCK) {
+      return true;
+    }
+  }
+  return false;
+}
 
 const app = new Hono<{ Bindings: Env }>();
 
@@ -141,6 +160,14 @@ app.post("/", async (c) => {
     .where(eq(schema.products.id, body.id));
   if (existing.length > 0) return c.json({ error: "Product id already exists" }, 400);
   const row = cmsProductToRow(body as never);
+  if (hasInvalidStock(row.colors)) {
+    return c.json(
+      {
+        error: `Stock values must be whole numbers between 0 and ${MAX_STOCK.toLocaleString("en-US")}.`,
+      },
+      400
+    );
+  }
   await db.insert(schema.products).values(row);
 
   const initialStock = flattenStock(row.colors);
@@ -156,6 +183,123 @@ app.post("/", async (c) => {
   });
 
   return c.json({ ok: true }, 201);
+});
+
+app.post("/:id/stock-adjustments", async (c) => {
+  const id = c.req.param("id");
+  if (!id) return c.json({ error: "Missing product id" }, 400);
+
+  const authUser = await getAuthUser(c.env, c.req.header("authorization"));
+  if (!authUser) return c.json({ error: "Unauthorized" }, 401);
+
+  const body = await c.req
+    .json<{ reason?: unknown; changes?: unknown }>()
+    .catch(() => null);
+
+  const reason =
+    typeof body?.reason === "string" ? body.reason.trim().slice(0, 200) : "";
+  if (!reason) {
+    return c.json({ error: "A reason is required when stock changes." }, 400);
+  }
+
+  const rawChanges = Array.isArray(body?.changes) ? body.changes : [];
+  if (rawChanges.length === 0) {
+    return c.json({ error: "No stock changes were provided." }, 400);
+  }
+  if (rawChanges.length > 500) {
+    return c.json({ error: "Too many stock changes in one request." }, 400);
+  }
+
+  const changes: StockChange[] = [];
+  const seen = new Set<string>();
+  for (const raw of rawChanges) {
+    if (!raw || typeof raw !== "object") {
+      return c.json({ error: "Invalid stock change." }, 400);
+    }
+    const value = raw as Record<string, unknown>;
+    const colorName = typeof value.colorName === "string" ? value.colorName : "";
+    const size = typeof value.size === "string" ? value.size : "";
+    const newStock = Number(value.newStock);
+
+    if (
+      !colorName ||
+      !size ||
+      !Number.isSafeInteger(newStock) ||
+      newStock < 0 ||
+      newStock > MAX_STOCK
+    ) {
+      return c.json(
+        {
+          error: `Stock values must be whole numbers between 0 and ${MAX_STOCK.toLocaleString("en-US")}.`,
+        },
+        400
+      );
+    }
+
+    const key = `${colorName}::${size}`;
+    if (seen.has(key)) {
+      return c.json(
+        { error: `Duplicate stock change for ${colorName} / ${size}.` },
+        400
+      );
+    }
+    seen.add(key);
+    changes.push({ colorName, size, newStock });
+  }
+
+  const db = getDb(c.env);
+  const [row] = await db
+    .select({ name: schema.products.name, colors: schema.products.colors })
+    .from(schema.products)
+    .where(eq(schema.products.id, id));
+  if (!row) return c.json({ error: "Product not found" }, 404);
+
+  const before = flattenStock(row.colors);
+  for (const change of changes) {
+    if (!before.has(`${change.colorName}::${change.size}`)) {
+      return c.json(
+        { error: `Unknown variant: ${change.colorName} / ${change.size}.` },
+        400
+      );
+    }
+  }
+
+  const updatedColors = applyStockChanges(row.colors, changes);
+  const after = flattenStock(updatedColors);
+  const movements = buildStockDiffMovements({
+    productId: id,
+    productName: row.name,
+    before,
+    after,
+    kind: "edit",
+    reason,
+    changedBy: await resolveChangedBy(c.env, authUser.id),
+  });
+
+  if (movements.length === 0) {
+    return c.json({ error: "The new stock matches the current stock." }, 400);
+  }
+
+  const updateQuery = db
+    .update(schema.products)
+    .set({ colors: updatedColors, updatedAt: new Date() })
+    .where(eq(schema.products.id, id));
+  const insertQuery = db
+    .insert(schema.stockMovements)
+    .values(toMovementValues(movements));
+
+  await db.batch([updateQuery, insertQuery]);
+
+  const [updated] = await db
+    .select()
+    .from(schema.products)
+    .where(eq(schema.products.id, id));
+
+  return c.json({
+    ok: true,
+    changed: movements.length,
+    product: updated ? rowToCmsProduct(updated) : null,
+  });
 });
 
 app.delete("/", async (c) => {
@@ -196,18 +340,63 @@ app.put("/:id", async (c) => {
   const authUser = await getAuthUser(c.env, c.req.header("authorization"));
   if (!authUser) return c.json({ error: "Unauthorized" }, 401);
 
-  const body = await c.req.json<{ name?: string; stockReason?: string }>();
+  const body = await c.req.json<{
+    name?: string;
+    stockReason?: string;
+    colors?: unknown;
+    sizes?: unknown;
+  }>();
   if (!body?.name) return c.json({ error: "Invalid product body" }, 400);
 
   const db = getDb(c.env);
   const [oldRow] = await db
-    .select({ name: schema.products.name, colors: schema.products.colors })
+    .select({
+      name: schema.products.name,
+      colors: schema.products.colors,
+      sizes: schema.products.sizes,
+    })
     .from(schema.products)
     .where(eq(schema.products.id, id));
   if (!oldRow) return c.json({ error: "Product not found" }, 404);
 
   const values = cmsProductToRow(body as never);
   delete values.createdAt;
+
+  const legacyReason =
+    typeof body.stockReason === "string" && body.stockReason.trim()
+      ? body.stockReason.trim().slice(0, 200)
+      : null;
+
+  if (body.colors === undefined) {
+    values.colors = oldRow.colors;
+  } else if (!legacyReason) {
+    const merged = mergePreservedStock(values.colors, oldRow.colors);
+    if (merged.removedInStock.length > 0) {
+      return c.json(
+        {
+          error: `Cannot remove or rename ${merged.removedInStock.join(
+            ", "
+          )}. Adjust the stock to 0 first, then save the change.`,
+        },
+        400
+      );
+    }
+    values.colors = merged.colors;
+  }
+
+  if (body.sizes === undefined && body.colors === undefined) {
+    values.sizes = oldRow.sizes;
+  }
+
+  if (legacyReason && body.colors !== undefined && hasInvalidStock(values.colors)) {
+    return c.json(
+      {
+        error: `Stock values must be whole numbers between 0 and ${MAX_STOCK.toLocaleString("en-US")}.`,
+      },
+      400
+    );
+  }
+
   const updated = await db
     .update(schema.products)
     .set(values)
@@ -215,21 +404,17 @@ app.put("/:id", async (c) => {
     .returning({ id: schema.products.id });
   if (updated.length === 0) return c.json({ error: "Product not found" }, 404);
 
-  const before = flattenStock(oldRow.colors);
-  const after = flattenStock(values.colors ?? []);
-  const reason =
-    typeof body.stockReason === "string" && body.stockReason.trim()
-      ? body.stockReason.trim().slice(0, 200)
-      : null;
-  await logStockDiff(c.env, {
-    productId: id,
-    productName: values.name ?? oldRow.name,
-    before,
-    after,
-    kind: "edit",
-    reason,
-    changedBy: await resolveChangedBy(c.env, authUser.id),
-  });
+  if (legacyReason) {
+    await logStockDiff(c.env, {
+      productId: id,
+      productName: values.name ?? oldRow.name,
+      before: flattenStock(oldRow.colors),
+      after: flattenStock(values.colors ?? []),
+      kind: "edit",
+      reason: legacyReason,
+      changedBy: await resolveChangedBy(c.env, authUser.id),
+    });
+  }
 
   return c.json({ ok: true });
 });
@@ -244,25 +429,18 @@ app.patch("/:id", async (c) => {
 
   const body = await c.req.json<Record<string, unknown>>();
 
+  if (body.colors !== undefined || body.sizes !== undefined) {
+    return c.json(
+      {
+        error:
+          "Stock and variant changes must be made through the product form or the stock adjustment endpoint.",
+      },
+      400
+    );
+  }
+
   const isStringArray = (v: unknown): v is string[] =>
     Array.isArray(v) && v.every((x) => typeof x === "string");
-
-  const isColorsArray = (v: unknown): boolean =>
-    Array.isArray(v) &&
-    v.every((c) => {
-      if (typeof c !== "object" || c === null) return false;
-      const r = c as Record<string, unknown>;
-      if (typeof r.name !== "string" || typeof r.hex !== "string") return false;
-      if (
-        r.hexes !== undefined &&
-        !(
-          Array.isArray(r.hexes) &&
-          r.hexes.every((x) => typeof x === "string")
-        )
-      )
-        return false;
-      return true;
-    });
 
   const PATCHABLE: Record<string, (v: unknown) => unknown> = {
     name: (v) => String(v),
@@ -274,8 +452,6 @@ app.patch("/:id", async (c) => {
     compareAtPrice: (v) => (v == null ? null : String(v)),
     description: (v) => String(v),
     status: (v) => (v === "active" || v === "draft" ? v : undefined),
-    colors: (v) => (isColorsArray(v) ? v : undefined),
-    sizes: (v) => (isStringArray(v) ? v : undefined),
     details: (v) => (isStringArray(v) ? v : undefined),
     sections: (v) => (isStringArray(v) ? v : undefined),
     sectionsOpen: (v) => (typeof v === "boolean" ? v : undefined),

@@ -49,5 +49,10 @@ export default function ProductFormPage() {
     );
   }
 
-  return <ProductFormInner editing={productId && fetched ? fetched : undefined} />;
+  return (
+    <ProductFormInner
+      key={productId ?? "new"}
+      editing={productId && fetched ? fetched : undefined}
+    />
+  );
 }

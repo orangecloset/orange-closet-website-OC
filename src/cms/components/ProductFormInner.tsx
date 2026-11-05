@@ -1,12 +1,14 @@
 import { useMemo, useState, type FormEvent } from "react";
 import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom";
-import { GripVertical, Plus, X } from "lucide-react";
+import { GripVertical, Plus, SwatchBook, X } from "lucide-react";
 import { useToast } from "../store/toastContext";
 import { useCms } from "../store/cmsContext";
+import { apiErrorMessage } from "../lib/api";
 import type { CmsProduct, ProductStatus } from "../../data/store-types";
 import { colorSwatchCss } from "../../data/products";
 import { Button, Container, Header, Input, Label, Select, Switch, Tabs, Textarea } from "./ui";
 import { UploadButton } from "./UploadButton";
+import { StockAdjustModal } from "./StockAdjustModal";
 import { SortableList, DndContainer, SortableItems, DragHandle } from "./SortableList";
 
 function normalizeHex(value: string): string {
@@ -26,10 +28,14 @@ type ColorInput = {
   stockBySize: Record<string, string>;
 };
 
+const MAX_STOCK = 500_000;
+
 function parseStockValue(raw: string | undefined): number {
   const trimmed = (raw ?? "").trim();
   const parsed = Number(trimmed);
-  return trimmed === "" || Number.isNaN(parsed) ? 0 : Math.max(0, Math.floor(parsed));
+  return trimmed === "" || !Number.isFinite(parsed)
+    ? 0
+    : Math.min(MAX_STOCK, Math.max(0, Math.floor(parsed)));
 }
 
 export function ProductFormInner({ editing }: { editing?: CmsProduct }) {
@@ -57,13 +63,17 @@ export function ProductFormInner({ editing }: { editing?: CmsProduct }) {
   const [activeTab, setActiveTab] = useState("general");
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [saving, setSaving] = useState(false);
+  const [stockModalOpen, setStockModalOpen] = useState(false);
+  const [stockProduct, setStockProduct] = useState<CmsProduct | null>(editing ?? null);
 
   const [colors, setColors] = useState<ColorInput[]>(
     editing?.colors.length
       ? editing.colors.map((c) => {
           const stockBySize: Record<string, string> = {};
           (c.sizes ?? []).forEach((vs) => {
-            stockBySize[vs.size] = vs.stock === 0 ? "" : String(vs.stock);
+            const stock = Number(vs.stock);
+            stockBySize[vs.size] =
+              Number.isFinite(stock) && stock !== 0 ? String(stock) : "";
           });
           const hexes =
             c.hexes && c.hexes.length > 0 ? [...c.hexes] : [c.hex];
@@ -78,12 +88,61 @@ export function ProductFormInner({ editing }: { editing?: CmsProduct }) {
   const isEditing = Boolean(editing);
   const hasSizes = sizes.length > 0;
 
+  const stockGroups = useMemo(() => {
+    if (isEditing) {
+      return (stockProduct?.colors ?? []).map((color) => ({
+        name: color.name,
+        hexes: (color.hexes && color.hexes.length > 0
+          ? color.hexes
+          : [color.hex]
+        ).map(normalizeHex),
+        colorIndex: -1,
+        rows: (color.sizes ?? []).map((variant) => {
+          const stock = Number(variant.stock);
+          return {
+            size: variant.size,
+            value: Number.isFinite(stock) && stock !== 0 ? String(stock) : "",
+          };
+        }),
+      }));
+    }
+
+    return colors.map((color, index) => ({
+      name: color.name || `Color ${index + 1}`,
+      hexes: color.hexes.map(normalizeHex),
+      colorIndex: index,
+      rows: (hasSizes ? sizes : ["One Size"]).map((size) => ({
+        size,
+        value: color.stockBySize[size] ?? "",
+      })),
+    }));
+  }, [isEditing, stockProduct, colors, hasSizes, sizes]);
+
   const setColor = (index: number, patch: Partial<ColorInput>) => {
     setColors((prev) => prev.map((c, i) => (i === index ? { ...c, ...patch } : c)));
   };
 
   const setStockBySize = (colorIndex: number, size: string, value: string) => {
     setColors((prev) => prev.map((c, i) => i === colorIndex ? { ...c, stockBySize: { ...c.stockBySize, [size]: value } } : c));
+  };
+
+  const handleStockSaved = (updated: CmsProduct | null) => {
+    setStockProduct(updated);
+    if (!updated) return;
+
+    setColors((prev) =>
+      prev.map((color) => {
+        const fresh = updated.colors.find((item) => item.name === color.name);
+        if (!fresh) return color;
+        const stockBySize: Record<string, string> = {};
+        (fresh.sizes ?? []).forEach((variant) => {
+          const stock = Number(variant.stock);
+          stockBySize[variant.size] =
+            Number.isFinite(stock) && stock !== 0 ? String(stock) : "";
+        });
+        return { ...color, stockBySize };
+      })
+    );
   };
 
   const addColor = () => {
@@ -240,7 +299,13 @@ export function ProductFormInner({ editing }: { editing?: CmsProduct }) {
         showToast(isEditing ? "Product updated." : "Product created.");
         navigate("/cms-admin/products");
       })
-      .catch(() => showToast("Couldn't save the product. Please try again."))
+      .catch((err) =>
+        showToast(
+          apiErrorMessage(err, "Couldn't save the product. Please try again."),
+          false,
+          "error"
+        )
+      )
       .finally(() => setSaving(false));
   };
 
@@ -248,6 +313,7 @@ export function ProductFormInner({ editing }: { editing?: CmsProduct }) {
     { key: "general", label: "General" },
     { key: "sizes", label: "Sizes", count: sizes.length || undefined },
     { key: "colors", label: "Colors & Variants", count: colors.length },
+    { key: "stock", label: "Stock" },
     { key: "status", label: "Status" },
   ];
 
@@ -510,6 +576,7 @@ export function ProductFormInner({ editing }: { editing?: CmsProduct }) {
                             <div className="flex items-center gap-1">
                               <UploadButton
                                 label="Upload"
+                                multiple
                                 onUploaded={(url) => {
                                   setColors((prev) =>
                                     prev.map((c, i) =>
@@ -549,43 +616,6 @@ export function ProductFormInner({ editing }: { editing?: CmsProduct }) {
                         </div>
                       </div>
 
-                      {hasSizes ? (
-                        <div className="flex flex-col gap-2">
-                          <Label>Stock by Size</Label>
-                          <div className="overflow-x-auto rounded-md border border-[var(--border-subtle)]">
-                            <table className="w-full text-left">
-                              <thead>
-                                <tr className="border-b border-[var(--border-subtle)] text-xs text-[var(--fg-muted)]">
-                                  <th className="px-6 py-2.5 font-medium">Size</th>
-                                  <th className="px-6 py-2.5 font-medium">Stock</th>
-                                </tr>
-                              </thead>
-                              <tbody>
-                                {sizes.map((s) => {
-                                  const val = c.stockBySize[s] ?? "";
-                                  return (
-                                    <tr
-                                      key={s}
-                                      className="border-b border-[var(--border-subtle)] transition-colors last:border-b-0 hover:bg-[var(--bg-subtle-hover)]"
-                                    >
-                                      <td className="px-6 py-3 text-sm text-[var(--fg-base)]">{s}</td>
-                                      <td className="px-6 py-3 text-sm">
-                                        <Input type="number" min={0} value={val} onChange={(e) => setStockBySize(index, s, e.target.value)} placeholder="0" className="h-8 w-24" />
-                                      </td>
-                                    </tr>
-                                  );
-                                })}
-                              </tbody>
-                            </table>
-                          </div>
-                          <p className="text-xs text-[var(--fg-muted)]">Set 0 to mark that size sold out.</p>
-                        </div>
-                      ) : (
-                        <div className="flex flex-col gap-2">
-                          <Label htmlFor={`color-stock-${index}`}>Stock</Label>
-                          <Input id={`color-stock-${index}`} type="number" min={0} value={c.stockBySize["One Size"] ?? ""} onChange={(e) => setStockBySize(index, "One Size", e.target.value)} placeholder="e.g. 25" className="w-40" />
-                        </div>
-                      )}
                     </div>
                   )}
                 />
@@ -593,6 +623,94 @@ export function ProductFormInner({ editing }: { editing?: CmsProduct }) {
               <Button variant="secondary" size="small" type="button" onClick={addColor} className="w-fit">
                 <Plus className="h-4 w-4" /> Add Color
               </Button>
+            </div>
+          )}
+
+          {activeTab === "stock" && (
+            <div className="flex flex-col gap-3 px-6 py-4">
+              <div className="flex flex-wrap items-start justify-between gap-3">
+                <div>
+                  <p className="text-sm font-medium text-[var(--fg-base)]">Inventory</p>
+                  <p className="mt-0.5 text-xs text-[var(--fg-muted)]">
+                    {isEditing
+                      ? "Stock is read-only here. Use Adjust Stock so every change is recorded in Inventory with a reason."
+                      : "Enter the initial stock for each color and size. It will be recorded as Initial stock."}
+                  </p>
+                </div>
+                {isEditing && (
+                  <Button
+                    variant="secondary"
+                    size="small"
+                    type="button"
+                    onClick={() => setStockModalOpen(true)}
+                  >
+                    <SwatchBook className="h-4 w-4" />
+                    Adjust Stock
+                  </Button>
+                )}
+              </div>
+
+              {stockGroups.length === 0 ? (
+                <p className="text-sm text-[var(--fg-muted)]">
+                  No variants yet. Add a color in Colors &amp; Variants first.
+                </p>
+              ) : (
+                stockGroups.map((group) => {
+                  const total = group.rows.reduce(
+                    (sum, row) => sum + parseStockValue(row.value),
+                    0
+                  );
+                  return (
+                    <div
+                      key={`${group.name}-${group.colorIndex}`}
+                      className="rounded-md border border-[var(--border-subtle)] bg-[var(--bg-subtle)] p-3"
+                    >
+                      <div className="mb-2 flex items-center gap-3">
+                        <span
+                          className="h-5 w-5 shrink-0 rounded-full border border-[var(--border-base)]"
+                          style={{ background: colorSwatchCss(group.hexes) }}
+                        />
+                        <p className="min-w-0 flex-1 truncate text-sm font-medium text-[var(--fg-base)]">
+                          {group.name}
+                        </p>
+                        <span className="text-xs text-[var(--fg-muted)]">
+                          {total <= 0 ? "Sold out" : `${total} in stock`}
+                        </span>
+                      </div>
+                      <div className="grid grid-cols-[minmax(0,1fr)_12rem] items-center gap-x-4 gap-y-2">
+                        {group.rows.map((row) => (
+                          <div key={`${group.name}-${row.size}`} className="contents">
+                            <p className="truncate text-sm text-[var(--fg-base)]">
+                              {row.size}
+                            </p>
+                            <Input
+                              type="number"
+                              min={0}
+                              max={MAX_STOCK}
+                              aria-label={`${group.name} ${row.size} stock`}
+                              value={row.value}
+                              disabled={isEditing}
+                              onChange={(e) => {
+                                if (group.colorIndex >= 0) {
+                                  setStockBySize(group.colorIndex, row.size, e.target.value);
+                                }
+                              }}
+                              placeholder="0"
+                            />
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                })
+              )}
+
+              {isEditing && (
+                <p className="text-xs text-[var(--fg-muted)]">
+                  Newly added colors or sizes start at 0 stock when you save. Add them
+                  first, then use Adjust Stock.
+                </p>
+              )}
             </div>
           )}
 
@@ -628,6 +746,13 @@ export function ProductFormInner({ editing }: { editing?: CmsProduct }) {
           )}
         </Container>
       </form>
+
+      <StockAdjustModal
+        product={stockProduct}
+        open={stockModalOpen}
+        onClose={() => setStockModalOpen(false)}
+        onSaved={handleStockSaved}
+      />
     </div>
   );
 }

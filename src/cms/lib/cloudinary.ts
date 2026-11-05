@@ -33,6 +33,8 @@ const PRESET_FOLDERS: Record<UploadPreset, string> = {
   raw: "orange-closet/settings",
 };
 
+export const MAX_UPLOAD_MB = 15;
+
 const MAX_SIZE_BYTES = 500 * 1024;
 
 async function compress(file: File, preset: UploadPreset): Promise<File> {

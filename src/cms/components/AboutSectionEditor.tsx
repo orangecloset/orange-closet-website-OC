@@ -249,6 +249,7 @@ export function SectionEditor({
                 ) : null
               )}
               <UploadButton
+                multiple
                 onUploaded={(url) =>
                   onChange({ images: [...section.images.filter((img) => img.trim()), url] })
                 }

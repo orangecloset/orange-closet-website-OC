@@ -4,6 +4,7 @@ import { useToast } from "../store/toastContext";
 import { useCms } from "../store/cmsContext";
 import type { CmsProduct } from "../../data/store-types";
 import { randomString } from "../lib/utils";
+import { apiErrorMessage } from "../lib/api";
 import { invalidateProducts, usePagedProducts, useProductSuggestions } from "../lib/queries";
 import { parsePrice, downloadReceiptPdf } from "../lib/receipt";
 import { getCmsSession } from "../store/auth";
@@ -138,6 +139,14 @@ export default function SoldPage() {
     e.preventDefault();
     if (!product || !activeColor || !activeVariant || activeVariant.stock <= 0)
       return;
+    if (qty > activeVariant.stock) {
+      showToast(
+        `Only ${activeVariant.stock} in stock for ${activeColor.name} / ${activeVariant.size}.`,
+        false,
+        "error"
+      );
+      return;
+    }
     setShowConfirm(true);
   };
 
@@ -152,7 +161,7 @@ export default function SoldPage() {
         productImage: activeColor.images[0] || undefined,
         colorName: activeColor.name,
         size: selectedSize,
-        quantity: Math.max(1, qty),
+        quantity: Math.min(Math.max(1, qty), activeVariant.stock),
         price: product.price,
         soldAt: new Date(`${soldDate}T12:00:00`).toISOString(),
         soldBy: getCmsSession()?.user?.name,
@@ -184,7 +193,14 @@ export default function SoldPage() {
       }
     } catch (err) {
       console.error("[cms] failed to record sale", err);
-      showToast("Couldn't record the sale. Please try again. (SLL_01)");
+      showToast(
+        apiErrorMessage(
+          err,
+          "Couldn't record the sale. Please try again. (SLL_01)"
+        ),
+        false,
+        "error"
+      );
       setSliderKey((k) => k + 1);
     } finally {
       setRecording(false);

@@ -8,7 +8,7 @@ import {
 } from "react";
 import type { ProductColor } from "../../data/products";
 import { randomString } from "../lib/utils";
-import { api, type SaleInput } from "../lib/api";
+import { api, type SaleInput, type StockAdjustmentInput } from "../lib/api";
 import { invalidateInventory, invalidateProducts } from "../lib/queries";
 import {
   ABOUT_KEY,
@@ -238,7 +238,7 @@ export function CmsProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const updateProduct = useCallback(
-    async (id: string, input: Partial<CmsProductInput> & { stockReason?: string }) => {
+    async (id: string, input: Partial<CmsProductInput>) => {
       const current = await api.getProduct(id);
       const now = new Date().toISOString();
       const patch: Record<string, unknown> = { updatedAt: now };
@@ -305,16 +305,21 @@ export function CmsProvider({ children }: { children: ReactNode }) {
           return { ...c, sizes: [{ size: "One Size", stock: total }] };
         });
       }
-      const colors = (patch.colors as ProductColor[] | undefined) ?? current.colors;
-      patch.stock = colors.reduce(
-        (sum, c) => sum + c.sizes.reduce((s, vs) => s + vs.stock, 0),
-        0
-      );
       if (input.status !== undefined) patch.status = input.status;
       const updated = { ...current, ...patch } as CmsProduct;
-      await api.updateProduct(id, updated, input.stockReason);
+      await api.updateProduct(id, updated);
       invalidateProducts();
       invalidateInventory();
+    },
+    []
+  );
+
+  const adjustStock = useCallback(
+    async (id: string, input: StockAdjustmentInput) => {
+      const result = await api.adjustStock(id, input);
+      invalidateProducts();
+      invalidateInventory();
+      return result.product;
     },
     []
   );
@@ -488,6 +493,7 @@ export function CmsProvider({ children }: { children: ReactNode }) {
       flushSaves,
       addProduct,
       updateProduct,
+      adjustStock,
       deleteProduct,
       recordSale,
       bulkDeleteProducts,
@@ -514,6 +520,7 @@ export function CmsProvider({ children }: { children: ReactNode }) {
       flushSaves,
       addProduct,
       updateProduct,
+      adjustStock,
       deleteProduct,
       recordSale,
       bulkDeleteProducts,

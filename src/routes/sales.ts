@@ -163,9 +163,23 @@ app.post("/", async (c) => {
     })
     .from(schema.products)
     .where(eq(schema.products.id, body.productId!));
-  const beforeStock = flattenStock(productRow?.colors);
+  if (!productRow) {
+    return c.json({ error: "Product not found" }, 404);
+  }
+
+  const beforeStock = flattenStock(productRow.colors);
   const key = `${body.colorName}::${body.size}`;
   const prevStock = beforeStock.get(key) ?? 0;
+
+  if (body.quantity > prevStock) {
+    return c.json(
+      {
+        error: `Only ${prevStock} unit${prevStock === 1 ? "" : "s"} in stock for ${body.colorName} / ${body.size}.`,
+      },
+      400
+    );
+  }
+
   const authUser = await getAuthUser(c.env, c.req.header("authorization"));
   const changedBy =
     optionalText(body.soldBy) ?? (await resolveChangedBy(c.env, authUser?.id ?? null));

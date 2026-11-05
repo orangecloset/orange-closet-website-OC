@@ -13,7 +13,7 @@ const SEARCH_DEBOUNCE_MS = 350;
 
 const KIND_BADGES: Record<StockMovement["kind"], { label: string; color: "green" | "blue" | "grey" }> = {
   sale: { label: "Sale", color: "green" },
-  edit: { label: "Edit", color: "blue" },
+  edit: { label: "Adjustment", color: "blue" },
   create: { label: "Created", color: "grey" },
 };
 
@@ -151,7 +151,7 @@ export default function InventoryPage() {
             <Select value={kindFilter} onChange={(e) => setKindFilter(e.target.value)}>
               <option value="all">All types</option>
               <option value="sale">Sale</option>
-              <option value="edit">Edit</option>
+              <option value="edit">Adjustment</option>
               <option value="create">Created</option>
             </Select>
           </div>

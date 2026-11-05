@@ -22,6 +22,21 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
   return res.json() as Promise<T>;
 }
 
+export function apiErrorMessage(err: unknown, fallback: string): string {
+  if (!(err instanceof Error)) return fallback;
+  const body = err.message.replace(/^API \d+:\s*/, "");
+  let parsed: { error?: unknown } | null = null;
+  try {
+    parsed = JSON.parse(body) as { error?: unknown };
+  } catch {
+    parsed = null;
+  }
+  if (typeof parsed?.error === "string" && parsed.error.trim()) {
+    return parsed.error;
+  }
+  return body.trim() || fallback;
+}
+
 export type SaleInput = {
   id: string;
   productId: string;
@@ -96,6 +111,17 @@ export type PagedStockMovements = {
   hasPrevPage: boolean;
 };
 
+export type StockAdjustmentChange = {
+  colorName: string;
+  size: string;
+  newStock: number;
+};
+
+export type StockAdjustmentInput = {
+  reason: string;
+  changes: StockAdjustmentChange[];
+};
+
 export type InventoryStats = {
   totalUnits: number;
   productsWithStock: number;
@@ -148,11 +174,20 @@ export const api = {
   createProduct: (product: CmsProduct) =>
     request<{ ok: true }>("/api/products", { method: "POST", body: JSON.stringify(product) }),
 
-  updateProduct: (id: string, product: CmsProduct, stockReason?: string) =>
+  updateProduct: (id: string, product: CmsProduct) =>
     request<{ ok: true }>(`/api/products/${id}`, {
       method: "PUT",
-      body: JSON.stringify(stockReason ? { ...product, stockReason } : product),
+      body: JSON.stringify(product),
     }),
+
+  adjustStock: (id: string, input: StockAdjustmentInput) =>
+    request<{ ok: true; changed: number; product: CmsProduct | null }>(
+      `/api/products/${id}/stock-adjustments`,
+      {
+        method: "POST",
+        body: JSON.stringify(input),
+      }
+    ),
 
   deleteProduct: (id: string) =>
     request<{ ok: true }>(`/api/products/${id}`, { method: "DELETE" }),

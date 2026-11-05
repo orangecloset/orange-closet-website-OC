@@ -4,7 +4,35 @@ import type { Env } from "../env.js";
 
 export type StockKind = "sale" | "edit" | "create";
 
+export type StockChange = {
+  colorName: string;
+  size: string;
+  newStock: number;
+};
+
 type ColorsJson = { name?: unknown; sizes?: { size?: unknown; stock?: unknown }[] }[];
+
+type StockColorJson = {
+  name?: unknown;
+  sizes?: { size?: unknown; stock?: unknown }[];
+  [key: string]: unknown;
+};
+
+function stockKey(colorName: string, size: string): string {
+  return `${colorName}::${size}`;
+}
+
+function readColorName(color: unknown): string {
+  if (!color || typeof color !== "object") return "";
+  const name = (color as { name?: unknown }).name;
+  return typeof name === "string" ? name : "";
+}
+
+function readSize(value: unknown): string {
+  if (!value || typeof value !== "object") return "";
+  const size = (value as { size?: unknown }).size;
+  return typeof size === "string" ? size : "";
+}
 
 export function flattenStock(colors: unknown): Map<string, number> {
   const map = new Map<string, number>();
@@ -17,10 +45,76 @@ export function flattenStock(colors: unknown): Map<string, number> {
       if (!s || typeof s !== "object") continue;
       const size = typeof s.size === "string" ? s.size : "";
       const stock = Number(s.stock);
-      map.set(`${colorName}::${size}`, Number.isFinite(stock) ? stock : 0);
+      map.set(stockKey(colorName, size), Number.isFinite(stock) ? stock : 0);
     }
   }
   return map;
+}
+
+export function applyStockChanges(colors: unknown, changes: StockChange[]): unknown[] {
+  const byKey = new Map(
+    changes.map((change) => [stockKey(change.colorName, change.size), change.newStock])
+  );
+
+  return (Array.isArray(colors) ? colors : []).map((color) => {
+    if (!color || typeof color !== "object") return color;
+    const c = color as StockColorJson;
+    if (!Array.isArray(c.sizes)) return color;
+    const colorName = readColorName(color);
+
+    return {
+      ...c,
+      sizes: c.sizes.map((s) => {
+        if (!s || typeof s !== "object") return s;
+        const next = byKey.get(stockKey(colorName, readSize(s)));
+        return next === undefined ? s : { ...s, stock: next };
+      }),
+    };
+  });
+}
+
+export function mergePreservedStock(
+  colors: unknown,
+  oldColors: unknown
+): { colors: unknown[]; removedInStock: string[] } {
+  const oldStock = flattenStock(oldColors);
+  const oldColorList = Array.isArray(oldColors) ? oldColors : [];
+  const incoming = Array.isArray(colors) ? colors : [];
+  const incomingKeys = new Set<string>();
+
+  const merged = incoming.map((color) => {
+    if (!color || typeof color !== "object") return color;
+    const c = color as StockColorJson;
+    const colorName = readColorName(color);
+
+    const sizes = Array.isArray(c.sizes)
+      ? c.sizes
+      : (oldColorList as StockColorJson[]).find(
+          (oldColor) => readColorName(oldColor) === colorName
+        )?.sizes;
+
+    if (!Array.isArray(sizes)) return color;
+
+    return {
+      ...c,
+      sizes: sizes.map((s) => {
+        if (!s || typeof s !== "object") return s;
+        const key = stockKey(colorName, readSize(s));
+        incomingKeys.add(key);
+        return { ...s, stock: oldStock.get(key) ?? 0 };
+      }),
+    };
+  });
+
+  const removedInStock: string[] = [];
+  for (const [key, stock] of oldStock) {
+    if (stock > 0 && !incomingKeys.has(key)) {
+      const [colorName, size] = key.split("::");
+      removedInStock.push(`${colorName} / ${size} (${stock} in stock)`);
+    }
+  }
+
+  return { colors: merged, removedInStock };
 }
 
 function movementId(): string {
@@ -57,39 +151,38 @@ export type MovementInput = {
   ref?: string | null;
 };
 
+export function toMovementValues(rows: MovementInput[]) {
+  return rows.map((r) => ({
+    id: movementId(),
+    productId: r.productId,
+    productName: r.productName,
+    colorName: r.colorName,
+    size: r.size,
+    prevStock: r.prevStock,
+    newStock: r.newStock,
+    kind: r.kind,
+    reason: r.reason ?? null,
+    changedBy: r.changedBy ?? null,
+    ref: r.ref ?? null,
+  }));
+}
+
 export async function insertMovements(env: Env, rows: MovementInput[]): Promise<void> {
   if (rows.length === 0) return;
   const db = getDb(env);
-  await db.insert(schema.stockMovements).values(
-    rows.map((r) => ({
-      id: movementId(),
-      productId: r.productId,
-      productName: r.productName,
-      colorName: r.colorName,
-      size: r.size,
-      prevStock: r.prevStock,
-      newStock: r.newStock,
-      kind: r.kind,
-      reason: r.reason ?? null,
-      changedBy: r.changedBy ?? null,
-      ref: r.ref ?? null,
-    }))
-  );
+  await db.insert(schema.stockMovements).values(toMovementValues(rows));
 }
 
-export async function logStockDiff(
-  env: Env,
-  opts: {
-    productId: string;
-    productName: string;
-    before: Map<string, number>;
-    after: Map<string, number>;
-    kind: StockKind;
-    reason?: string | null;
-    changedBy?: string | null;
-    ref?: string | null;
-  }
-): Promise<void> {
+export function buildStockDiffMovements(opts: {
+  productId: string;
+  productName: string;
+  before: Map<string, number>;
+  after: Map<string, number>;
+  kind: StockKind;
+  reason?: string | null;
+  changedBy?: string | null;
+  ref?: string | null;
+}): MovementInput[] {
   const rows: MovementInput[] = [];
   const keys = new Set([...opts.before.keys(), ...opts.after.keys()]);
   for (const key of keys) {
@@ -110,7 +203,14 @@ export async function logStockDiff(
       ref: opts.ref ?? null,
     });
   }
-  await insertMovements(env, rows);
+  return rows;
+}
+
+export async function logStockDiff(
+  env: Env,
+  opts: Parameters<typeof buildStockDiffMovements>[0]
+): Promise<void> {
+  await insertMovements(env, buildStockDiffMovements(opts));
 }
 
 export async function resolveChangedBy(env: Env, userId: string | null): Promise<string | null> {
