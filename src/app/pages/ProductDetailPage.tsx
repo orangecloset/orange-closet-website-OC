@@ -8,6 +8,8 @@ import { useViewport } from "../hooks/useViewport";
 import { getCatalogToken, getCatalogUid, getCatalogMode } from "../lib/access";
 import ProductCard from "../components/ProductCard";
 import MarkdownText from "../components/MarkdownText";
+import RichText from "../components/RichText";
+import { isEmptyHtml, isHtml } from "../../lib/richText";
 import { usePageTitle } from "../hooks/usePageTitle";
 import type { ReactNode } from "react";
 
@@ -741,10 +743,14 @@ export default function ProductDetailPage() {
 
           <div className="mt-6 border-t border-gray-200">
             {(product.sections ?? [])
-              .filter((section) => section.body.trim() !== "")
+              .filter((section) => !isEmptyHtml(section.body))
               .map((section) => (
                 <Accordion key={section.title} title={section.title} defaultOpen={product.sectionsOpen}>
-                  <MarkdownText text={section.body} />
+                  {isHtml(section.body) ? (
+                    <RichText html={section.body} />
+                  ) : (
+                    <MarkdownText text={section.body} />
+                  )}
                 </Accordion>
               ))}
           </div>

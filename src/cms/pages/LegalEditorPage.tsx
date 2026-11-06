@@ -1,9 +1,12 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import { useCms } from "../store/cmsContext";
 import { useToast } from "../store/toastContext";
-import { Button, Label, Textarea } from "../components/ui";
+import { Button, Label } from "../components/ui";
+import { RichTextEditor } from "../components/RichTextEditor";
+import { legalMarkdownToHtml } from "../lib/legalMarkdown";
+import { isEmptyHtml } from "../../lib/richText";
 
 function deriveSlug(label: string) {
   return label
@@ -26,6 +29,7 @@ export default function LegalEditorPage() {
 
   const [body, setBody] = useState(page?.body ?? "");
   const [saving, setSaving] = useState(false);
+  const editorValue = useMemo(() => legalMarkdownToHtml(body), [body]);
 
   useEffect(() => {
     setBody(page?.body ?? "");
@@ -46,7 +50,7 @@ export default function LegalEditorPage() {
     setSaving(true);
     try {
       const next = [...settings.legalLinks];
-      next[index] = { ...next[index], body };
+      next[index] = { ...next[index], body: isEmptyHtml(body) ? "" : body };
       updateSettings({ legalLinks: next });
       await flushSaves();
       showToast("Legal page saved.");
@@ -63,7 +67,7 @@ export default function LegalEditorPage() {
         <div className="flex min-w-0 flex-col gap-0.5">
           <h2 className="text-base font-medium text-[var(--fg-base)]">{page.label}</h2>
           <p className="hidden text-sm text-[var(--fg-subtle)] sm:block">
-            Markdown content shown at /legal/{slug}
+            Content shown at /legal/{slug}
           </p>
         </div>
         <div className="flex shrink-0 items-center gap-2">
@@ -78,13 +82,18 @@ export default function LegalEditorPage() {
       </div>
 
       <div className="flex flex-1 flex-col gap-2 overflow-hidden">
-        <Label>Content (Markdown)</Label>
-        <Textarea
-          value={body}
-          onChange={(e) => setBody(e.target.value)}
-          placeholder="Write your legal content here using markdown..."
-          className="flex-1 resize-none font-mono text-xs !max-h-none focus-visible:shadow-none"
-          style={{ minHeight: 0 }}
+        <div className="flex items-center justify-between gap-2">
+          <Label>Content</Label>
+          <span className="text-xs text-[var(--fg-muted)]">
+            Select text and use the toolbar to format it.
+          </span>
+        </div>
+        <RichTextEditor
+          value={editorValue}
+          onChange={setBody}
+          ariaLabel={`Content for ${page.label}`}
+          className="legal-editor"
+          headingLevels={[1, 2, 3, 4, 5, 6]}
         />
       </div>
     </div>

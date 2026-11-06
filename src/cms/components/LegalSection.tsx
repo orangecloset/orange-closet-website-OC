@@ -26,7 +26,7 @@ export function LegalSection({
       <div className="flex items-center justify-between">
         <div>
           <h3 className="text-sm font-medium text-[var(--fg-base)]">Legal</h3>
-          <p className="text-xs text-[var(--fg-muted)]">Markdown pages shown at /legal/your-page</p>
+          <p className="text-xs text-[var(--fg-muted)]">Pages shown at /legal/your-page</p>
         </div>
         <Button variant="secondary" size="small" type="button" onClick={add}>
           <Plus className="h-4 w-4" />

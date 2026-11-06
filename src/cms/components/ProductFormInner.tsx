@@ -6,10 +6,12 @@ import { useCms } from "../store/cmsContext";
 import { apiErrorMessage } from "../lib/api";
 import type { CmsProduct, ProductStatus } from "../../data/store-types";
 import { colorSwatchCss } from "../../data/products";
-import { Button, Container, Header, Input, Label, Select, Switch, Tabs, Textarea } from "./ui";
+import { Button, Container, Header, Input, Label, Select, Switch, Tabs } from "./ui";
 import { UploadButton } from "./UploadButton";
 import { StockAdjustModal } from "./StockAdjustModal";
 import { SortableList, DndContainer, SortableItems, DragHandle } from "./SortableList";
+import { RichTextEditor } from "./RichTextEditor";
+import { isEmptyHtml } from "../../lib/richText";
 
 function normalizeHex(value: string): string {
   const m = /^#?([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.exec(value.trim());
@@ -273,7 +275,7 @@ export function ProductFormInner({ editing }: { editing?: CmsProduct }) {
 
     const validSections = sections
       .filter((s) => s.title.trim())
-      .map((s) => ({ title: s.title.trim(), body: s.body }));
+      .map((s) => ({ title: s.title.trim(), body: isEmptyHtml(s.body) ? "" : s.body }));
 
     const input = {
       name: name.trim(),
@@ -395,7 +397,7 @@ export function ProductFormInner({ editing }: { editing?: CmsProduct }) {
                   </div>
                 </div>
                 <p className="text-xs text-[var(--fg-muted)]">
-                  Formatting: # heading, - bullet, **text** = bold, | col1 | col2 | = table, blank line = new paragraph.
+                  Select text and use the toolbar to make it bold or italic, add lists, or insert a table.
                 </p>
                 <div className="flex flex-col gap-3">
                   <SortableList
@@ -420,13 +422,13 @@ export function ProductFormInner({ editing }: { editing?: CmsProduct }) {
                             </Button>
                           )}
                         </div>
-                        <Textarea
+                        <RichTextEditor
                           value={s.body}
-                          onChange={(e) =>
-                            setSections((prev) => prev.map((sec, i) => (i === idx ? { ...sec, body: e.target.value } : sec)))
+                          onChange={(html) =>
+                            setSections((prev) => prev.map((sec, i) => (i === idx ? { ...sec, body: html } : sec)))
                           }
-                          placeholder="Section content... (use | col1 | col2 | for tables)"
-                          rows={3}
+                          ariaLabel={`Content for section ${idx + 1}`}
+                          className="rte-product"
                         />
                       </div>
                     )}

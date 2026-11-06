@@ -3,6 +3,8 @@ import Markdown from "react-markdown";
 import { ArrowLeft } from "lucide-react";
 import { useCatalog } from "../context/CatalogContext";
 import { usePageTitle } from "../hooks/usePageTitle";
+import RichText from "../components/RichText";
+import { isEmptyHtml, isHtml } from "../../lib/richText";
 
 export default function LegalPage() {
   const { slug } = useParams<{ slug: string }>();
@@ -19,7 +21,7 @@ export default function LegalPage() {
 
   usePageTitle(page?.label ?? "Legal");
 
-  if (!page || !page.body?.trim()) {
+  if (!page || isEmptyHtml(page.body ?? "")) {
     return (
       <section className="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 py-24 min-h-full flex flex-col items-center justify-center text-center">
         <h1 className="text-2xl sm:text-3xl lg:text-4xl font-semibold mb-3">Page Not Found</h1>
@@ -37,6 +39,8 @@ export default function LegalPage() {
     );
   }
 
+  const body = page.body ?? "";
+
   return (
     <section className="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10 lg:py-16">
       <Link
@@ -53,9 +57,16 @@ export default function LegalPage() {
 
       <h1 className="text-2xl sm:text-3xl font-semibold mb-8 text-gray-700">{page.label}</h1>
 
-      <div className="legal-markdown max-w-none text-sm leading-relaxed text-gray-700">
-        <Markdown>{page.body}</Markdown>
-      </div>
+      {isHtml(body) ? (
+        <RichText
+          html={body}
+          className="legal-markdown legal-rich max-w-none text-sm leading-relaxed text-gray-700"
+        />
+      ) : (
+        <div className="legal-markdown max-w-none text-sm leading-relaxed text-gray-700">
+          <Markdown>{body}</Markdown>
+        </div>
+      )}
     </section>
   );
 }

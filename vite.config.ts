@@ -25,9 +25,12 @@ export default defineConfig({
           if (p.includes('browser-image-compression')) return 'vendor-upload'
           if (p.includes('qr-code-styling')) return 'vendor-qr'
           if (p.includes('lucide-react')) return 'vendor-icons'
+          if (p.includes('@tiptap/') || p.includes('/prosemirror-')) return 'vendor-editor'
+          if (p.includes('dompurify')) return 'vendor-sanitize'
           if (
             p.includes('react-markdown') ||
             p.includes('remark') ||
+            p.includes('rehype') ||
             p.includes('micromark') ||
             p.includes('mdast') ||
             p.includes('unist') ||

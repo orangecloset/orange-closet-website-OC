@@ -1,4 +1,3 @@
-// Storefront hook (src/app). If the CMS also needs it, move it to src/hooks/.
 import { useEffect, type DependencyList, type RefObject } from "react";
 import type { Options } from "qr-code-styling";
 

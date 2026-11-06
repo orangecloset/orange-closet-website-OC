@@ -1,4 +1,6 @@
+import DOMPurify from "dompurify";
 import type { RecentSale } from "../../data/store-types";
+import { isEmptyHtml, isHtml } from "../../lib/richText";
 
 export type ReceiptProductContent = {
   sections?: { title: string; body: string }[];
@@ -118,6 +120,23 @@ function renderMarkdownToHtml(text: string): string {
   return htmlParts.join("");
 }
 
+const RECEIPT_RICH_TAGS = [
+  "p", "br", "strong", "b", "em", "i", "u", "s",
+  "ul", "ol", "li", "h1", "h2", "h3", "h4", "h5", "h6",
+  "table", "thead", "tbody", "tfoot", "tr", "th", "td",
+  "blockquote", "pre", "code", "hr", "a",
+];
+
+const RECEIPT_RICH_ATTR = ["href", "title", "target", "rel", "colspan", "rowspan"];
+
+function renderSectionBody(text: string): string {
+  if (!isHtml(text)) return renderMarkdownToHtml(text);
+  return DOMPurify.sanitize(text, {
+    ALLOWED_TAGS: RECEIPT_RICH_TAGS,
+    ALLOWED_ATTR: RECEIPT_RICH_ATTR,
+  });
+}
+
 const RECEIPT_STYLES = `
   .receipt { font-family: 'Segoe UI', Arial, sans-serif; background: #fff; color: #1a1a1a; width: 100%; max-width: 100%; margin: 0 auto; padding: 0; }
   .receipt *, .receipt *::before, .receipt *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -147,6 +166,30 @@ const RECEIPT_STYLES = `
   table.content-table td { font-size: 12px; color: #333; padding: 3px 0; vertical-align: top; }
   table.content-table td:not(:last-child) { padding-right: 24px; }
   table.content-table td:first-child { font-weight: 600; width: 1%; white-space: nowrap; }
+  .content-desc p { margin: 2px 0; }
+  .content-desc p:first-child { margin-top: 0; }
+  .content-desc p:last-child { margin-bottom: 0; }
+  .content-desc h1, .content-desc h2, .content-desc h3,
+  .content-desc h4, .content-desc h5, .content-desc h6 {
+    font-size: 12px; font-weight: 600; margin: 6px 0 2px;
+  }
+  .content-desc strong { font-weight: 600; }
+  .content-desc em { font-style: italic; }
+  .content-desc u { text-decoration: underline; }
+  .content-desc s { text-decoration: line-through; }
+  .content-desc ul { list-style: disc; padding-left: 18px; margin: 2px 0; }
+  .content-desc ol { list-style: decimal; padding-left: 18px; margin: 2px 0; }
+  .content-desc li { font-size: 12px; color: #333; line-height: 1.6; }
+  .content-desc table { width: 100%; border-collapse: collapse; margin: 4px 0; }
+  .content-desc td, .content-desc th {
+    font-size: 12px; color: #333; padding: 3px 24px 3px 0;
+    vertical-align: top; text-align: left;
+  }
+  .content-desc td:last-child, .content-desc th:last-child { padding-right: 0; }
+  .content-desc td:first-child, .content-desc th:first-child {
+    font-weight: 600; white-space: nowrap; width: 1%;
+  }
+  .content-desc a { color: #1a1a1a; text-decoration: underline; }
   .signatures { display: flex; gap: 24px; padding: 32px 0 8px; }
   .sig { flex: 1; text-align: center; }
   .sig-line { border-top: 1px solid #1a1a1a; margin-bottom: 5px; }
@@ -170,7 +213,9 @@ export function buildReceiptHtml({ storeName, logoUrl, sale, productContent }: R
   const total = unit * sale.quantity;
   const image = flexibleImageUrl(sale.productImage);
 
-  const sections = (productContent?.sections ?? []).filter((s) => s.title.trim() && s.body.trim());
+  const sections = (productContent?.sections ?? []).filter(
+    (s) => s.title.trim() && !isEmptyHtml(s.body)
+  );
 
   const contentSection =
     sections.length > 0
@@ -178,7 +223,7 @@ export function buildReceiptHtml({ storeName, logoUrl, sale, productContent }: R
   <div class="section">
     ${sections.map((s) => `
       <div class="section-label">${esc(s.title)}</div>
-      <div class="content-desc">${renderMarkdownToHtml(s.body)}</div>
+      <div class="content-desc">${renderSectionBody(s.body)}</div>
     `).join("")}
   </div>`
       : "";
