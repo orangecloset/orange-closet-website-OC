@@ -14,7 +14,6 @@ import {
   Undo2,
 } from "lucide-react";
 import { cn } from "../lib/utils";
-import { toEditorHtml } from "../../lib/richText";
 
 function ToolbarButton({
   label,
@@ -119,7 +118,7 @@ export function RichTextEditor({
         },
       }),
     ],
-    content: toEditorHtml(value),
+    content: value,
     onUpdate: ({ editor: current }) => {
       const html = current.getHTML();
       lastHtml.current = html;
@@ -136,7 +135,7 @@ export function RichTextEditor({
   useEffect(() => {
     if (value === lastHtml.current) return;
     lastHtml.current = value;
-    editor.commands.setContent(toEditorHtml(value), { emitUpdate: false });
+    editor.commands.setContent(value, { emitUpdate: false });
   }, [editor, value]);
 
   useEffect(() => {

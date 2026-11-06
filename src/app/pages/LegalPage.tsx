@@ -1,10 +1,9 @@
 import { Link, useParams } from "react-router-dom";
-import Markdown from "react-markdown";
 import { ArrowLeft } from "lucide-react";
 import { useCatalog } from "../context/CatalogContext";
 import { usePageTitle } from "../hooks/usePageTitle";
 import RichText from "../components/RichText";
-import { isEmptyHtml, isHtml } from "../../lib/richText";
+import { isEmptyHtml } from "../../lib/richText";
 
 export default function LegalPage() {
   const { slug } = useParams<{ slug: string }>();
@@ -57,16 +56,10 @@ export default function LegalPage() {
 
       <h1 className="text-2xl sm:text-3xl font-semibold mb-8 text-gray-700">{page.label}</h1>
 
-      {isHtml(body) ? (
-        <RichText
-          html={body}
-          className="legal-markdown legal-rich max-w-none text-sm leading-relaxed text-gray-700"
-        />
-      ) : (
-        <div className="legal-markdown max-w-none text-sm leading-relaxed text-gray-700">
-          <Markdown>{body}</Markdown>
-        </div>
-      )}
+      <RichText
+        html={body}
+        className="legal-content legal-rich max-w-none text-sm leading-relaxed text-gray-700"
+      />
     </section>
   );
 }

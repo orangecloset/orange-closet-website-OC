@@ -28,18 +28,6 @@ export default defineConfig({
           if (p.includes('@tiptap/') || p.includes('/prosemirror-')) return 'vendor-editor'
           if (p.includes('dompurify')) return 'vendor-sanitize'
           if (
-            p.includes('react-markdown') ||
-            p.includes('remark') ||
-            p.includes('rehype') ||
-            p.includes('micromark') ||
-            p.includes('mdast') ||
-            p.includes('unist') ||
-            p.includes('hast') ||
-            p.includes('vfile') ||
-            p.includes('unified') ||
-            p.includes('property-information')
-          ) return 'vendor-markdown'
-          if (
             p.includes('/react/') ||
             p.includes('/react-dom/') ||
             p.includes('/react-router') ||

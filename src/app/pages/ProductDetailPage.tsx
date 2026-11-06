@@ -7,9 +7,8 @@ import { useCatalog } from "../context/CatalogContext";
 import { useViewport } from "../hooks/useViewport";
 import { getCatalogToken, getCatalogUid, getCatalogMode } from "../lib/access";
 import ProductCard from "../components/ProductCard";
-import MarkdownText from "../components/MarkdownText";
 import RichText from "../components/RichText";
-import { isEmptyHtml, isHtml } from "../../lib/richText";
+import { isEmptyHtml } from "../../lib/richText";
 import { usePageTitle } from "../hooks/usePageTitle";
 import type { ReactNode } from "react";
 
@@ -746,11 +745,7 @@ export default function ProductDetailPage() {
               .filter((section) => !isEmptyHtml(section.body))
               .map((section) => (
                 <Accordion key={section.title} title={section.title} defaultOpen={product.sectionsOpen}>
-                  {isHtml(section.body) ? (
-                    <RichText html={section.body} />
-                  ) : (
-                    <MarkdownText text={section.body} />
-                  )}
+                  <RichText html={section.body} />
                 </Accordion>
               ))}
           </div>

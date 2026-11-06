@@ -1,11 +1,10 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import { useCms } from "../store/cmsContext";
 import { useToast } from "../store/toastContext";
 import { Button, Label } from "../components/ui";
 import { RichTextEditor } from "../components/RichTextEditor";
-import { legalMarkdownToHtml } from "../lib/legalMarkdown";
 import { isEmptyHtml } from "../../lib/richText";
 
 function deriveSlug(label: string) {
@@ -29,7 +28,6 @@ export default function LegalEditorPage() {
 
   const [body, setBody] = useState(page?.body ?? "");
   const [saving, setSaving] = useState(false);
-  const editorValue = useMemo(() => legalMarkdownToHtml(body), [body]);
 
   useEffect(() => {
     setBody(page?.body ?? "");
@@ -89,7 +87,7 @@ export default function LegalEditorPage() {
           </span>
         </div>
         <RichTextEditor
-          value={editorValue}
+          value={body}
           onChange={setBody}
           ariaLabel={`Content for ${page.label}`}
           className="legal-editor"

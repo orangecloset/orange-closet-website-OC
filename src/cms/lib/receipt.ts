@@ -1,6 +1,6 @@
 import DOMPurify from "dompurify";
 import type { RecentSale } from "../../data/store-types";
-import { isEmptyHtml, isHtml } from "../../lib/richText";
+import { isEmptyHtml } from "../../lib/richText";
 
 export type ReceiptProductContent = {
   sections?: { title: string; body: string }[];
@@ -57,69 +57,6 @@ function esc(value: unknown): string {
     .replace(/"/g, "&quot;");
 }
 
-function renderInlineMarkdown(text: string): string {
-  return esc(text).replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
-}
-
-function renderMarkdownToHtml(text: string): string {
-  const lines = text.split("\n");
-  const htmlParts: string[] = [];
-  let listItems: string[] = [];
-  let tableRows: string[][] = [];
-
-  const flushList = () => {
-    if (listItems.length === 0) return;
-    htmlParts.push(`<ul class="content-list">${listItems.map((li) => `<li>${li}</li>`).join("")}</ul>`);
-    listItems = [];
-  };
-
-  const flushTable = () => {
-    if (tableRows.length === 0) return;
-    htmlParts.push(
-      `<table class="content-table">${tableRows.map((row) =>
-        `<tr>${row.map((cell) => `<td>${renderInlineMarkdown(cell)}</td>`).join("")}</tr>`
-      ).join("")}</table>`
-    );
-    tableRows = [];
-  };
-
-  const parseTableRow = (line: string): string[] | null => {
-    if (!line.trimStart().startsWith("|")) return null;
-    const cells = line
-      .replace(/^\|/, "")
-      .replace(/\|$/, "")
-      .split("|")
-      .map((c) => c.trim());
-    return cells;
-  };
-
-  for (const raw of lines) {
-    const line = raw.trimEnd();
-    const row = parseTableRow(line);
-    if (row) {
-      flushList();
-      tableRows.push(row);
-    } else if (/^\s*-\s+/.test(line)) {
-      flushTable();
-      listItems.push(renderInlineMarkdown(line.replace(/^\s*-\s+/, "")));
-    } else if (/^\s*#/.test(line)) {
-      flushTable();
-      flushList();
-      htmlParts.push(`<p style="font-weight:600;margin:6px 0 2px">${renderInlineMarkdown(line.replace(/^\s*#\s*/, ""))}</p>`);
-    } else if (line.trim() === "") {
-      flushTable();
-      flushList();
-    } else {
-      flushTable();
-      flushList();
-      htmlParts.push(`<p style="margin:2px 0">${renderInlineMarkdown(line)}</p>`);
-    }
-  }
-  flushTable();
-  flushList();
-  return htmlParts.join("");
-}
-
 const RECEIPT_RICH_TAGS = [
   "p", "br", "strong", "b", "em", "i", "u", "s",
   "ul", "ol", "li", "h1", "h2", "h3", "h4", "h5", "h6",
@@ -130,7 +67,6 @@ const RECEIPT_RICH_TAGS = [
 const RECEIPT_RICH_ATTR = ["href", "title", "target", "rel", "colspan", "rowspan"];
 
 function renderSectionBody(text: string): string {
-  if (!isHtml(text)) return renderMarkdownToHtml(text);
   return DOMPurify.sanitize(text, {
     ALLOWED_TAGS: RECEIPT_RICH_TAGS,
     ALLOWED_ATTR: RECEIPT_RICH_ATTR,
@@ -159,13 +95,7 @@ const RECEIPT_STYLES = `
   table.details td:first-child { color: #666; width: 150px; padding-right: 24px; }
   .section { padding: 12px 0; border-bottom: 1px solid #ddd; }
   .section-label { font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: #888; margin-bottom: 6px; }
-  .content-desc { font-size: 12px; color: #333; line-height: 1.6; margin-bottom: 8px; white-space: pre-line; }
-  ul.content-list { list-style: disc; padding-left: 18px; }
-  ul  .content-list li { font-size: 12px; color: #333; line-height: 1.6; }
-  table.content-table { width: 100%; border-collapse: collapse; margin: 4px 0; }
-  table.content-table td { font-size: 12px; color: #333; padding: 3px 0; vertical-align: top; }
-  table.content-table td:not(:last-child) { padding-right: 24px; }
-  table.content-table td:first-child { font-weight: 600; width: 1%; white-space: nowrap; }
+  .content-desc { font-size: 12px; color: #333; line-height: 1.6; margin-bottom: 8px; }
   .content-desc p { margin: 2px 0; }
   .content-desc p:first-child { margin-top: 0; }
   .content-desc p:last-child { margin-bottom: 0; }
