@@ -1,6 +1,7 @@
 import { useMemo, useState, type FormEvent } from "react";
 import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { GripVertical, Plus, SwatchBook, X } from "lucide-react";
+import { arrayMove } from "@dnd-kit/sortable";
 import { useToast } from "../store/toastContext";
 import { useCms } from "../store/cmsContext";
 import { apiErrorMessage } from "../lib/api";
@@ -24,6 +25,7 @@ function normalizeHex(value: string): string {
 }
 
 type ColorInput = {
+  id: string;
   name: string;
   hexes: string[];
   images: string[];
@@ -31,6 +33,9 @@ type ColorInput = {
 };
 
 const MAX_STOCK = 500_000;
+
+let nextColorId = 0;
+const makeColorId = () => `color-${++nextColorId}`;
 
 function parseStockValue(raw: string | undefined): number {
   const trimmed = (raw ?? "").trim();
@@ -80,9 +85,9 @@ export function ProductFormInner({ editing }: { editing?: CmsProduct }) {
           const hexes =
             c.hexes && c.hexes.length > 0 ? [...c.hexes] : [c.hex];
           const images = c.images.filter((img) => img.trim());
-          return { name: c.name, hexes, images: images.length > 0 ? images : [""], stockBySize };
+          return { id: makeColorId(), name: c.name, hexes, images: images.length > 0 ? images : [""], stockBySize };
         })
-      : [{ name: "Default", hexes: ["#e5e7eb"], images: [""], stockBySize: {} }]
+      : [{ id: makeColorId(), name: "Default", hexes: ["#e5e7eb"], images: [""], stockBySize: {} }]
   );
 
   const typeInfo = types.find((t) => t.slug === type);
@@ -148,7 +153,7 @@ export function ProductFormInner({ editing }: { editing?: CmsProduct }) {
   };
 
   const addColor = () => {
-    setColors((prev) => [...prev, { name: "", hexes: ["#e5e7eb"], images: [""], stockBySize: {} }]);
+    setColors((prev) => [...prev, { id: makeColorId(), name: "", hexes: ["#e5e7eb"], images: [""], stockBySize: {} }]);
   };
 
   const setVariantColor = (colorIndex: number, hexIndex: number, value: string) => {
@@ -238,7 +243,7 @@ export function ProductFormInner({ editing }: { editing?: CmsProduct }) {
     const hasAny = colors.some((c) => c.name.trim() || c.hexes.some((h) => h.trim()) || c.images.some((img) => img.trim()));
     const variants = hasAny
       ? colors
-      : [{ name: "Default", hexes: ["#e5e7eb"], images: [colors[0]?.images[0] ?? ""], stockBySize: {} }];
+      : [{ id: makeColorId(), name: "Default", hexes: ["#e5e7eb"], images: [colors[0]?.images[0] ?? ""], stockBySize: {} }];
 
     const parseStock = parseStockValue;
 
@@ -466,38 +471,18 @@ export function ProductFormInner({ editing }: { editing?: CmsProduct }) {
           {activeTab === "colors" && (
             <div className="flex flex-col gap-3 px-6 py-4">
               <DndContainer
-                onDragEnd={(activeId, overId) => {
-                  if (activeId.startsWith("color-") && overId.startsWith("color-")) {
-                    const oldIndex = parseInt(activeId.split("-")[1], 10);
-                    const newIndex = parseInt(overId.split("-")[1], 10);
-                    if (isNaN(oldIndex) || isNaN(newIndex)) return;
-                    setColors((prev) => {
-                      const next = [...prev];
-                      const [moved] = next.splice(oldIndex, 1);
-                      const insertAt = oldIndex < newIndex ? newIndex - 1 : newIndex;
-                      next.splice(insertAt, 0, moved);
-                      return next;
-                    });
-                  }
-                  if (activeId.startsWith("img-") && overId.startsWith("img-")) {
-                    const [, aColorIdx, aImgIdx] = activeId.split("-").map(Number);
-                    const [, oColorIdx, oImgIdx] = overId.split("-").map(Number);
-                    if (isNaN(aColorIdx) || isNaN(aImgIdx) || isNaN(oColorIdx) || isNaN(oImgIdx)) return;
-                    if (aColorIdx !== oColorIdx) return;
-                    setColors((prev) => prev.map((col, ci) => {
-                      if (ci !== aColorIdx) return col;
-                      const nextImages = [...col.images];
-                      const [moved] = nextImages.splice(aImgIdx, 1);
-                      const insertAt = aImgIdx < oImgIdx ? oImgIdx - 1 : oImgIdx;
-                      nextImages.splice(insertAt, 0, moved);
-                      return { ...col, images: nextImages };
-                    }));
-                  }
+                onDragEnd={(_activeId, _overId, activeData, overData) => {
+                  if (activeData?.kind !== "color" || overData?.kind !== "color") return;
+                  const oldIndex = Number(activeData.colorIndex);
+                  const newIndex = Number(overData.colorIndex);
+                  if (Number.isNaN(oldIndex) || Number.isNaN(newIndex)) return;
+                  setColors((prev) => arrayMove(prev, oldIndex, newIndex));
                 }}
               >
                 <SortableItems
                   items={colors}
-                  keyExtractor={(_c, index) => `color-${index}`}
+                  keyExtractor={(c) => c.id}
+                  getItemData={(_c, colorIndex) => ({ kind: "color", colorIndex })}
                   renderItem={(c, index, dragHandleProps) => (
                     <div className="flex flex-col gap-3 rounded-md border border-[var(--border-subtle)] bg-[var(--bg-subtle)] p-3">
                       <div className="flex items-center justify-between">
@@ -573,7 +558,7 @@ export function ProductFormInner({ editing }: { editing?: CmsProduct }) {
                                 onUploaded={(url) => {
                                   setColors((prev) =>
                                     prev.map((c, i) =>
-                                      i === index
+                                      i === index && !c.images.includes(url)
                                         ? { ...c, images: [...c.images.filter((img) => img.trim()), url] }
                                         : c
                                     )
@@ -589,35 +574,60 @@ export function ProductFormInner({ editing }: { editing?: CmsProduct }) {
                           )}
                           <div className="flex flex-col gap-2">
                             {c.images.some((img) => img.trim()) ? (
-                              <SortableItems
-                                items={c.images}
-                                keyExtractor={(_img, imgIdx) => `img-${index}-${imgIdx}`}
-                                renderItem={(img, imgIdx, imageDragHandleProps) => (
-                                  <div className="flex items-center gap-2">
-                                    <DragHandle handleProps={imageDragHandleProps} />
-                                    <img
-                                      src={img}
-                                      alt=""
-                                      className="h-12 w-12 shrink-0 rounded object-cover bg-[var(--bg-base)]"
-                                    />
-                                    {imgIdx === 0 && (
+                              <DndContainer
+                                onDragEnd={(_activeId, _overId, activeData, overData) => {
+                                  if (activeData?.kind !== "image" || overData?.kind !== "image") return;
+                                  if (activeData.colorIndex !== overData.colorIndex) return;
+                                  const oldIndex = Number(activeData.imageIndex);
+                                  const newIndex = Number(overData.imageIndex);
+                                  const colorIndex = Number(activeData.colorIndex);
+                                  if (
+                                    Number.isNaN(oldIndex) ||
+                                    Number.isNaN(newIndex) ||
+                                    Number.isNaN(colorIndex)
+                                  ) return;
+                                  setColors((prev) =>
+                                    prev.map((col, ci) =>
+                                      ci === colorIndex
+                                        ? { ...col, images: arrayMove(col.images, oldIndex, newIndex) }
+                                        : col
+                                    )
+                                  );
+                                }}
+                              >
+                                <SortableItems
+                                  items={c.images}
+                                  keyExtractor={(img) => `img-${index}-${img}`}
+                                  getItemData={(_img, imageIndex) => ({
+                                    kind: "image",
+                                    colorIndex: index,
+                                    imageIndex,
+                                  })}
+                                  renderItem={(img, imgIdx, imageDragHandleProps) => (
+                                    <div className="flex items-center gap-2">
+                                      <DragHandle handleProps={imageDragHandleProps} />
+                                      <img
+                                        src={img}
+                                        alt=""
+                                        className="h-20 w-20 shrink-0 rounded-md object-cover bg-[var(--bg-base)]"
+                                      />
                                       <span className="text-[11px] font-medium uppercase tracking-wide text-[var(--fg-muted)]">
-                                        Main
+                                        {imgIdx === 0 ? "Main" : `Image ${imgIdx}`}
                                       </span>
-                                    )}
-                                    <div className="flex-1" />
-                                    <Button
-                                      variant="ghost"
-                                      size="small"
-                                      type="button"
-                                      onClick={() => removeImageFromColor(index, imgIdx)}
-                                      aria-label="Remove image"
-                                    >
-                                      <X className="h-3 w-3" />
-                                    </Button>
-                                  </div>
-                                )}
-                              />
+                                      <div className="flex-1" />
+                                      <Button
+                                        variant="ghost"
+                                        size="small"
+                                        type="button"
+                                        onClick={() => removeImageFromColor(index, imgIdx)}
+                                        aria-label="Remove image"
+                                      >
+                                        <X className="h-3 w-3" />
+                                      </Button>
+                                    </div>
+                                  )}
+                                />
+                              </DndContainer>
                             ) : (
                               <p className="text-xs text-[var(--fg-muted)]">No images uploaded yet.</p>
                             )}

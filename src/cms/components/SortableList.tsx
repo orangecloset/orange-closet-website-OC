@@ -20,13 +20,15 @@ import { GripVertical } from "lucide-react";
 
 function SortableItem({
   id,
+  data,
   children,
 }: {
   id: string;
+  data?: Record<string, unknown>;
   children: (props: { dragHandleProps: Record<string, unknown> }) => React.ReactNode;
 }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
-    useSortable({ id });
+    useSortable({ id, data });
 
   const style: React.CSSProperties = {
     transform: CSS.Transform.toString(transform),
@@ -67,14 +69,24 @@ export function DndContainer({
   onDragEnd,
 }: {
   children: React.ReactNode;
-  onDragEnd: (activeId: string, overId: string) => void;
+  onDragEnd: (
+    activeId: string,
+    overId: string,
+    activeData: Record<string, unknown> | undefined,
+    overData: Record<string, unknown> | undefined
+  ) => void;
 }) {
   const sensors = useDndSensors();
 
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
     if (!over || active.id === over.id) return;
-    onDragEnd(String(active.id), String(over.id));
+    onDragEnd(
+      String(active.id),
+      String(over.id),
+      active.data.current,
+      over.data.current
+    );
   };
 
   return (
@@ -89,11 +101,13 @@ export function SortableItems<T>({
   renderItem,
   keyExtractor,
   layout = "vertical",
+  getItemData,
 }: {
   items: T[];
   renderItem: (item: T, index: number, dragHandleProps: Record<string, unknown>) => React.ReactNode;
   keyExtractor: (item: T, index: number) => string;
   layout?: "vertical" | "horizontal";
+  getItemData?: (item: T, index: number) => Record<string, unknown> | undefined;
 }) {
   const strategy =
     layout === "horizontal" ? horizontalListSortingStrategy : verticalListSortingStrategy;
@@ -104,7 +118,11 @@ export function SortableItems<T>({
       strategy={strategy}
     >
       {items.map((item, index) => (
-        <SortableItem key={keyExtractor(item, index)} id={keyExtractor(item, index)}>
+        <SortableItem
+          key={keyExtractor(item, index)}
+          id={keyExtractor(item, index)}
+          data={getItemData?.(item, index)}
+        >
           {({ dragHandleProps }) => renderItem(item, index, dragHandleProps)}
         </SortableItem>
       ))}
