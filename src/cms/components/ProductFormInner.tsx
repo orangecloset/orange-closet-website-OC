@@ -188,15 +188,6 @@ export function ProductFormInner({ editing }: { editing?: CmsProduct }) {
     }));
   };
 
-  const updateColorImage = (colorIndex: number, imageIndex: number, value: string) => {
-    setColors((prev) => prev.map((c, i) => {
-      if (i !== colorIndex) return c;
-      const images = [...c.images];
-      images[imageIndex] = value;
-      return { ...c, images };
-    }));
-  };
-
   const addSize = () => {
     const trimmed = newSize.trim();
     if (!trimmed || sizes.includes(trimmed)) return;
@@ -589,7 +580,6 @@ export function ProductFormInner({ editing }: { editing?: CmsProduct }) {
                                   );
                                 }}
                               />
-
                             </div>
                           </div>
                           {index === 0 && (
@@ -597,26 +587,42 @@ export function ProductFormInner({ editing }: { editing?: CmsProduct }) {
                               The first image of the primary color is used as the main image. Drag to reorder.
                             </p>
                           )}
-                        <div className="flex flex-col gap-2">
-                          <SortableItems
-                            items={c.images}
-                            keyExtractor={(_img, imgIdx) => `img-${index}-${imgIdx}`}
-                            renderItem={(img, imgIdx, imageDragHandleProps) => (
-                              <div className="flex items-center gap-2">
-                                <DragHandle handleProps={imageDragHandleProps} />
-                                <Input value={img} onChange={(e) => updateColorImage(index, imgIdx, e.target.value)} placeholder={`Image URL ${imgIdx + 1}${imgIdx === 0 ? " (main)" : ""}`} className="flex-1" />
-                                {img && <img src={img} alt="" className="h-8 w-8 shrink-0 rounded object-cover bg-[var(--bg-base)]" />}
-
-                                {(c.images.length > 1 || img.trim() !== "") && (
-                                  <Button variant="ghost" size="small" type="button" onClick={() => removeImageFromColor(index, imgIdx)} aria-label="Remove image">
-                                    <X className="h-3 w-3" />
-                                  </Button>
+                          <div className="flex flex-col gap-2">
+                            {c.images.some((img) => img.trim()) ? (
+                              <SortableItems
+                                items={c.images}
+                                keyExtractor={(_img, imgIdx) => `img-${index}-${imgIdx}`}
+                                renderItem={(img, imgIdx, imageDragHandleProps) => (
+                                  <div className="flex items-center gap-2">
+                                    <DragHandle handleProps={imageDragHandleProps} />
+                                    <img
+                                      src={img}
+                                      alt=""
+                                      className="h-12 w-12 shrink-0 rounded object-cover bg-[var(--bg-base)]"
+                                    />
+                                    {imgIdx === 0 && (
+                                      <span className="text-[11px] font-medium uppercase tracking-wide text-[var(--fg-muted)]">
+                                        Main
+                                      </span>
+                                    )}
+                                    <div className="flex-1" />
+                                    <Button
+                                      variant="ghost"
+                                      size="small"
+                                      type="button"
+                                      onClick={() => removeImageFromColor(index, imgIdx)}
+                                      aria-label="Remove image"
+                                    >
+                                      <X className="h-3 w-3" />
+                                    </Button>
+                                  </div>
                                 )}
-                              </div>
+                              />
+                            ) : (
+                              <p className="text-xs text-[var(--fg-muted)]">No images uploaded yet.</p>
                             )}
-                          />
+                          </div>
                         </div>
-                      </div>
 
                     </div>
                   )}
