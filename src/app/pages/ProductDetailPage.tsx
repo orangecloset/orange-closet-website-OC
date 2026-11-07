@@ -505,7 +505,7 @@ export default function ProductDetailPage() {
           className="w-full lg:w-[55%] shrink-0 lg:sticky lg:pt-4 lg:self-start"
           style={{ top: stickyTop }}
         >
-          <nav className="text-[11px] text-gray-500 uppercase tracking-wide mb-6 flex flex-wrap items-center gap-1.5">
+          <nav className="text-[11px] text-gray-500 uppercase tracking-wide mb-4 sm:mb-6 flex flex-wrap items-center gap-1.5">
             <Link to="/" className="hover:text-black transition-colors">
               Home
             </Link>
@@ -514,13 +514,15 @@ export default function ProductDetailPage() {
               {typeLabel}
             </Link>
             <span>/</span>
+            <span className="sm:hidden text-gray-400">…</span>
+            <span className="sm:hidden">/</span>
             <Link
               to={`${typeRoute}/${product.category}`}
-              className="hover:text-black transition-colors"
+              className="hidden sm:inline hover:text-black transition-colors"
             >
               {product.categoryLabel}
             </Link>
-            <span>/</span>
+            <span className="hidden sm:inline">/</span>
             <span className="text-gray-900">{product.name}</span>
           </nav>
           <div className="flex flex-col lg:flex-row gap-3">
@@ -585,7 +587,7 @@ export default function ProductDetailPage() {
             </div>
 
             <div ref={galleryRef} className="order-1 lg:order-2 relative flex-1 bg-[#f5f5f5] cursor-zoom-in" onClick={() => { if (activeImages.length > 0) setLightboxIndex(imageIndex); }}>
-              <div className="relative aspect-[4/3] lg:aspect-[3/4] w-full overflow-hidden">
+              <div className="relative aspect-square sm:aspect-[4/3] lg:aspect-[3/4] w-full overflow-hidden">
                 {activeImages.length > 0 ? (
                   <div
                     className="h-full flex flex-row lg:flex-col will-change-transform transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]"
