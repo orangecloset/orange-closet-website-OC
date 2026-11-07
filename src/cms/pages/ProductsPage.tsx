@@ -5,7 +5,7 @@ import { useToast } from "../store/toastContext";
 import { useCms } from "../store/cmsContext";
 import { invalidateProducts, usePagedProducts, useProductSuggestions } from "../lib/queries";
 import { isNewProduct, type CmsProduct, type ProductStatus } from "../../data/store-types";
-import { ActionMenu, Badge, Button, Checkbox, ConfirmDialog, Container, Header, Input, Select, Tabs } from "../components/ui";
+import { ActionMenu, Badge, Button, Checkbox, ConfirmDialog, Container, Header, Input, MobileList, Select, Tabs } from "../components/ui";
 import { StockAdjustModal } from "../components/StockAdjustModal";
 import { formatDate } from "../lib/utils";
 
@@ -140,8 +140,8 @@ export default function ProductsPage() {
         title="Products"
         subtitle={loading ? "Loading products…" : `${totalItems} product(s)`}
         actions={
-          <Link to="/cms-admin/products/new">
-            <Button variant="primary" size="header" className="w-36">
+          <Link to="/cms-admin/products/new" className="w-full sm:w-auto">
+            <Button variant="primary" size="header" className="w-full sm:w-36">
               <Plus className="h-4 w-4 shrink-0" />
               Add Product
             </Button>
@@ -150,7 +150,7 @@ export default function ProductsPage() {
       />
 
       <Container>
-        <div className="flex flex-col gap-3 px-6 pt-2 lg:flex-row lg:items-center lg:justify-between">
+        <div className="flex flex-col gap-3 px-4 pt-2 sm:px-6 lg:flex-row lg:items-center lg:justify-between">
           <div className="min-w-0 overflow-x-auto sm:overflow-visible">
             <Tabs items={STATUS_FILTERS} active={statusFilter} onChange={(key) => { setStatusFilter(key); setPage(1); }} />
           </div>
@@ -166,7 +166,7 @@ export default function ProductsPage() {
           </div>
         </div>
 
-        <div className="flex flex-col gap-3 border-b border-[var(--border-subtle)] px-6 py-4 lg:flex-row lg:items-center">
+        <div className="flex flex-col gap-3 border-b border-[var(--border-subtle)] px-4 py-4 sm:px-6 lg:flex-row lg:items-center">
           <div className="relative z-20 flex-1">
             <Search className="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--fg-muted)]" />
             <Input
@@ -227,7 +227,7 @@ export default function ProductsPage() {
         </div>
 
         {selectedIds.size > 0 && (
-          <div className="flex flex-wrap items-center gap-2 border-b border-[var(--border-subtle)] bg-[var(--bg-subtle)] px-6 py-3">
+          <div className="flex flex-wrap items-center gap-2 border-b border-[var(--border-subtle)] bg-[var(--bg-subtle)] px-4 py-3 sm:px-6">
             <span className="text-sm text-[var(--fg-muted)]">{selectedIds.size} selected</span>
             <Select value={bulkAction ?? ""} onChange={(e) => setBulkAction(e.target.value || null)} className="w-36">
               <option value="">Bulk action...</option>
@@ -244,7 +244,7 @@ export default function ProductsPage() {
           </div>
         )}
 
-        <div className="overflow-x-auto">
+        <div className="hidden overflow-x-auto md:block">
           <table className="w-full min-w-[740px] text-left">
             <thead>
               <tr className="border-b border-[var(--border-subtle)] text-xs text-[var(--fg-muted)]">
@@ -314,7 +314,75 @@ export default function ProductsPage() {
           </table>
         </div>
 
-        <div className="flex items-center justify-between px-6 py-4">
+        <MobileList>
+          {loading && (
+            <div className="flex justify-center px-4 py-12">
+              <Loader2 className="h-5 w-5 animate-spin text-[var(--fg-muted)]" />
+            </div>
+          )}
+          {!loading && pageItems.length === 0 && (
+            <p className="px-4 py-12 text-center text-sm text-[var(--fg-muted)]">No products found.</p>
+          )}
+          {!loading && pageItems.length > 0 && (
+            <div className="flex items-center justify-between px-4 py-2.5">
+              <Checkbox checked={allPageSelected} onChange={toggleSelectAll} label="Select all" />
+              <span className="text-xs text-[var(--fg-muted)]">{pageItems.length} on this page</span>
+            </div>
+          )}
+          {pageItems.map((p) => {
+            const thumb = p.colors[0]?.images[0];
+            return (
+              <div
+                key={p.id}
+                className={`flex flex-col gap-2.5 p-4 transition-colors ${selectedIds.has(p.id) ? "bg-[var(--bg-subtle)]" : ""}`}
+              >
+                <div className="flex items-start gap-3">
+                  <Checkbox checked={selectedIds.has(p.id)} onChange={() => toggleSelect(p.id)} className="mt-0.5" />
+                  {thumb ? (
+                    <img src={thumb} alt="" className="h-14 w-14 shrink-0 rounded-md object-cover bg-[var(--bg-subtle)]" />
+                  ) : (
+                    <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-md bg-[var(--bg-subtle)]">
+                      <ShoppingBag className="h-5 w-5 text-[var(--fg-disabled)]" />
+                    </div>
+                  )}
+                  <div className="min-w-0 flex-1">
+                    <Link to={`/cms-admin/products/${p.id}/edit`} className="block truncate text-sm font-medium text-[var(--fg-base)]">
+                      {p.name}
+                    </Link>
+                    <p className="truncate text-xs text-[var(--fg-muted)]">
+                      {p.brand ?? "Store"} · {typeLabel(p.type)}
+                    </p>
+                    <div className="mt-1.5 flex flex-wrap items-center gap-2">
+                      <span className="text-sm text-[var(--fg-base)]">
+                        {p.compareAtPrice && (<span className="mr-1 text-xs text-[var(--fg-muted)] line-through">{p.compareAtPrice}</span>)}
+                        {p.price}
+                      </span>
+                      {statusBadge(p, isNewProduct(p, settings.newArrivalDays))}
+                    </div>
+                  </div>
+                  <ActionMenu items={[
+                    { label: "Edit", icon: <Pencil className="h-4 w-4" />, to: `/cms-admin/products/${p.id}/edit` },
+                    { label: "Adjust Stock", icon: <SwatchBook className="h-4 w-4" />, onClick: () => openStocks(p) },
+                    { label: "Delete", icon: <Trash2 className="h-4 w-4" />, danger: true, onClick: () => setDeleteTarget(p.id) },
+                  ]} />
+                </div>
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <button
+                    type="button"
+                    onClick={() => openStocks(p)}
+                    className="relative inline-flex h-9 shrink-0 items-center gap-1.5 rounded-md bg-[var(--button-neutral)] px-3 text-[13px] font-medium text-[var(--fg-base)] shadow-[var(--buttons-neutral)] outline-none transition-colors hover:bg-[var(--button-neutral-hover)] active:bg-[var(--button-neutral-pressed)]"
+                  >
+                    <SwatchBook className="h-4 w-4 shrink-0" />
+                    {totalStock(p)} in stock
+                  </button>
+                  <span className="text-xs text-[var(--fg-muted)]">Updated {formatDate(p.updatedAt)}</span>
+                </div>
+              </div>
+            );
+          })}
+        </MobileList>
+
+        <div className="flex flex-col gap-2 px-4 py-4 sm:px-6 md:flex-row md:items-center md:justify-between">
           <span className="text-xs text-[var(--fg-muted)]">
             {loading
               ? "Loading…"

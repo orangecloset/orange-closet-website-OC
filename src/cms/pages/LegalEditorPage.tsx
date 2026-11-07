@@ -61,14 +61,14 @@ export default function LegalEditorPage() {
 
   return (
     <div className="flex min-h-0 flex-col overflow-hidden" style={{ height: "calc(100dvh - 5.5rem)" }}>
-      <div className="flex items-center justify-between gap-4 pb-3">
+      <div className="flex flex-col gap-3 pb-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
         <div className="flex min-w-0 flex-col gap-0.5">
           <h2 className="text-base font-medium text-[var(--fg-base)]">{page.label}</h2>
-          <p className="hidden text-sm text-[var(--fg-subtle)] sm:block">
+          <p className="text-sm text-[var(--fg-subtle)]">
             Content shown at /legal/{slug}
           </p>
         </div>
-        <div className="flex shrink-0 items-center gap-2">
+        <div className="flex w-full flex-wrap items-center gap-2 sm:w-auto sm:shrink-0 sm:flex-nowrap">
           <Button variant="secondary" size="header" onClick={() => navigate("/cms-admin/settings")}>
             <ArrowLeft className="h-4 w-4" />
             Back to Settings

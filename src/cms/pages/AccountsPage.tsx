@@ -9,6 +9,7 @@ import {
   Header,
   Input,
   Label,
+  MobileList,
   Modal,
 } from "../components/ui";
 import { api, type CmsUser } from "../lib/api";
@@ -21,7 +22,7 @@ import { formatDate } from "../lib/utils";
 function roleBadge(role: string) {
   if (role === "super_admin") {
     return (
-      <Badge color="orange" className="min-w-[104px]">
+      <Badge color="orange" className="min-w-0 sm:min-w-[104px]">
         <span className="inline-flex items-center gap-1">
           <ShieldCheck className="h-3 w-3" />
           Super Admin
@@ -31,13 +32,13 @@ function roleBadge(role: string) {
   }
   if (role === "staff") {
     return (
-      <Badge color="green" className="min-w-[104px]">
+      <Badge color="green" className="min-w-0 sm:min-w-[104px]">
         Staff
       </Badge>
     );
   }
   return (
-    <Badge color="grey" className="min-w-[104px]">
+    <Badge color="grey" className="min-w-0 sm:min-w-[104px]">
       Blocked
     </Badge>
   );
@@ -336,7 +337,7 @@ export default function AccountsPage() {
       <div className="flex flex-col gap-y-3">
         <Header title="Accounts" subtitle="Your CMS account" actions={myAccountButton} />
         <Container>
-          <div className="px-6 py-4">
+          <div className="px-4 py-4 sm:px-6">
             <div className="flex flex-col gap-1">
               <span className="text-sm font-medium text-[var(--fg-base)]">
                 {me?.name}
@@ -369,11 +370,11 @@ export default function AccountsPage() {
       />
 
       <Container>
-        <div className="px-6 py-3 text-xs text-[var(--fg-muted)]">
+        <div className="px-4 py-3 text-xs text-[var(--fg-muted)] sm:px-6">
           Signed in as <span className="font-medium text-[var(--fg-base)]">{me?.email}</span>
         </div>
 
-        <div className="overflow-x-auto">
+        <div className="hidden overflow-x-auto md:block">
           <table className="w-full min-w-[560px] text-left">
             <thead>
               <tr className="border-b border-[var(--border-subtle)] text-xs text-[var(--fg-muted)]">
@@ -472,7 +473,83 @@ export default function AccountsPage() {
             </tbody>
           </table>
         </div>
-        <div className="px-6 py-3 text-xs text-[var(--fg-muted)]">
+
+        <MobileList>
+          {loading && (
+            <div className="flex justify-center px-4 py-12">
+              <Loader2 className="h-5 w-5 animate-spin text-[var(--fg-muted)]" />
+            </div>
+          )}
+          {!loading && users.length === 0 && (
+            <p className="px-4 py-12 text-center text-sm text-[var(--fg-muted)]">No accounts yet.</p>
+          )}
+          {users.map((u) => {
+            const isMe = u.id === me?.id;
+            const isSuper = u.role === "super_admin";
+            return (
+              <div key={u.id} className="flex flex-col gap-2.5 p-4">
+                <div className="flex items-start justify-between gap-2">
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-medium text-[var(--fg-base)]">
+                      {u.name}
+                      {isMe && <span className="ml-1.5 text-xs text-[var(--fg-muted)]">(you)</span>}
+                    </p>
+                    <p className="truncate text-xs text-[var(--fg-muted)]">{u.email}</p>
+                    <p className="mt-0.5 text-xs text-[var(--fg-muted)]">Joined {formatDate(u.createdAt)}</p>
+                  </div>
+                  {roleBadge(u.role)}
+                </div>
+                {!isSuper && (
+                  <div className="flex flex-wrap items-center justify-end gap-1.5">
+                    <Button
+                      variant="ghost"
+                      size="small"
+                      disabled={busyId === u.id}
+                      onClick={() => openEditAccount(u)}
+                      aria-label={`Edit ${u.email}`}
+                    >
+                      <Pencil className="h-4 w-4" />
+                    </Button>
+                    {u.role === "pending" ? (
+                      <Button
+                        variant="primary"
+                        size="small"
+                        style={{ width: 104 }}
+                        disabled={busyId === u.id}
+                        onClick={() => handleSetRole(u, "staff")}
+                      >
+                        <Check className="h-4 w-4" />
+                        Unblock
+                      </Button>
+                    ) : (
+                      <Button
+                        variant="secondary"
+                        size="small"
+                        style={{ width: 104 }}
+                        disabled={busyId === u.id}
+                        onClick={() => handleSetRole(u, "pending")}
+                      >
+                        <X className="h-4 w-4" />
+                        Block
+                      </Button>
+                    )}
+                    <Button
+                      variant="danger"
+                      size="small"
+                      disabled={busyId === u.id}
+                      onClick={() => setDeleteTarget(u)}
+                      aria-label={`Remove ${u.email}`}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </MobileList>
+
+        <div className="px-4 py-3 text-xs text-[var(--fg-muted)] sm:px-6">
           {users.length} account{users.length === 1 ? "" : "s"} · {staffCount} staff
           {pendingCount > 0 ? ` · ${pendingCount} blocked` : ""} · super admin cannot be modified
         </div>

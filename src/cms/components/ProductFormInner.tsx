@@ -320,7 +320,7 @@ export function ProductFormInner({ editing }: { editing?: CmsProduct }) {
   }
 
   return (
-    <div className="flex flex-col gap-y-3">
+    <div className="flex flex-col gap-y-3 pb-24 md:pb-0">
       <Header
         title={isEditing ? "Edit Product" : "Add Product"}
         subtitle={isEditing ? editing?.id : "Create a new product"}
@@ -336,12 +336,12 @@ export function ProductFormInner({ editing }: { editing?: CmsProduct }) {
 
       <form id="product-form" onSubmit={handleSubmit} className="flex flex-col gap-y-3">
         <Container>
-          <div className="px-6 pt-2">
+          <div className="px-4 pt-2 sm:px-6">
             <Tabs items={tabs} active={activeTab} onChange={setActiveTab} />
           </div>
 
           {activeTab === "general" && (
-            <div className="grid grid-cols-1 gap-4 px-6 py-4 lg:grid-cols-2">
+            <div className="grid grid-cols-1 gap-4 px-4 py-4 sm:px-6 lg:grid-cols-2">
               <div className="flex flex-col gap-2 lg:col-span-2">
                 <Label htmlFor="name">Name *</Label>
                 <Input id="name" value={name} onChange={(e) => { setName(e.target.value); if (errors.name) setErrors((p) => { const n = { ...p }; delete n.name; return n; }); }} placeholder="e.g. Noane Side-Pocket Bucket Bag" />
@@ -377,9 +377,9 @@ export function ProductFormInner({ editing }: { editing?: CmsProduct }) {
                 <Input id="compareAtPrice" value={compareAtPrice} onChange={(e) => setCompareAtPrice(e.target.value)} placeholder="Optional" />
               </div>
               <div className="flex flex-col gap-2 lg:col-span-2">
-                <div className="flex items-center justify-between">
+                <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                   <Label>Content Sections</Label>
-                  <div className="flex items-center gap-2">
+                  <div className="flex flex-wrap items-center gap-2">
                     <Switch checked={sectionsOpen} onCheckedChange={setSectionsOpen} />
                     <span className="text-xs text-[var(--fg-muted)]">Open by default</span>
                     <Button
@@ -435,7 +435,7 @@ export function ProductFormInner({ editing }: { editing?: CmsProduct }) {
           )}
 
           {activeTab === "sizes" && (
-            <div className="flex flex-col gap-3 px-6 py-4">
+            <div className="flex flex-col gap-3 px-4 py-4 sm:px-6">
               <div className="flex flex-wrap items-center gap-2">
                 <SortableList
                   items={sizes}
@@ -459,7 +459,7 @@ export function ProductFormInner({ editing }: { editing?: CmsProduct }) {
                 )}
               </div>
               <div className="flex items-center gap-2">
-                <Input value={newSize} onChange={(e) => setNewSize(e.target.value)} placeholder="e.g. 37, 40mm, M, L" className="w-48"
+                <Input value={newSize} onChange={(e) => setNewSize(e.target.value)} placeholder="e.g. 37, 40mm, M, L" className="min-w-0 flex-1 sm:w-48 sm:flex-none"
                   onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addSize(); } }} />
                 <Button variant="secondary" size="small" type="button" onClick={addSize} disabled={!newSize.trim() || sizes.includes(newSize.trim())}>
                   <Plus className="h-4 w-4" /> Add
@@ -469,7 +469,7 @@ export function ProductFormInner({ editing }: { editing?: CmsProduct }) {
           )}
 
           {activeTab === "colors" && (
-            <div className="flex flex-col gap-3 px-6 py-4">
+            <div className="flex flex-col gap-3 px-4 py-4 sm:px-6">
               <DndContainer
                 onDragEnd={(_activeId, _overId, activeData, overData) => {
                   if (activeData?.kind !== "color" || overData?.kind !== "color") return;
@@ -503,7 +503,7 @@ export function ProductFormInner({ editing }: { editing?: CmsProduct }) {
                           <Input id={`color-name-${index}`} value={c.name} onChange={(e) => setColor(index, { name: e.target.value })} placeholder="e.g. Black" />
                         </div>
                         <div className="flex flex-col gap-2">
-                          <div className="flex items-center justify-between">
+                          <div className="flex flex-wrap items-center justify-between gap-1">
                             <Label htmlFor={`color-hex-${index}`}>Color(s)</Label>
                             {c.hexes.length < 3 && (
                               <Button variant="ghost" size="small" type="button" onClick={() => addColorToVariant(index)} className="h-6">
@@ -516,7 +516,7 @@ export function ProductFormInner({ editing }: { editing?: CmsProduct }) {
                               className="mt-0.5 h-9 w-9 shrink-0 rounded-full border border-[var(--border-base)]"
                               style={{ background: colorSwatchCss(c.hexes.map(normalizeHex)) }}
                             />
-                            <div className="flex flex-col gap-1.5">
+                            <div className="flex min-w-0 flex-1 flex-col gap-1.5">
                               {c.hexes.map((hex, hexIndex) => (
                                 <div key={`${index}-${hexIndex}`} className="flex items-center gap-1.5">
                                   <input
@@ -531,7 +531,7 @@ export function ProductFormInner({ editing }: { editing?: CmsProduct }) {
                                     value={hex}
                                     onChange={(e) => setVariantColor(index, hexIndex, e.target.value)}
                                     placeholder="#e5e7eb"
-                                    className="w-32"
+                                    className="w-full min-w-0 sm:w-32"
                                   />
                                   {c.hexes.length > 1 && (
                                     <Button variant="ghost" size="small" type="button" onClick={() => removeColorFromVariant(index, hexIndex)} aria-label={`Remove colour ${hexIndex + 1}`} className="h-7 w-7 p-0">
@@ -549,7 +549,7 @@ export function ProductFormInner({ editing }: { editing?: CmsProduct }) {
                       </div>
 
                         <div className="flex flex-col gap-2">
-                          <div className="flex items-center justify-between">
+                          <div className="flex flex-wrap items-center justify-between gap-1">
                             <Label>Images</Label>
                             <div className="flex items-center gap-1">
                               <UploadButton
@@ -645,7 +645,7 @@ export function ProductFormInner({ editing }: { editing?: CmsProduct }) {
           )}
 
           {activeTab === "stock" && (
-            <div className="flex flex-col gap-3 px-6 py-4">
+            <div className="flex flex-col gap-3 px-4 py-4 sm:px-6">
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div>
                   <p className="text-sm font-medium text-[var(--fg-base)]">Inventory</p>
@@ -695,7 +695,7 @@ export function ProductFormInner({ editing }: { editing?: CmsProduct }) {
                           {total <= 0 ? "Sold out" : `${total} in stock`}
                         </span>
                       </div>
-                      <div className="grid grid-cols-[minmax(0,1fr)_12rem] items-center gap-x-4 gap-y-2">
+                      <div className="grid grid-cols-[minmax(0,1fr)_5.5rem] items-center gap-x-4 gap-y-2 sm:grid-cols-[minmax(0,1fr)_12rem]">
                         {group.rows.map((row) => (
                           <div key={`${group.name}-${row.size}`} className="contents">
                             <p className="truncate text-sm text-[var(--fg-base)]">
@@ -733,7 +733,7 @@ export function ProductFormInner({ editing }: { editing?: CmsProduct }) {
           )}
 
           {activeTab === "status" && (
-            <div className="flex flex-col gap-4 px-6 py-4">
+            <div className="flex flex-col gap-4 px-4 py-4 sm:px-6">
               <div className="flex flex-col gap-2">
                 <Label>Product Status</Label>
                 <div className="flex flex-wrap gap-2">
@@ -764,6 +764,24 @@ export function ProductFormInner({ editing }: { editing?: CmsProduct }) {
           )}
         </Container>
       </form>
+
+      <div className="fixed inset-x-0 bottom-0 z-40 flex items-center gap-2 border-t border-[var(--border-base)] bg-[var(--bg-base)] px-4 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] shadow-[var(--elevation-flyout)] md:hidden">
+        <Link to="/cms-admin/products" className="flex-1">
+          <Button variant="secondary" size="base" className="w-full">
+            Cancel
+          </Button>
+        </Link>
+        <Button
+          variant="primary"
+          size="base"
+          form="product-form"
+          type="submit"
+          disabled={saving}
+          className="flex-1"
+        >
+          {saving ? "Saving…" : "Save"}
+        </Button>
+      </div>
 
       <StockAdjustModal
         product={stockProduct}

@@ -142,7 +142,7 @@ export function ProductSection({
   return (
     <Container>
       <Header title={title} subtitle={subtitle} />
-      <div className="px-6 py-4">
+      <div className="px-4 py-4 sm:px-6">
         <div className="flex items-center gap-2" ref={rowRef}>
           <div className="relative flex-1" ref={inputWrapRef}>
             <Search className="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--fg-muted)]" />

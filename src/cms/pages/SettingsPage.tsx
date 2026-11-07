@@ -35,7 +35,7 @@ function LinkSection({
 }) {
   const add = () => onChange([...links, { label: "", url: "" }]);
   return (
-    <div className="flex flex-col gap-3 px-6 py-4">
+    <div className="flex flex-col gap-3 px-4 py-4 sm:px-6">
       <div className="flex items-center justify-between">
         <div>
           <h3 className="text-sm font-medium text-[var(--fg-base)]">{title}</h3>
@@ -188,7 +188,7 @@ export default function SettingsPage() {
       <form id="settings-form" onSubmit={handleSubmit} className="flex flex-col gap-y-3">
         <Container>
           <Header title="Store Identity" subtitle="Brand name and tagline" />
-          <div className="grid grid-cols-1 gap-4 px-6 py-4 lg:grid-cols-2">
+          <div className="grid grid-cols-1 gap-4 px-4 py-4 sm:px-6 lg:grid-cols-2">
             <div className="flex flex-col gap-2">
               <Label htmlFor="store-name">Store Name</Label>
               <Input
@@ -218,7 +218,7 @@ export default function SettingsPage() {
             </div>
             <div className="flex flex-col gap-2">
               <Label>Favicon</Label>
-              <div className="flex items-center gap-2">
+              <div className="flex flex-wrap items-center gap-2">
                 <img
                   src={settings.faviconUrl}
                   alt=""
@@ -246,7 +246,7 @@ export default function SettingsPage() {
             </div>
             <div className="flex flex-col gap-2">
               <Label>Social Share Image</Label>
-              <div className="flex items-center gap-2">
+              <div className="flex flex-wrap items-center gap-2">
                 {settings.ogImageUrl ? (
                   <img
                     src={settings.ogImageUrl}
@@ -282,7 +282,7 @@ export default function SettingsPage() {
 
         <Container>
           <Header title="Storefront Behavior" subtitle="Toggles that control what appears on the storefront" />
-          <div className="flex flex-col gap-4 px-6 py-4">
+          <div className="flex flex-col gap-4 px-4 py-4 sm:px-6">
             <div className="flex items-center justify-between">
               <div>
                 <Label>Share button</Label>
@@ -330,7 +330,7 @@ export default function SettingsPage() {
 
         <Container>
           <Header title="Social & Contact" subtitle="Facebook QR, Messenger, and location" />
-          <div className="grid grid-cols-1 gap-4 px-6 py-4 lg:grid-cols-2">
+          <div className="grid grid-cols-1 gap-4 px-4 py-4 sm:px-6 lg:grid-cols-2">
             <div className="flex flex-col gap-2">
               <Label htmlFor="facebook-url">Facebook URL</Label>
               <Input
@@ -372,7 +372,7 @@ export default function SettingsPage() {
 
         <Container>
           <Header title="Concierge Section" subtitle="The 'Message Us' block in the footer. Needs messenger url to work" />
-          <div className="grid grid-cols-1 gap-4 px-6 py-4 lg:grid-cols-2">
+          <div className="grid grid-cols-1 gap-4 px-4 py-4 sm:px-6 lg:grid-cols-2">
             <div className="flex flex-col gap-2">
               <Label htmlFor="concierge-heading">Heading</Label>
               <Input
@@ -418,14 +418,14 @@ export default function SettingsPage() {
 
         <Container>
           <Header title="Social Media Icons" subtitle="Icons in the 'Visit Us' area — leave the URL empty to hide the icon" />
-          <div className="flex flex-col gap-3 px-6 py-4">
+          <div className="flex flex-col gap-3 px-4 py-4 sm:px-6">
             {SOCIAL_PLATFORMS.map(({ label, Icon }) => {
               const url =
                 settings.socials.find((s) => s.label.toLowerCase() === label.toLowerCase())
                   ?.url ?? "";
               return (
-                <div key={label} className="flex items-center gap-2">
-                  <span className="flex w-36 shrink-0 items-center gap-2 text-sm font-medium text-[var(--fg-base)]">
+                <div key={label} className="flex flex-col gap-1.5 sm:flex-row sm:items-center sm:gap-2">
+                  <span className="flex w-auto shrink-0 items-center gap-2 text-sm font-medium text-[var(--fg-base)] sm:w-36">
                     <Icon className="h-4 w-4 shrink-0" />
                     {label}
                   </span>
@@ -451,7 +451,7 @@ export default function SettingsPage() {
 
         <Container>
           <Header title="Copyright" subtitle="Bottom line of the footer" />
-          <div className="px-6 py-4">
+          <div className="px-4 py-4 sm:px-6">
             <Input
               value={settings.copyrightText}
               onChange={(e) => set({ copyrightText: e.target.value })}
@@ -471,7 +471,7 @@ export default function SettingsPage() {
               </Button>
             }
           />
-          <div className="flex items-start gap-2 border-b border-t border-[var(--tag-red-border)] px-6 py-3">
+          <div className="flex items-start gap-2 border-b border-t border-[var(--tag-red-border)] px-4 py-3 sm:px-6">
             <TriangleAlert className="mt-0.5 h-4 w-4 shrink-0 text-[var(--tag-red-text)]" />
             <div className="flex flex-col gap-1">
               <p className="text-xs font-medium text-[var(--tag-red-text)]">
@@ -484,7 +484,7 @@ export default function SettingsPage() {
           </div>
           <div className="flex flex-col divide-y divide-[var(--border-subtle)]">
             {links.length === 0 && (
-              <p className="px-6 py-4 text-sm text-[var(--fg-muted)]">
+              <p className="px-4 py-4 sm:px-6 text-sm text-[var(--fg-muted)]">
                 No links yet. Create one to share with staff.
               </p>
             )}
@@ -492,8 +492,8 @@ export default function SettingsPage() {
               const url = `${window.location.origin}/catalog/${link.uid}`;
               const pinVisible = pinVisibleId === link.uid;
               return (
-                <div key={link.uid} className="flex flex-col gap-3 px-6 py-4">
-                  <div className="flex items-center justify-between gap-4">
+                <div key={link.uid} className="flex flex-col gap-3 px-4 py-4 sm:px-6">
+                  <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
                     <div className="flex min-w-0 items-center gap-2">
                       <span className="text-sm text-[var(--fg-muted)]">Link</span>
                       <code className="max-w-full truncate rounded-md bg-[var(--bg-subtle)] px-2 py-1 font-mono text-xs text-[var(--fg-base)]">
@@ -520,7 +520,7 @@ export default function SettingsPage() {
                       )}
                     </div>
                   </div>
-                  <div className="flex items-center justify-between gap-4">
+                  <div className="flex flex-wrap items-center justify-between gap-2 sm:gap-4">
                     <div className="flex items-center gap-2">
                       <span className="text-sm text-[var(--fg-muted)]">PIN</span>
                       <>
@@ -600,7 +600,7 @@ export default function SettingsPage() {
               </Button>
             }
           />
-          <div className="px-6 py-4">
+          <div className="px-4 py-4 sm:px-6">
             <p className="text-xs text-[var(--fg-muted)]">
               Unused images are deleted as soon as a cleanup runs. A weekly
               automatic cleanup also runs on the server.

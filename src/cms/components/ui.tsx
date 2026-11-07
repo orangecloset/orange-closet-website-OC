@@ -44,14 +44,14 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   return (
     <ToastContext.Provider value={{ showToast, dismissAll, dismissWarnings }}>
       {children}
-      <div className="pointer-events-none fixed bottom-4 right-4 z-[200] flex flex-col gap-2">
+      <div className="pointer-events-none fixed inset-x-4 bottom-4 z-[200] flex flex-col gap-2 sm:inset-x-auto sm:right-4">
         {toasts.map((t) => {
           const isError = t.type === "error";
           const isWarning = t.type === "warning";
           return (
             <div
               key={t.id}
-              className={`pointer-events-auto flex items-center gap-2.5 rounded-md border px-4 py-2.5 shadow-[var(--elevation-flyout)] ${
+              className={`pointer-events-auto flex w-full items-center gap-2.5 rounded-md border px-4 py-2.5 shadow-[var(--elevation-flyout)] sm:w-auto ${
                 isError
                   ? "border-red-300 bg-red-50"
                   : isWarning
@@ -126,14 +126,14 @@ export function Tabs({
   onChange: (key: string) => void;
 }) {
   return (
-    <div className="flex gap-0 border-b border-[var(--border-subtle)]">
+    <div className="flex gap-0 overflow-x-auto border-b border-[var(--border-subtle)] [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
       {items.map((item) => (
         <button
           key={item.key}
           type="button"
           onClick={() => onChange(item.key)}
           className={cn(
-            "relative px-4 py-2.5 text-[13px] font-medium transition-colors",
+            "relative shrink-0 px-3 py-2.5 text-[13px] font-medium transition-colors sm:px-4",
             active === item.key
               ? "text-[var(--fg-base)]"
               : "text-[var(--fg-muted)] hover:text-[var(--fg-base)]"
@@ -184,10 +184,10 @@ const buttonVariants: Record<ButtonVariant, string> = {
 };
 
 const buttonSizes: Record<ButtonSize, string> = {
-  small: "px-2 py-1 text-[13px]",
-  base: "px-3 py-1.5 text-[13px]",
+  small: "px-2.5 py-1.5 text-[13px] sm:px-2 sm:py-1",
+  base: "px-3 py-2 text-[13px] sm:py-1.5",
   large: "px-4 py-2.5 text-sm",
-  header: "h-[30px] px-3 text-[13px]",
+  header: "h-9 px-3 text-[13px] sm:h-[30px]",
 };
 
 export function Button({
@@ -223,11 +223,11 @@ const badgeColors: Record<BadgeColor, string> = {
 };
 
 const badgeSizes: Record<BadgeSize, string> = {
-  "2xsmall": "h-5 w-16 px-1 text-[12px]",
-  xsmall: "h-6 w-[88px] px-1 text-[12px]",
-  small: "h-7 w-24 px-2 text-[12px]",
-  base: "h-8 w-28 px-3 text-[12px]",
-  large: "h-10 w-32 px-4 text-[13px]",
+  "2xsmall": "h-5 w-auto px-2 text-[12px] sm:w-16 sm:px-1",
+  xsmall: "h-6 w-auto px-2 text-[12px] sm:w-[88px] sm:px-1",
+  small: "h-7 w-auto px-2.5 text-[12px] sm:w-24 sm:px-2",
+  base: "h-8 w-auto px-3 text-[12px] sm:w-28 sm:px-3",
+  large: "h-10 w-auto px-3.5 text-[13px] sm:w-32 sm:px-4",
 };
 
 export function Badge({
@@ -284,14 +284,18 @@ export function Header({
   actions?: ReactNode;
 }) {
   return (
-    <div className="flex items-center justify-between gap-4 px-6 py-4">
+    <div className="flex flex-col gap-3 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:gap-4 sm:px-6">
       <div className="flex min-w-0 flex-col gap-0.5">
-        <h2 className="text-base font-medium text-[var(--fg-base)]">{title}</h2>
+        <h2 className="truncate text-base font-medium text-[var(--fg-base)]">{title}</h2>
         {subtitle && (
-          <p className="hidden text-sm text-[var(--fg-subtle)] sm:block">{subtitle}</p>
+          <p className="text-sm text-[var(--fg-subtle)]">{subtitle}</p>
         )}
       </div>
-      {actions && <div className="flex shrink-0 items-center gap-2">{actions}</div>}
+      {actions && (
+        <div className="flex w-full flex-wrap items-center gap-2 sm:w-auto sm:shrink-0 sm:flex-nowrap">
+          {actions}
+        </div>
+      )}
     </div>
   );
 }
@@ -316,7 +320,7 @@ const fieldBase =
 export function Input({ className, ...props }: InputHTMLAttributes<HTMLInputElement>) {
   return (
     <input
-      className={cn("h-8 px-2 py-1.5", fieldBase, className)}
+      className={cn("h-9 px-2 py-1.5 sm:h-8", fieldBase, className)}
       {...props}
     />
   );
@@ -341,7 +345,7 @@ export function Select({
 }: SelectHTMLAttributes<HTMLSelectElement>) {
   return (
     <select
-      className={cn("h-8 px-2 py-1.5", fieldBase, className)}
+      className={cn("h-9 px-2 py-1.5 sm:h-8", fieldBase, className)}
       {...props}
     >
       {children}
@@ -456,7 +460,7 @@ export function ActionMenu({ items }: { items: ActionItem[] }) {
         type="button"
         onClick={toggle}
         aria-label="Actions"
-        className="flex h-fit w-fit items-center justify-center rounded-sm p-1 text-[var(--fg-muted)] outline-none transition-colors hover:bg-[var(--bg-subtle-hover)] hover:text-[var(--fg-base)] focus-visible:shadow-[var(--borders-focus)]"
+        className="flex h-fit w-fit items-center justify-center rounded-sm p-1.5 text-[var(--fg-muted)] outline-none transition-colors hover:bg-[var(--bg-subtle-hover)] hover:text-[var(--fg-base)] focus-visible:shadow-[var(--borders-focus)] sm:p-1"
       >
         <EllipsisVertical className="h-4 w-4" />
       </button>
@@ -532,7 +536,7 @@ export function Modal({
   useFocusTrap(dialogRef, open, onClose);
   if (!open) return null;
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-50 flex items-end justify-center sm:items-center sm:p-4">
       <div className="absolute inset-0 bg-[var(--bg-overlay)]" onClick={onClose} aria-hidden />
       <div
         ref={dialogRef}
@@ -540,15 +544,15 @@ export function Modal({
         role="dialog"
         aria-modal="true"
         aria-label={title}
-        className="relative flex max-h-full w-full max-w-md flex-col overflow-hidden rounded-xl bg-[var(--bg-base)] shadow-[var(--elevation-modal)] outline-none"
+        className="relative flex max-h-[90dvh] w-full max-w-md flex-col overflow-hidden rounded-t-xl bg-[var(--bg-base)] shadow-[var(--elevation-modal)] outline-none sm:max-h-full sm:rounded-xl"
       >
-        <div className="shrink-0 border-b border-[var(--border-subtle)] bg-[var(--bg-base)] px-6 py-4">
+        <div className="shrink-0 border-b border-[var(--border-subtle)] bg-[var(--bg-base)] px-4 py-4 sm:px-6">
           <h3 className="text-lg font-medium text-[var(--fg-base)]">{title}</h3>
           {description && <p className="mt-1 text-sm text-[var(--fg-subtle)]">{description}</p>}
         </div>
-        <div className="flex-1 overflow-y-auto px-6 py-4">{children}</div>
+        <div className="flex-1 overflow-y-auto px-4 py-4 sm:px-6">{children}</div>
         {footer && (
-          <div className="flex shrink-0 items-center justify-end gap-2 border-t border-[var(--border-subtle)] bg-[var(--bg-base)] px-6 py-4">
+          <div className="flex shrink-0 flex-wrap items-center justify-end gap-2 border-t border-[var(--border-subtle)] bg-[var(--bg-base)] px-4 py-4 pb-[max(1rem,env(safe-area-inset-bottom))] sm:px-6 sm:pb-4">
             {footer}
           </div>
         )}
@@ -767,10 +771,24 @@ export function StatCard({
   hint?: string;
 }) {
   return (
-    <div className="rounded-lg bg-[var(--bg-base)] px-6 py-4 shadow-[var(--elevation-card-rest)]">
-      <p className="text-[13px] text-[var(--fg-muted)]">{label}</p>
+    <div className="rounded-lg bg-[var(--bg-base)] px-4 py-3 shadow-[var(--elevation-card-rest)] sm:px-6 sm:py-4">
+      <p className="text-xs text-[var(--fg-muted)] sm:text-[13px]">{label}</p>
       <p className="mt-1 text-lg font-medium text-[var(--fg-base)]">{value}</p>
       {hint && <p className="mt-1 text-xs text-[var(--fg-disabled)]">{hint}</p>}
+    </div>
+  );
+}
+
+export function MobileList({
+  children,
+  className,
+}: {
+  children: ReactNode;
+  className?: string;
+}) {
+  return (
+    <div className={cn("flex flex-col divide-y divide-[var(--border-subtle)] md:hidden", className)}>
+      {children}
     </div>
   );
 }
@@ -786,7 +804,7 @@ export function PasswordInput({
       <Input
         type="text"
         autoComplete="one-time-code"
-        className={cn("pr-8", className)}
+        className={cn("pr-9 sm:pr-8", className)}
         style={{ WebkitTextSecurity: visible ? "none" : "disc", ...style } as CSSProperties}
         {...props}
       />
@@ -794,7 +812,7 @@ export function PasswordInput({
         type="button"
         onClick={() => setVisible((prev) => !prev)}
         aria-label={visible ? "Hide password" : "Show password"}
-        className="absolute bottom-0 right-0 flex h-8 w-8 items-center justify-center border-l border-[var(--border-base)] text-[var(--fg-muted)] outline-none transition-colors hover:text-[var(--fg-base)] focus-visible:shadow-[var(--borders-focus)]"
+        className="absolute bottom-0 right-0 flex h-9 w-9 items-center justify-center border-l border-[var(--border-base)] text-[var(--fg-muted)] outline-none transition-colors hover:text-[var(--fg-base)] focus-visible:shadow-[var(--borders-focus)] sm:h-8 sm:w-8"
       >
         {visible ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
       </button>

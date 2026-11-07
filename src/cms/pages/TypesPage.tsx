@@ -4,7 +4,7 @@ import { useToast } from "../store/toastContext";
 import { useCms } from "../store/cmsContext";
 import { api } from "../lib/api";
 import type { ProductTypeInfo, TypeCategory } from "../../data/store-types";
-import { Button, ConfirmDialog, Container, Header } from "../components/ui";
+import { Button, ConfirmDialog, Container, Header, MobileList } from "../components/ui";
 import { DndContainer, SortableItems, DragHandle } from "../components/SortableList";
 import { arrayMove } from "@dnd-kit/sortable";
 import { TypeFormModal } from "../components/TypeFormModal";
@@ -199,7 +199,7 @@ export default function TypesPage() {
         title="Categories"
         subtitle="Manage storefront product types."
         actions={
-          <Button variant="primary" size="header" className="w-36" onClick={openCreate}>
+          <Button variant="primary" size="header" className="w-full sm:w-36" onClick={openCreate}>
             <Plus className="h-4 w-4 shrink-0" />
             Add Category
           </Button>
@@ -207,7 +207,7 @@ export default function TypesPage() {
       />
 
       <Container>
-        <div className="overflow-x-auto">
+        <div className="hidden overflow-x-auto md:block">
           <div className="w-full min-w-[640px] text-left">
             <div className="flex border-b border-[var(--border-subtle)] text-xs text-[var(--fg-muted)]">
               <div className="w-10 px-4 py-2.5 font-medium"></div>
@@ -287,6 +287,74 @@ export default function TypesPage() {
             )}
           </div>
         </div>
+
+        <MobileList>
+          <DndContainer
+            onDragEnd={(activeId, overId) => {
+              const oldIndex = types.findIndex((t) => t.slug === activeId);
+              const newIndex = types.findIndex((t) => t.slug === overId);
+              if (oldIndex === -1 || newIndex === -1) return;
+              handleTypesReorder(arrayMove(types, oldIndex, newIndex));
+            }}
+          >
+            <SortableItems
+              items={types}
+              keyExtractor={(t) => t.slug}
+              renderItem={(t, _index, dragHandleProps) => (
+                <div className="flex items-start gap-2 p-4">
+                  <div className="pt-0.5">
+                    <DragHandle handleProps={dragHandleProps} />
+                  </div>
+                  <img
+                    src={t.heroImage}
+                    alt=""
+                    className="h-12 w-12 shrink-0 rounded-md object-cover bg-[var(--bg-subtle)]"
+                  />
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-medium text-[var(--fg-base)]">{t.label}</p>
+                    <p className="truncate text-xs text-[var(--fg-muted)]">{t.slug}</p>
+                    <p className="truncate text-xs text-[var(--fg-muted)]">{t.route}</p>
+                    <button
+                      type="button"
+                      onClick={() => openAddSubCategory(t)}
+                      className="mt-1 rounded text-xs font-medium text-[var(--fg-interactive)]"
+                    >
+                      {t.categories.length} sub-categor{t.categories.length === 1 ? "y" : "ies"}
+                    </button>
+                  </div>
+                  <div className="flex shrink-0 items-center gap-0.5">
+                    <Button
+                      variant="ghost"
+                      size="small"
+                      onClick={() => openAddSubCategory(t)}
+                      title="Add sub-category"
+                      aria-label="Add sub-category"
+                    >
+                      <Plus className="h-4 w-4 text-[var(--tag-green-text)]" />
+                    </Button>
+                    <Button variant="ghost" size="small" onClick={() => openEdit(t)} aria-label={`Edit ${t.label}`}>
+                      <Pencil className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="small"
+                      onClick={() => setDeleteTarget(t.slug)}
+                      title="Delete"
+                      aria-label="Delete category"
+                    >
+                      <Trash2 className="h-4 w-4 shrink-0 text-[var(--tag-red-text)]" />
+                    </Button>
+                  </div>
+                </div>
+              )}
+            />
+          </DndContainer>
+          {types.length === 0 && (
+            <div className="px-4 py-12 text-center text-sm text-[var(--fg-muted)]">
+              No categories yet. Click "Add Category" to create one.
+            </div>
+          )}
+        </MobileList>
       </Container>
 
       <TypeFormModal

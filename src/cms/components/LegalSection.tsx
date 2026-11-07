@@ -22,8 +22,8 @@ export function LegalSection({
   const add = () => onChange([...links, { label: "", url: "", body: "" }]);
 
   return (
-    <div className="flex flex-col gap-3 px-6 py-4">
-      <div className="flex items-center justify-between">
+    <div className="flex flex-col gap-3 px-4 py-4 sm:px-6">
+      <div className="flex flex-wrap items-center justify-between gap-2">
         <div>
           <h3 className="text-sm font-medium text-[var(--fg-base)]">Legal</h3>
           <p className="text-xs text-[var(--fg-muted)]">Pages shown at /legal/your-page</p>

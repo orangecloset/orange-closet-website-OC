@@ -84,7 +84,7 @@ export default function AboutPage() {
       />
 
       <Container>
-        <div className="flex flex-col gap-4 px-6 py-4">
+        <div className="flex flex-col gap-4 px-4 py-4 sm:px-6">
           <div className="flex items-center gap-2">
             <h2 className="text-sm font-medium text-[var(--fg-base)]">Hero</h2>
             <button
@@ -99,7 +99,7 @@ export default function AboutPage() {
               }`}
             />
           </div>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
               <Label>Subtitle</Label>
               <Input
@@ -119,7 +119,7 @@ export default function AboutPage() {
           </div>
           <div className="flex flex-col gap-2">
             <Label>Hero Image</Label>
-            <div className="flex items-center gap-3">
+            <div className="flex flex-wrap items-center gap-3">
               {about.heroImage && (
                 <img
                   src={about.heroImage}
@@ -142,7 +142,7 @@ export default function AboutPage() {
           </div>
           <div className="flex flex-col gap-2">
             <Label>Mobile Hero Image</Label>
-            <div className="flex items-center gap-3">
+            <div className="flex flex-wrap items-center gap-3">
               {about.mobileHeroImage && (
                 <img
                   src={about.mobileHeroImage}
@@ -177,7 +177,7 @@ export default function AboutPage() {
             </Button>
           }
         />
-        <div className="flex flex-col gap-3 px-6 py-4">
+        <div className="flex flex-col gap-3 px-4 py-4 sm:px-6">
           <SortableList
             items={about.sections}
             onReorder={handleReorderSections}

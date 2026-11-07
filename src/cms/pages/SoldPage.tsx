@@ -9,7 +9,7 @@ import { invalidateProducts, usePagedProducts, useProductSuggestions } from "../
 import { parsePrice, downloadReceiptPdf } from "../lib/receipt";
 import { getCmsSession } from "../store/auth";
 import { productColorCss } from "../../data/products";
-import { Badge, Button, Container, Header, Input, Label, Modal, Select, SlideToConfirm } from "../components/ui";
+import { Badge, Button, Container, Header, Input, Label, MobileList, Modal, Select, SlideToConfirm } from "../components/ui";
 
 const PAGE_SIZE = 30;
 const SEARCH_DEBOUNCE_MS = 350;
@@ -215,7 +215,7 @@ export default function SoldPage() {
         actions={
           <>
             {!product && (
-              <Button variant="secondary" size="header" className="w-36" onClick={cycleAvailability}>
+              <Button variant="secondary" size="header" className="w-full sm:w-36" onClick={cycleAvailability}>
                 <ListFilter className="h-4 w-4 shrink-0" />
                 {AVAILABILITY_FILTERS.find((f) => f.key === availabilityFilter)?.label}
               </Button>
@@ -233,7 +233,7 @@ export default function SoldPage() {
       <Container>
         {!product ? (
           <>
-            <div className="flex flex-col gap-3 border-b border-[var(--border-subtle)] px-6 py-4 lg:flex-row lg:items-center">
+            <div className="flex flex-col gap-3 border-b border-[var(--border-subtle)] px-4 py-4 sm:px-6 lg:flex-row lg:items-center">
               <div className="relative z-20 flex-1">
                 <Search className="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--fg-muted)]" />
                 <Input
@@ -293,7 +293,7 @@ export default function SoldPage() {
               </div>
             </div>
 
-            <div className="overflow-x-auto">
+            <div className="hidden overflow-x-auto md:block">
               <table className="w-full min-w-[640px] text-left">
                 <thead>
                   <tr className="border-b border-[var(--border-subtle)] text-xs text-[var(--fg-muted)]">
@@ -350,7 +350,47 @@ export default function SoldPage() {
               </table>
             </div>
 
-            <div className="flex items-center justify-between px-6 py-4">
+            <MobileList>
+              {loading && (
+                <div className="flex justify-center px-4 py-12">
+                  <Loader2 className="h-5 w-5 animate-spin text-[var(--fg-muted)]" />
+                </div>
+              )}
+              {!loading && items.length === 0 && (
+                <p className="px-4 py-12 text-center text-sm text-[var(--fg-muted)]">No products found</p>
+              )}
+              {items.map((p) => {
+                const thumb = p.colors[0]?.images[0];
+                return (
+                  <button
+                    key={p.id}
+                    type="button"
+                    onClick={() => handleSelect(p)}
+                    className="flex w-full items-center gap-3 p-4 text-left transition-colors active:bg-[var(--bg-subtle-hover)]"
+                  >
+                    {thumb ? (
+                      <img
+                        src={thumb}
+                        alt=""
+                        className="h-12 w-12 shrink-0 rounded-md object-cover bg-[var(--bg-subtle)]"
+                      />
+                    ) : (
+                      <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-md bg-[var(--bg-subtle)]">
+                        <ShoppingBag className="h-4 w-4 text-[var(--fg-disabled)]" />
+                      </div>
+                    )}
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-sm font-medium text-[var(--fg-base)]">{p.name}</p>
+                      <p className="text-xs text-[var(--fg-muted)]">{p.price}</p>
+                    </div>
+                    {stockBadge(totalStock(p))}
+                    <ChevronRight className="h-4 w-4 shrink-0 text-[var(--fg-disabled)]" />
+                  </button>
+                );
+              })}
+            </MobileList>
+
+            <div className="flex flex-col gap-2 px-4 py-4 sm:px-6 md:flex-row md:items-center md:justify-between">
               <span className="text-xs text-[var(--fg-muted)]">
                 {loading
                   ? "Loading…"
@@ -382,8 +422,9 @@ export default function SoldPage() {
           </>
         ) : (
           <form
+            id="sell-form"
             onSubmit={handleSubmit}
-            className="flex flex-col gap-6 p-6"
+            className="flex flex-col gap-6 p-4 pb-28 sm:p-6 md:pb-6"
           >
             <div className="flex items-center gap-4">
               <img
@@ -493,7 +534,7 @@ export default function SoldPage() {
                     const v = e.target.value;
                     setQuantity(v === "" ? "" : Number(v));
                   }}
-                  className="mt-1.5 w-40"
+                  className="mt-1.5 w-full sm:w-40"
                 />
                 <p className="mt-1.5 text-xs text-[var(--fg-muted)]">
                   Current stock: {sizeStock} → After sale:{" "}
@@ -511,7 +552,7 @@ export default function SoldPage() {
                 max={todayIso()}
                 onChange={(e) => setSoldDate(e.target.value)}
                 required
-                className="mt-1.5 w-52"
+                className="mt-1.5 w-full sm:w-52"
               />
             </div>
 
@@ -578,7 +619,7 @@ export default function SoldPage() {
               </div>
             </div>
 
-            <div className="border-t border-[var(--border-subtle)] pt-5">
+            <div className="hidden border-t border-[var(--border-subtle)] pt-5 md:block">
               <div className="flex justify-end">
                 <Button
                   variant="primary"
@@ -591,8 +632,28 @@ export default function SoldPage() {
               </div>
             </div>
           </form>
-        )}
+          )}
       </Container>
+
+      {product && (
+        <div className="fixed inset-x-0 bottom-0 z-40 flex items-center gap-3 border-t border-[var(--border-base)] bg-[var(--bg-base)] px-4 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] shadow-[var(--elevation-flyout)] md:hidden">
+          <div className="min-w-0 flex-1">
+            <p className="text-[11px] uppercase tracking-wide text-[var(--fg-muted)]">Total</p>
+            <p className="truncate text-sm font-medium text-[var(--fg-base)]">
+              ₱{(parsePrice(product.price) * Math.max(1, qty)).toLocaleString("en-US", { minimumFractionDigits: 2 })}
+            </p>
+          </div>
+          <Button
+            variant="primary"
+            size="base"
+            type="submit"
+            form="sell-form"
+            disabled={!activeVariant || sizeStock <= 0}
+          >
+            Record Sale
+          </Button>
+        </div>
+      )}
 
       {product && activeColor && activeVariant && (
         <Modal

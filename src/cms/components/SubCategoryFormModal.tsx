@@ -107,7 +107,7 @@ function SubCategoryFormModal({
           onSubmit={onSubmit}
           className="flex flex-col gap-3 rounded-md border border-[var(--border-subtle)] bg-[var(--bg-subtle)] p-3"
         >
-          <div className="flex items-center justify-between">
+          <div className="flex flex-wrap items-center justify-between gap-2">
             <Label>{editingSubIndex !== null ? "Edit sub-category" : "New sub-category"}</Label>
             {editingSubIndex !== null && (
               <Button

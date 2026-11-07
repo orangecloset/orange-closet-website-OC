@@ -57,7 +57,7 @@ export default function HomepagePage() {
       />
 
       <Container>
-        <div className="flex items-center justify-between px-6 py-4">
+        <div className="flex items-center justify-between px-4 py-4 sm:px-6">
           <span className="text-sm text-[var(--fg-muted)]">Hero image clickable</span>
           <Switch
             checked={homepage.heroImageClickable}
@@ -67,7 +67,7 @@ export default function HomepagePage() {
       </Container>
 
       <Container>
-        <div className="flex items-center justify-between px-6 py-4">
+        <div className="flex items-center justify-between px-4 py-4 sm:px-6">
           <span className="text-sm text-[var(--fg-muted)]">Show On Sale section</span>
           <Switch
             checked={homepage.showOnSale}
@@ -77,7 +77,7 @@ export default function HomepagePage() {
       </Container>
 
       <Container>
-        <div className="flex items-center justify-between px-6 py-4">
+        <div className="flex items-center justify-between px-4 py-4 sm:px-6">
           <span className="text-sm text-[var(--fg-muted)]">Show New Arrivals section</span>
           <Switch
             checked={homepage.showNewArrivals}
@@ -102,7 +102,7 @@ export default function HomepagePage() {
             </Button>
           }
         />
-        <div className="grid grid-cols-1 gap-3 px-6 py-4 lg:grid-cols-2">
+        <div className="grid grid-cols-1 gap-3 px-4 py-4 sm:px-6 lg:grid-cols-2">
           {homepage.heroes.map((hero) => (
             <HeroCard key={hero.id} hero={hero} />
           ))}

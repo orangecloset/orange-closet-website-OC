@@ -6,7 +6,7 @@ import type { RecentSale } from "../../data/store-types";
 import { api } from "../lib/api";
 import type { PagedSales } from "../lib/api";
 import { parsePrice, downloadReceiptPdf, openReceiptTab, openReceiptPdfTab, type ReceiptData } from "../lib/receipt";
-import { Badge, Button, Container, Header } from "../components/ui";
+import { Badge, Button, Container, Header, MobileList } from "../components/ui";
 
 const PAGE_SIZE = 50;
 
@@ -101,7 +101,7 @@ export default function SalesHistoryPage() {
       />
 
       <Container>
-        <div className="overflow-x-auto">
+        <div className="hidden overflow-x-auto md:block">
           <table className="w-full min-w-[860px] text-left">
             <thead>
               <tr className="border-b border-[var(--border-subtle)] text-xs text-[var(--fg-muted)]">
@@ -190,7 +190,76 @@ export default function SalesHistoryPage() {
           </table>
         </div>
 
-        <div className="flex items-center justify-between px-6 py-4">
+        <MobileList>
+          {loading && (
+            <div className="flex justify-center px-4 py-12">
+              <Loader2 className="h-5 w-5 animate-spin text-[var(--fg-muted)]" />
+            </div>
+          )}
+          {!loading && items.length === 0 && (
+            <p className="px-4 py-12 text-center text-sm text-[var(--fg-muted)]">No sales recorded yet.</p>
+          )}
+          {items.map((s) => {
+            const total = parsePrice(s.price) * s.quantity;
+            return (
+              <div
+                key={s.id}
+                onClick={() => handleOpenReceipt(s)}
+                className="flex cursor-pointer flex-col gap-2.5 p-4 transition-colors active:bg-[var(--bg-subtle-hover)]"
+              >
+                <div className="flex items-start gap-3">
+                  {s.productImage ? (
+                    <img
+                      src={s.productImage}
+                      alt=""
+                      className="h-12 w-12 shrink-0 rounded-md object-cover bg-[var(--bg-subtle)]"
+                    />
+                  ) : (
+                    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-md bg-[var(--bg-subtle)]">
+                      <ShoppingBag className="h-4 w-4 text-[var(--fg-disabled)]" />
+                    </div>
+                  )}
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-medium text-[var(--fg-base)]">{s.productName}</p>
+                    <p className="truncate text-xs text-[var(--fg-muted)]">
+                      {s.colorName} · {s.size} · ×{s.quantity}
+                    </p>
+                    <p className="truncate text-xs text-[var(--fg-muted)]">
+                      {formatDate(s.soldAt ?? s.createdAt)}
+                      {s.soldBy ? ` · ${s.soldBy}` : ""}
+                    </p>
+                  </div>
+                  <div className="flex shrink-0 flex-col items-end gap-1">
+                    <span className="text-sm font-medium text-[var(--fg-base)]">{formatMoney(total)}</span>
+                    {s.receiptNo && <Badge color="grey">{s.receiptNo}</Badge>}
+                  </div>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-xs text-[var(--fg-muted)]">Tap to view receipt</span>
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      void handleDownload(s);
+                    }}
+                    disabled={downloadingId === s.id}
+                    title="Download PDF receipt"
+                    aria-label={`Download PDF receipt ${s.receiptNo || s.id}`}
+                    className="flex h-9 w-9 items-center justify-center rounded-md text-[var(--fg-subtle)] transition-colors hover:bg-[var(--bg-subtle-hover)] hover:text-[var(--fg-base)] disabled:opacity-50"
+                  >
+                    {downloadingId === s.id ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <Download className="h-4 w-4" />
+                    )}
+                  </button>
+                </div>
+              </div>
+            );
+          })}
+        </MobileList>
+
+        <div className="flex flex-col gap-2 px-4 py-4 sm:px-6 md:flex-row md:items-center md:justify-between">
           <span className="text-xs text-[var(--fg-muted)]">
             {loading
               ? "Loading…"

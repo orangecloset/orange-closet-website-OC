@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { NavLink, Route, Routes, Link, useNavigate, useLocation } from "react-router-dom";
-import { LayoutDashboard, Package, Home, Tags, Settings, LogOut, Store, Menu, Info, ShoppingBag, Users, Boxes } from "lucide-react";
+import { LayoutDashboard, Package, Home, Tags, Settings, LogOut, Store, Menu, X, Info, ShoppingBag, Users, Boxes } from "lucide-react";
 import { isAuthenticated, logout, getCmsSession } from "./store/auth";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { queryClient } from "./lib/queries";
@@ -8,6 +8,7 @@ import { CmsProvider } from "./store/cmsStore";
 import { useCms } from "./store/cmsContext";
 import { ToastProvider } from "./components/ui";
 import { useToast } from "./store/toastContext";
+import { useMediaQuery } from "../hooks/useMediaQuery";
 import { cn } from "./lib/utils";
 import LoginPage from "./pages/LoginPage";
 import DashboardPage from "./pages/DashboardPage";
@@ -92,7 +93,7 @@ function SidebarNavItem({ item, collapsed }: { item: { label: string; to: string
       end={item.end}
       className={({ isActive }) =>
         cn(
-          "group flex items-center gap-2.5 rounded-md px-2.5 py-1.5 text-[13px] transition-colors",
+          "group flex items-center gap-2.5 rounded-md px-2.5 py-2.5 text-[13px] transition-colors md:py-1.5",
           isActive
             ? "bg-[var(--bg-subtle)] text-[var(--fg-base)] shadow-[var(--borders-base)]"
             : "text-[var(--fg-subtle)] hover:bg-[var(--bg-subtle-hover)] hover:text-[var(--fg-base)]"
@@ -118,7 +119,7 @@ function SidebarFooterLink({ to, icon: Icon, label, collapsed }: { to: string; i
   return (
     <Link
       to={to}
-      className="flex items-center gap-2.5 rounded-md px-2.5 py-1.5 text-[13px] text-[var(--fg-subtle)] transition-colors hover:bg-[var(--bg-subtle-hover)] hover:text-[var(--fg-base)]"
+      className="flex items-center gap-2.5 rounded-md px-2.5 py-2.5 text-[13px] text-[var(--fg-subtle)] transition-colors hover:bg-[var(--bg-subtle-hover)] hover:text-[var(--fg-base)] md:py-1.5"
     >
       <span className="flex h-4 w-4 shrink-0 items-center justify-center">
         <Icon className="h-4 w-4" />
@@ -202,12 +203,12 @@ function UnsavedChangesNotice() {
 function AdminShell({ onLogout }: { onLogout: () => void }) {
   const navigate = useNavigate();
   const location = useLocation();
-  const [collapsed, setCollapsed] = useState(() => {
-    if (typeof window !== "undefined" && window.innerWidth < 640) return true;
-    return false;
-  });
+  const isDesktop = useMediaQuery("(min-width: 768px)");
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
+  const [collapsed, setCollapsed] = useState(false);
   const me = getCmsSession()?.user ?? null;
   const { settings } = useCms();
+  const navCollapsed = isDesktop ? collapsed : false;
 
   const handleLogout = () => {
     logout();
@@ -221,22 +222,53 @@ function AdminShell({ onLogout }: { onLogout: () => void }) {
     document.title = `${currentTitle} · ${settings.storeName || "Store"} CMS`;
   }, [currentTitle, settings.storeName]);
 
+  useEffect(() => {
+    setMobileNavOpen(false);
+  }, [location.pathname]);
+
+  useEffect(() => {
+    if (isDesktop) setMobileNavOpen(false);
+  }, [isDesktop]);
+
+  useEffect(() => {
+    if (!mobileNavOpen) return;
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setMobileNavOpen(false);
+    };
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    document.addEventListener("keydown", handleKey);
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      document.removeEventListener("keydown", handleKey);
+    };
+  }, [mobileNavOpen]);
+
   return (
     <ToastProvider>
       <OfflineNotice />
       <UnsavedChangesNotice />
-    <div className="cms-admin flex h-screen overflow-hidden bg-[var(--bg-subtle)] text-[var(--fg-base)]">
+    <div className="cms-admin flex h-[100dvh] overflow-hidden bg-[var(--bg-subtle)] text-[var(--fg-base)]">
+      <div
+        className={cn(
+          "fixed inset-0 z-[60] bg-[var(--bg-overlay)] transition-opacity duration-200 md:hidden",
+          mobileNavOpen ? "opacity-100" : "pointer-events-none opacity-0"
+        )}
+        onClick={() => setMobileNavOpen(false)}
+        aria-hidden
+      />
       <aside
         className={cn(
-          "flex shrink-0 flex-col border-r border-[var(--border-base)] bg-[var(--bg-base)] transition-all duration-200",
-          collapsed ? "w-16" : "w-56"
+          "fixed inset-y-0 left-0 z-[70] flex w-72 max-w-[85vw] flex-col border-r border-[var(--border-base)] bg-[var(--bg-base)] transition-all duration-200 md:static md:z-auto md:max-w-none md:shrink-0 md:translate-x-0",
+          mobileNavOpen ? "translate-x-0" : "-translate-x-full",
+          collapsed ? "md:w-16" : "md:w-56"
         )}
       >
-        <div className="flex h-14 items-center justify-end gap-2 border-b border-[var(--border-base)] px-3">
+        <div className="flex h-14 items-center gap-2 border-b border-[var(--border-base)] px-3">
           <div
             className={cn(
               "flex items-center gap-2 overflow-hidden transition-all duration-200",
-              collapsed ? "w-0 opacity-0" : "mr-auto w-auto opacity-100"
+              navCollapsed ? "w-0 opacity-0" : "mr-auto w-auto opacity-100"
             )}
           >
             {settings.faviconUrl?.trim() ? (
@@ -257,48 +289,49 @@ function AdminShell({ onLogout }: { onLogout: () => void }) {
               <span className="text-[11px] text-[var(--fg-muted)]">CMS Admin</span>
             </div>
           </div>
-          {collapsed && (
-            <div className="flex sm:hidden h-7 w-7 shrink-0 items-center justify-center mr-1.5">
-              {settings.faviconUrl?.trim() ? (
-                <img src={settings.faviconUrl} alt="" className="h-5 w-5 object-contain" />
-              ) : (
-                <div className="flex h-5 w-5 items-center justify-center rounded bg-[var(--button-inverted)]">
-                  <span className="text-[10px] font-bold text-[var(--contrast-fg-primary)]">O</span>
-                </div>
-              )}
-            </div>
-          )}
+          <button
+            type="button"
+            onClick={() => setMobileNavOpen(false)}
+            className="ml-auto flex h-9 w-9 shrink-0 items-center justify-center rounded-md text-[var(--fg-subtle)] hover:bg-[var(--bg-subtle-hover)] hover:text-[var(--fg-base)] md:hidden"
+            aria-label="Close menu"
+          >
+            <X className="h-5 w-5" />
+          </button>
           <button
             type="button"
             onClick={() => setCollapsed(!collapsed)}
-            className="hidden sm:flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-[var(--fg-subtle)] hover:bg-[var(--bg-subtle-hover)] hover:text-[var(--fg-base)] mr-1.5"
+            className={cn(
+              "hidden h-7 w-7 shrink-0 items-center justify-center rounded-md text-[var(--fg-subtle)] hover:bg-[var(--bg-subtle-hover)] hover:text-[var(--fg-base)] md:flex",
+              navCollapsed ? "mx-auto" : "ml-auto mr-1.5"
+            )}
+            aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
           >
             <Menu className="h-4 w-4" />
           </button>
         </div>
 
-        <nav className="flex flex-1 flex-col gap-3 p-3">
+        <nav className="flex flex-1 flex-col gap-3 overflow-y-auto p-3">
           {NAV_SECTIONS.map((section) => (
             <div key={section.label} className="flex flex-col gap-0.5">
-              <SidebarSectionTitle label={section.label} collapsed={collapsed} divider={section.label !== "Main"} />
+              <SidebarSectionTitle label={section.label} collapsed={navCollapsed} divider={section.label !== "Main"} />
               {section.items.map((item) => (
-                <SidebarNavItem key={item.to} item={item} collapsed={collapsed} />
+                <SidebarNavItem key={item.to} item={item} collapsed={navCollapsed} />
               ))}
             </div>
           ))}
           <div className="mt-auto flex flex-col gap-0.5">
-            <SidebarSectionTitle label="Settings" collapsed={collapsed} />
-            <SidebarNavItem item={SETTINGS_ITEM} collapsed={collapsed} />
-            <SidebarNavItem item={ACCOUNTS_ITEM} collapsed={collapsed} />
+            <SidebarSectionTitle label="Settings" collapsed={navCollapsed} />
+            <SidebarNavItem item={SETTINGS_ITEM} collapsed={navCollapsed} />
+            <SidebarNavItem item={ACCOUNTS_ITEM} collapsed={navCollapsed} />
           </div>
         </nav>
 
-        <div className="flex flex-col gap-0.5 border-t border-[var(--border-base)] p-3">
-          <SidebarFooterLink to="/" icon={Store} label="Storefront" collapsed={collapsed} />
+        <div className="flex flex-col gap-0.5 border-t border-[var(--border-base)] p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] md:pb-3">
+          <SidebarFooterLink to="/" icon={Store} label="Storefront" collapsed={navCollapsed} />
           <button
             type="button"
             onClick={handleLogout}
-            className="flex items-center gap-2.5 rounded-md px-2.5 py-1.5 text-left text-[13px] text-[var(--fg-subtle)] transition-colors hover:bg-[var(--bg-subtle-hover)] hover:text-[var(--fg-base)]"
+            className="flex items-center gap-2.5 rounded-md px-2.5 py-2.5 text-left text-[13px] text-[var(--fg-subtle)] transition-colors hover:bg-[var(--bg-subtle-hover)] hover:text-[var(--fg-base)] md:py-1.5"
           >
             <span className="flex h-4 w-4 shrink-0 items-center justify-center">
               <LogOut className="h-4 w-4" />
@@ -306,7 +339,7 @@ function AdminShell({ onLogout }: { onLogout: () => void }) {
             <span
               className={cn(
                 "overflow-hidden whitespace-nowrap transition-all duration-200",
-                collapsed ? "w-0 opacity-0" : "w-auto opacity-100"
+                navCollapsed ? "w-0 opacity-0" : "w-auto opacity-100"
               )}
             >
               Logout
@@ -316,20 +349,29 @@ function AdminShell({ onLogout }: { onLogout: () => void }) {
       </aside>
 
       <div className="flex flex-1 flex-col overflow-hidden transition-all duration-200">
-        <div className="flex h-14 shrink-0 items-center border-b border-[var(--border-base)] bg-[var(--bg-base)] px-4">
-          <nav className="flex items-center gap-1 text-[13px]">
-            <span className="text-[var(--fg-muted)]">{settings.storeName || "Store"}</span>
-            <span className="text-[var(--fg-muted)]">/</span>
-            <span className="font-medium text-[var(--fg-base)]">{currentTitle}</span>
+        <div className="flex h-14 shrink-0 items-center gap-2 border-b border-[var(--border-base)] bg-[var(--bg-base)] px-3 sm:px-4">
+          <button
+            type="button"
+            onClick={() => setMobileNavOpen(true)}
+            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md text-[var(--fg-subtle)] transition-colors hover:bg-[var(--bg-subtle-hover)] hover:text-[var(--fg-base)] md:hidden"
+            aria-label="Open menu"
+            aria-expanded={mobileNavOpen}
+          >
+            <Menu className="h-5 w-5" />
+          </button>
+          <nav className="flex min-w-0 items-center gap-1 text-[13px]">
+            <span className="hidden text-[var(--fg-muted)] sm:inline">{settings.storeName || "Store"}</span>
+            <span className="hidden text-[var(--fg-muted)] sm:inline">/</span>
+            <span className="truncate font-medium text-[var(--fg-base)]">{currentTitle}</span>
           </nav>
           {me && (
-            <span className="ml-auto hidden text-[13px] text-[var(--fg-muted)] sm:block">
+            <span className="ml-auto hidden max-w-[40%] truncate text-[13px] text-[var(--fg-muted)] sm:block">
               {me.name}
             </span>
           )}
         </div>
 
-        <main className="flex-1 overflow-y-auto p-4">
+        <main className="flex-1 overflow-y-auto p-3 sm:p-4">
           <Routes>
             <Route index element={<DashboardPage />} />
             <Route path="sell" element={<SoldPage />} />

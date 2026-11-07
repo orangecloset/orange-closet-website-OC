@@ -6,7 +6,7 @@ import type { StockMovement } from "../lib/api";
 import { useInventoryStats, useStockMovementsPaged } from "../lib/queries";
 import { openReceiptTab, openReceiptPdfTab, type ReceiptData } from "../lib/receipt";
 import { useCms } from "../store/cmsContext";
-import { Badge, Button, Container, Header, Input, Select, StatCard } from "../components/ui";
+import { Badge, Button, Container, Header, Input, MobileList, Select, StatCard } from "../components/ui";
 
 const PAGE_SIZE = 50;
 const SEARCH_DEBOUNCE_MS = 350;
@@ -134,7 +134,7 @@ export default function InventoryPage() {
       </div>
 
       <Container>
-        <div className="flex flex-col gap-3 border-b border-[var(--border-subtle)] px-6 py-4 lg:flex-row lg:items-center">
+        <div className="flex flex-col gap-3 border-b border-[var(--border-subtle)] px-4 py-4 sm:px-6 lg:flex-row lg:items-center">
           <div className="relative min-w-0 flex-1">
             <Search className="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--fg-muted)]" />
             <Input
@@ -157,7 +157,7 @@ export default function InventoryPage() {
           </div>
         </div>
 
-        <div className="overflow-x-auto">
+        <div className="hidden overflow-x-auto md:block">
           <table className="w-full min-w-[860px] text-left">
             <thead>
               <tr className="border-b border-[var(--border-subtle)] text-xs text-[var(--fg-muted)]">
@@ -240,7 +240,57 @@ export default function InventoryPage() {
           </table>
         </div>
 
-        <div className="flex items-center justify-between px-6 py-4">
+        <MobileList>
+          {loading && (
+            <div className="flex justify-center px-4 py-12">
+              <Loader2 className="h-5 w-5 animate-spin text-[var(--fg-muted)]" />
+            </div>
+          )}
+          {!loading && items.length === 0 && (
+            <div className="px-4 py-12 text-center text-sm text-[var(--fg-muted)]">
+              <Boxes className="mx-auto mb-2 h-6 w-6" />
+              No stock changes recorded yet.
+            </div>
+          )}
+          {items.map((m) => {
+            const kind = KIND_BADGES[m.kind] ?? KIND_BADGES.edit;
+            return (
+              <div key={m.id} className="flex flex-col gap-2 p-4">
+                <div className="flex items-start justify-between gap-2">
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-medium text-[var(--fg-base)]">{m.productName}</p>
+                    <p className="truncate text-xs text-[var(--fg-muted)]">{m.colorName} · {m.size}</p>
+                  </div>
+                  <Badge color={kind.color}>{kind.label}</Badge>
+                </div>
+                <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-[var(--fg-muted)]">
+                  <span>{formatDateTime(m.createdAt)}</span>
+                  <span className="font-medium text-[var(--fg-base)]">{m.prevStock} → {m.newStock}</span>
+                  <span>{m.changedBy || "—"}</span>
+                </div>
+                <p className="text-xs text-[var(--fg-base)]">{m.reason || "—"}</p>
+                <div>
+                  {m.ref ? (
+                    m.kind === "sale" ? (
+                      <button
+                        type="button"
+                        onClick={() => handleOpenReceipt(m)}
+                        title="Open receipt"
+                        className="rounded focus-visible:shadow-[var(--borders-focus)]"
+                      >
+                        <Badge color="grey">{m.ref}</Badge>
+                      </button>
+                    ) : (
+                      <Badge color="grey">{m.ref}</Badge>
+                    )
+                  ) : null}
+                </div>
+              </div>
+            );
+          })}
+        </MobileList>
+
+        <div className="flex flex-col gap-2 px-4 py-4 sm:px-6 md:flex-row md:items-center md:justify-between">
           <span className="text-xs text-[var(--fg-muted)]">
             {loading ? "Loading…" : `Page ${page} of ${totalPages} · ${totalItems} record(s)`}
           </span>

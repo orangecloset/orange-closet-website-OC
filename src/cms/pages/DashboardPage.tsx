@@ -86,10 +86,10 @@ export default function DashboardPage() {
           ) : (
           <div className="flex flex-col divide-y divide-[var(--border-subtle)]">
             {recentlyAdded.length === 0 && (
-              <p className="px-6 py-4 text-sm text-[var(--fg-muted)]">No products yet.</p>
+              <p className="px-4 py-4 sm:px-6 text-sm text-[var(--fg-muted)]">No products yet.</p>
             )}
             {recentlyAdded.map((p) => (
-              <div key={p.id} className="flex items-center gap-3 px-6 py-3">
+              <div key={p.id} className="flex items-center gap-3 px-4 py-3 sm:px-6">
                 <span
                   className="h-2.5 w-2.5 shrink-0 rounded-full bg-green-400"
                   aria-hidden="true"
@@ -117,10 +117,10 @@ export default function DashboardPage() {
           ) : (
           <div className="flex flex-col divide-y divide-[var(--border-subtle)]">
             {recentSales.length === 0 && (
-              <p className="px-6 py-4 text-sm text-[var(--fg-muted)]">No sales recorded yet.</p>
+              <p className="px-4 py-4 sm:px-6 text-sm text-[var(--fg-muted)]">No sales recorded yet.</p>
             )}
             {recentlySold.map((s) => (
-              <div key={s.id} className="flex items-center gap-3 px-6 py-3">
+              <div key={s.id} className="flex items-center gap-3 px-4 py-3 sm:px-6">
                 <span
                   className="h-2.5 w-2.5 shrink-0 rounded-full bg-orange-400"
                   aria-hidden="true"
@@ -147,14 +147,14 @@ export default function DashboardPage() {
           ) : (
           <div className="flex flex-col divide-y divide-[var(--border-subtle)]">
             {stats.soldOutProducts.length === 0 && (
-              <p className="px-6 py-4 text-sm text-[var(--fg-muted)]">No out of stock products.</p>
+              <p className="px-4 py-4 sm:px-6 text-sm text-[var(--fg-muted)]">No out of stock products.</p>
             )}
             {stats.soldOutProducts.map((p) => (
               <button
                 key={p.id}
                 type="button"
                 onClick={() => navigate("/cms-admin/products")}
-                className="flex items-center gap-3 px-6 py-3 text-left transition-colors hover:bg-[var(--bg-subtle-hover)]"
+                className="flex items-center gap-3 px-4 py-3 sm:px-6 text-left transition-colors hover:bg-[var(--bg-subtle-hover)]"
               >
                 <span
                   className="h-2.5 w-2.5 shrink-0 rounded-full bg-red-400"

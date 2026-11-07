@@ -26,7 +26,7 @@ export function BrandList() {
   return (
     <Container>
       <Header title="Brands" subtitle="Brands shown in the marquee on the homepage" />
-      <div className="px-6 py-4">
+      <div className="px-4 py-4 sm:px-6">
         <div className="flex flex-col gap-2 sm:flex-row">
           <Input
             value={value}

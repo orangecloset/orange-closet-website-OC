@@ -163,7 +163,7 @@ export function StockAdjustModal({
                     {total <= 0 ? "Sold out" : `${total} in stock`}
                   </span>
                 </div>
-                <div className="grid grid-cols-[minmax(0,1fr)_12rem] items-center gap-x-4 gap-y-2">
+                <div className="grid grid-cols-[minmax(0,1fr)_5.5rem] items-center gap-x-4 gap-y-2 sm:grid-cols-[minmax(0,1fr)_12rem]">
                   {sizes.map((variant) => {
                     const key = `${color.name}::${variant.size}`;
                     return (
