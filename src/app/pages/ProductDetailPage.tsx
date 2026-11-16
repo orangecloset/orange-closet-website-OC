@@ -18,14 +18,18 @@ function GalleryImage({
   className,
   eager,
   onError,
+  adaptBg,
 }: {
   src: string;
   alt: string;
   className?: string;
   eager?: boolean;
   onError?: (src: string) => void;
+  adaptBg?: boolean;
 }) {
   const [failed, setFailed] = useState(false);
+  const [wide, setWide] = useState(false);
+
   if (failed) {
     return (
       <div className={`bg-gray-100 flex items-center justify-center ${className ?? ""}`}>
@@ -37,11 +41,15 @@ function GalleryImage({
     <img
       src={src}
       alt={alt}
-      className={className}
+      className={`${className ?? ""} ${adaptBg ? (wide ? "bg-white" : "bg-[#f5f5f5]") : ""}`}
       crossOrigin="anonymous"
       loading={eager ? "eager" : "lazy"}
       decoding="async"
       draggable={false}
+      onLoad={(e) => {
+        const img = e.currentTarget;
+        setWide(img.naturalWidth > img.naturalHeight);
+      }}
       onError={() => {
         setFailed(true);
         onError?.(src);
@@ -605,6 +613,7 @@ export default function ProductDetailPage() {
                           className="w-full h-full object-contain"
                           eager={idx === 0}
                           onError={handleImageError}
+                          adaptBg={viewport === "mobile"}
                         />
                       </div>
                     ))}
