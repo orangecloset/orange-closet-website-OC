@@ -382,6 +382,14 @@ app.put("/:id", async (c) => {
       );
     }
     values.colors = merged.colors;
+    if (hasInvalidStock(values.colors)) {
+      return c.json(
+        {
+          error: `Stock values must be whole numbers between 0 and ${MAX_STOCK.toLocaleString("en-US")}.`,
+        },
+        400
+      );
+    }
   }
 
   if (body.sizes === undefined && body.colors === undefined) {
@@ -404,14 +412,15 @@ app.put("/:id", async (c) => {
     .returning({ id: schema.products.id });
   if (updated.length === 0) return c.json({ error: "Product not found" }, 404);
 
-  if (legacyReason) {
+  const stockReason = legacyReason ?? (body.colors !== undefined ? "Initial stock" : null);
+  if (stockReason) {
     await logStockDiff(c.env, {
       productId: id,
       productName: values.name ?? oldRow.name,
       before: flattenStock(oldRow.colors),
       after: flattenStock(values.colors ?? []),
       kind: "edit",
-      reason: legacyReason,
+      reason: stockReason,
       changedBy: await resolveChangedBy(c.env, authUser.id),
     });
   }

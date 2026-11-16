@@ -101,7 +101,11 @@ export function mergePreservedStock(
         if (!s || typeof s !== "object") return s;
         const key = stockKey(colorName, readSize(s));
         incomingKeys.add(key);
-        return { ...s, stock: oldStock.get(key) ?? 0 };
+        const prev = oldStock.get(key);
+        return {
+          ...s,
+          stock: prev ?? Math.max(0, Math.floor(Number((s as { stock?: unknown }).stock) || 0)),
+        };
       }),
     };
   });

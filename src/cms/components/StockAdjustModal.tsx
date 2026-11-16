@@ -137,7 +137,7 @@ export function StockAdjustModal({
         <div className="flex flex-col gap-4">
           <p className="text-xs text-[var(--fg-muted)]">
             Stock changes are recorded in Inventory with the reason below.
-            Product edits never change stock.
+            Product edits only set initial stock for newly added variants.
           </p>
 
           {product.colors.map((color) => {
