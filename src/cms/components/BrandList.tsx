@@ -1,8 +1,8 @@
 import { useState } from "react";
-import { GripVertical, Plus, X } from "lucide-react";
+import { Plus, X } from "lucide-react";
 import { useCms } from "../store/cmsContext";
 import { Button, Container, Header, Input } from "./ui";
-import { SortableList } from "./SortableList";
+import { ReorderButtons } from "./ReorderButtons";
 
 export function BrandList() {
   const { homepage, updateHomepage } = useCms();
@@ -21,6 +21,15 @@ export function BrandList() {
 
   const removeBrand = (index: number) => {
     updateHomepage({ brands: homepage.brands.filter((_, i) => i !== index) });
+  };
+
+  const moveBrand = (index: number, direction: -1 | 1) => {
+    const target = index + direction;
+    if (target < 0 || target >= homepage.brands.length) return;
+    const next = [...homepage.brands];
+    const [moved] = next.splice(index, 1);
+    next.splice(target, 0, moved);
+    updateHomepage({ brands: next });
   };
 
   return (
@@ -44,20 +53,23 @@ export function BrandList() {
             Add
           </Button>
         </div>
-        <div className="mt-4 flex flex-wrap gap-2">
-          <SortableList
-            items={homepage.brands}
-            onReorder={(next) => updateHomepage({ brands: next })}
-            keyExtractor={(b, i) => `${i}-${b}`}
-            layout="horizontal"
-            renderItem={(brand, index, dragHandleProps) => (
-              <span
-                className="inline-flex items-center gap-1.5 rounded-md border border-[var(--border-subtle)] bg-[var(--bg-subtle)] px-2.5 py-1 text-[13px] text-[var(--fg-base)]"
+        <div className="mt-4 max-h-[280px] overflow-y-auto overscroll-contain slim-scrollbar">
+          <div className="flex flex-col gap-2 pr-2">
+            {homepage.brands.map((brand, index) => (
+              <div
+                key={brand}
+                className="flex items-center gap-3 rounded-md border border-[var(--border-subtle)] bg-[var(--bg-subtle)] px-2.5 py-1.5"
               >
-                <span className="cursor-grab touch-none text-[var(--fg-muted)] hover:text-[var(--fg-base)]" {...dragHandleProps}>
-                  <GripVertical className="h-3 w-3" />
+                <ReorderButtons
+                  label={brand}
+                  canMoveUp={index > 0}
+                  canMoveDown={index < homepage.brands.length - 1}
+                  onMoveUp={() => moveBrand(index, -1)}
+                  onMoveDown={() => moveBrand(index, 1)}
+                />
+                <span className="min-w-0 flex-1 truncate text-[13px] text-[var(--fg-base)]">
+                  {brand}
                 </span>
-                {brand}
                 <button
                   type="button"
                   onClick={() => removeBrand(index)}
@@ -66,12 +78,12 @@ export function BrandList() {
                 >
                   <X className="h-3.5 w-3.5" />
                 </button>
-              </span>
+              </div>
+            ))}
+            {homepage.brands.length === 0 && (
+              <p className="text-sm text-[var(--fg-muted)]">No brands yet.</p>
             )}
-          />
-          {homepage.brands.length === 0 && (
-            <p className="text-sm text-[var(--fg-muted)]">No brands yet.</p>
-          )}
+          </div>
         </div>
       </div>
     </Container>

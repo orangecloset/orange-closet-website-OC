@@ -1,4 +1,4 @@
-﻿import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Menu, X, Search, Share2, ChevronDown, ShoppingBag } from "lucide-react";
 import { TYPE_LABELS, primaryColor } from "../../data/products";
@@ -87,7 +87,7 @@ function MegaScrollList({
     <div className="relative">
       <div
         ref={scrollRef}
-        className="mega-scrollbar max-h-[320px] overflow-y-auto overscroll-contain pr-8"
+        className="slim-scrollbar max-h-[320px] overflow-y-auto overscroll-contain pr-8"
       >
         <div ref={contentRef}>{children}</div>
       </div>
@@ -501,7 +501,7 @@ export default function Header({ onShare, showShare = true }: HeaderProps) {
                             <div className="min-w-0">
                               <p className="text-sm text-gray-900 truncate">{p.name}</p>
                               <p className="text-xs text-gray-500 capitalize">
-                                {p.categoryLabel} · {TYPE_LABELS[p.type] ?? p.type}
+                                {p.categoryLabel} � {TYPE_LABELS[p.type] ?? p.type}
                               </p>
                             </div>
                             <span className="ml-auto text-sm text-gray-900 shrink-0">

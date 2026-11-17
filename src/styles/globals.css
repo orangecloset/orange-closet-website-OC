@@ -101,27 +101,27 @@ src: url('https://storage.googleapis.com/download/storage/v1/b/prd-storytodesign
   scrollbar-color: #c4c4c4 transparent;
 }
 
-.mega-scrollbar::-webkit-scrollbar {
+.slim-scrollbar::-webkit-scrollbar {
   width: 3px;
 }
-.mega-scrollbar::-webkit-scrollbar-track {
+.slim-scrollbar::-webkit-scrollbar-track {
   background: transparent;
 }
-.mega-scrollbar::-webkit-scrollbar-thumb {
+.slim-scrollbar::-webkit-scrollbar-thumb {
   background: #cfcfcf;
   border-radius: 9999px;
 }
-.mega-scrollbar::-webkit-scrollbar-thumb:hover {
+.slim-scrollbar::-webkit-scrollbar-thumb:hover {
   background: #9ca3af;
 }
-.mega-scrollbar::-webkit-scrollbar-button {
+.slim-scrollbar::-webkit-scrollbar-button {
   display: none;
 }
-.mega-scrollbar::-webkit-scrollbar-corner {
+.slim-scrollbar::-webkit-scrollbar-corner {
   background: transparent;
 }
 @supports not selector(::-webkit-scrollbar) {
-  .mega-scrollbar {
+  .slim-scrollbar {
     scrollbar-width: thin;
     scrollbar-color: #cfcfcf transparent;
   }

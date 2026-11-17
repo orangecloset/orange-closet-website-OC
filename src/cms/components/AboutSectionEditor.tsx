@@ -1,6 +1,7 @@
-import { ChevronDown, ChevronUp, Plus, Trash2, X } from "lucide-react";
+import { Plus, Trash2, X } from "lucide-react";
 import type { AboutPageConfig } from "../../data/store-types";
 import { Button, Input, Label, Switch, Textarea } from "./ui";
+import { ReorderButtons } from "./ReorderButtons";
 import { UploadButton } from "./UploadButton";
 
 export type SectionData = AboutPageConfig["sections"][number];
@@ -163,34 +164,16 @@ export function SectionEditor({
   onChange: (patch: Partial<SectionData>) => void;
   onDelete: () => void;
 }) {
-  const controlClass =
-    "rounded-sm p-1 text-[var(--fg-muted)] transition-colors hover:bg-[var(--bg-subtle-hover)] hover:text-[var(--fg-base)] disabled:cursor-not-allowed disabled:opacity-30";
-
   return (
     <div className="rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-subtle)]">
       <div className="flex items-center gap-3 px-4 py-3">
-        <div className="flex shrink-0 items-center">
-          <button
-            type="button"
-            onClick={onMoveUp}
-            disabled={!canMoveUp}
-            aria-label={`Move section ${index + 1} up`}
-            title="Move up"
-            className={controlClass}
-          >
-            <ChevronUp className="h-4 w-4" />
-          </button>
-          <button
-            type="button"
-            onClick={onMoveDown}
-            disabled={!canMoveDown}
-            aria-label={`Move section ${index + 1} down`}
-            title="Move down"
-            className={controlClass}
-          >
-            <ChevronDown className="h-4 w-4" />
-          </button>
-        </div>
+        <ReorderButtons
+          label={`section ${index + 1}`}
+          canMoveUp={canMoveUp}
+          canMoveDown={canMoveDown}
+          onMoveUp={onMoveUp}
+          onMoveDown={onMoveDown}
+        />
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2">
             <span className="text-sm font-medium text-[var(--fg-base)]">
