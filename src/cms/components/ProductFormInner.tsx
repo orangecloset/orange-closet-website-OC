@@ -67,6 +67,7 @@ export function ProductFormInner({ editing }: { editing?: CmsProduct }) {
 
   const [name, setName] = useState(editing?.name ?? "");
   const [brand, setBrand] = useState(editing?.brand ?? "BRAND X");
+  const [itemCode, setItemCode] = useState(editing?.itemCode ?? "");
   const [type, setType] = useState<string>(editing?.type ?? presetType ?? "bags");
   const [category, setCategory] = useState(editing?.category ?? "");
   const [price, setPrice] = useState(editing?.price ?? "₱");
@@ -298,6 +299,7 @@ export function ProductFormInner({ editing }: { editing?: CmsProduct }) {
     const input = {
       name: name.trim(),
       brand: brand.trim() || undefined,
+      itemCode: itemCode.trim(),
       type,
       category,
       categoryLabel,
@@ -397,6 +399,19 @@ export function ProductFormInner({ editing }: { editing?: CmsProduct }) {
               <div className="flex flex-col gap-2">
                 <Label htmlFor="compareAtPrice">Compare-at Price</Label>
                 <Input id="compareAtPrice" value={compareAtPrice} onChange={(e) => setCompareAtPrice(e.target.value)} placeholder="Optional" />
+              </div>
+              <div className="flex flex-col gap-2">
+                <Label htmlFor="itemCode">Item Code</Label>
+                <Input
+                  id="itemCode"
+                  value={itemCode}
+                  maxLength={200}
+                  onChange={(e) => setItemCode(e.target.value)}
+                  placeholder="e.g. oc#213889798123"
+                />
+                <p className="text-xs text-[var(--fg-muted)]">
+                  Optional. Internal use only
+                </p>
               </div>
               <div className="flex flex-col gap-2 lg:col-span-2">
                 <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">

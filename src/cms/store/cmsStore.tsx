@@ -211,6 +211,7 @@ export function CmsProvider({ children }: { children: ReactNode }) {
       id: randomString(8),
       name: input.name,
       brand: input.brand ?? "Store",
+      itemCode: input.itemCode?.trim() || undefined,
       type: input.type,
       category: input.category,
       categoryLabel: input.categoryLabel,
@@ -244,6 +245,7 @@ export function CmsProvider({ children }: { children: ReactNode }) {
       const patch: Record<string, unknown> = { updatedAt: now };
       if (input.name !== undefined) patch.name = input.name;
       if (input.brand !== undefined) patch.brand = input.brand;
+      if (input.itemCode !== undefined) patch.itemCode = input.itemCode.trim();
       if (input.type !== undefined) patch.type = input.type;
       if (input.category !== undefined) patch.category = input.category;
       if (input.categoryLabel !== undefined) patch.categoryLabel = input.categoryLabel;

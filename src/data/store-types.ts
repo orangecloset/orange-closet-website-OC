@@ -7,6 +7,7 @@ export type CmsProduct = Omit<Product, "type"> & {
   status: ProductStatus;
   createdAt: string;
   updatedAt: string;
+  itemCode?: string;
   stock?: number;
 };
 
@@ -61,6 +62,7 @@ export type CmsColorInput = {
 export type CmsProductInput = {
   name: string;
   brand?: string;
+  itemCode?: string;
   type: string;
   category: string;
   categoryLabel: string;

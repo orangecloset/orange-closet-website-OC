@@ -342,6 +342,7 @@ app.put("/:id", async (c) => {
 
   const body = await c.req.json<{
     name?: string;
+    itemCode?: string;
     stockReason?: string;
     colors?: unknown;
     sizes?: unknown;
@@ -352,6 +353,7 @@ app.put("/:id", async (c) => {
   const [oldRow] = await db
     .select({
       name: schema.products.name,
+      itemCode: schema.products.itemCode,
       colors: schema.products.colors,
       sizes: schema.products.sizes,
     })
@@ -361,6 +363,7 @@ app.put("/:id", async (c) => {
 
   const values = cmsProductToRow(body as never);
   delete values.createdAt;
+  if (body.itemCode === undefined) values.itemCode = oldRow.itemCode;
 
   const legacyReason =
     typeof body.stockReason === "string" && body.stockReason.trim()
