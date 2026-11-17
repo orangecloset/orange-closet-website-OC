@@ -87,7 +87,7 @@ function MegaScrollList({
     <div className="relative">
       <div
         ref={scrollRef}
-        className="max-h-[320px] overflow-y-auto overscroll-contain thin-scrollbar"
+        className="mega-scrollbar max-h-[320px] overflow-y-auto overscroll-contain pr-8"
       >
         <div ref={contentRef}>{children}</div>
       </div>
@@ -525,9 +525,8 @@ export default function Header({ onShare, showShare = true }: HeaderProps) {
         <div
           className="hidden lg:block absolute left-0 right-0 top-full bg-white border-t border-gray-100 shadow-lg z-50"
         >
-          <div className="h-3 w-full" />
           <div className="px-2.5 sm:px-3.5 lg:px-16.5 flex">
-            <div className="py-6 pl-0 pr-8 min-w-[200px]">
+            <div className="py-6 min-w-[200px]">
               <MegaScrollList resetKey={megaType}>
                 {megaCats.map((cat) => (
                   <Link
@@ -542,7 +541,7 @@ export default function Header({ onShare, showShare = true }: HeaderProps) {
                 ))}
               </MegaScrollList>
             </div>
-            <div className="w-px bg-gray-200 my-4 shrink-0" />
+            <div className="w-px bg-gray-200 my-6 shrink-0" />
             <div className="flex items-center justify-center py-6 pl-8">
               {megaPreviewImage ? (
                 <ImageWithFallback
@@ -564,9 +563,8 @@ export default function Header({ onShare, showShare = true }: HeaderProps) {
         <div
           className="hidden lg:block absolute left-0 right-0 top-full bg-white border-t border-gray-100 shadow-lg z-50"
         >
-          <div className="h-3 w-full" />
           <div className="px-2.5 sm:px-3.5 lg:px-16.5 flex">
-            <div className="py-6 pl-0 pr-8 min-w-[180px]">
+            <div className="py-6 min-w-[180px]">
               <MegaScrollList>
                 {moreNavItems.map((item) => {
                   const slug = item.href.slice(1);
@@ -585,8 +583,8 @@ export default function Header({ onShare, showShare = true }: HeaderProps) {
                 })}
               </MegaScrollList>
             </div>
-            <div className="w-px bg-gray-200 my-4 shrink-0" />
-            <div className="py-6 px-8 min-w-[200px]">
+            <div className="w-px bg-gray-200 my-6 shrink-0" />
+            <div className="py-6 pl-8 min-w-[200px]">
               <MegaScrollList resetKey={moreActiveType}>
                 {moreCats.length > 0 ? (
                   moreCats.map((cat) => (
@@ -605,7 +603,7 @@ export default function Header({ onShare, showShare = true }: HeaderProps) {
                 )}
               </MegaScrollList>
             </div>
-            <div className="w-px bg-gray-200 my-4 shrink-0" />
+            <div className="w-px bg-gray-200 my-6 shrink-0" />
             <div className="flex items-center justify-center py-6 pl-8">
               {morePreviewImage ? (
                 <ImageWithFallback
