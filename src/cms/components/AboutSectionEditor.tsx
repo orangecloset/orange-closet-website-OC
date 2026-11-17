@@ -1,5 +1,4 @@
-import { useState } from "react";
-import { ChevronDown, ChevronRight, Plus, Trash2, X } from "lucide-react";
+import { ChevronDown, ChevronUp, Plus, Trash2, X } from "lucide-react";
 import type { AboutPageConfig } from "../../data/store-types";
 import { Button, Input, Label, Switch, Textarea } from "./ui";
 import { UploadButton } from "./UploadButton";
@@ -148,28 +147,50 @@ function CardListInput({
 export function SectionEditor({
   section,
   index,
+  canMoveUp,
+  canMoveDown,
+  onMoveUp,
+  onMoveDown,
   onChange,
   onDelete,
 }: {
   section: SectionData;
   index: number;
+  canMoveUp: boolean;
+  canMoveDown: boolean;
+  onMoveUp: () => void;
+  onMoveDown: () => void;
   onChange: (patch: Partial<SectionData>) => void;
   onDelete: () => void;
 }) {
-  const [open, setOpen] = useState(true);
+  const controlClass =
+    "rounded-sm p-1 text-[var(--fg-muted)] transition-colors hover:bg-[var(--bg-subtle-hover)] hover:text-[var(--fg-base)] disabled:cursor-not-allowed disabled:opacity-30";
 
   return (
     <div className="rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-subtle)]">
-      <button
-        type="button"
-        onClick={() => setOpen(!open)}
-        className="flex w-full items-center gap-3 px-4 py-3 text-left"
-      >
-        {open ? (
-          <ChevronDown className="h-4 w-4 shrink-0 text-[var(--fg-muted)]" />
-        ) : (
-          <ChevronRight className="h-4 w-4 shrink-0 text-[var(--fg-muted)]" />
-        )}
+      <div className="flex items-center gap-3 px-4 py-3">
+        <div className="flex shrink-0 items-center">
+          <button
+            type="button"
+            onClick={onMoveUp}
+            disabled={!canMoveUp}
+            aria-label={`Move section ${index + 1} up`}
+            title="Move up"
+            className={controlClass}
+          >
+            <ChevronUp className="h-4 w-4" />
+          </button>
+          <button
+            type="button"
+            onClick={onMoveDown}
+            disabled={!canMoveDown}
+            aria-label={`Move section ${index + 1} down`}
+            title="Move down"
+            className={controlClass}
+          >
+            <ChevronDown className="h-4 w-4" />
+          </button>
+        </div>
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2">
             <span className="text-sm font-medium text-[var(--fg-base)]">
@@ -185,7 +206,7 @@ export function SectionEditor({
             {section.heading || "No heading"}
           </p>
         </div>
-        <div className="flex shrink-0 items-center gap-2" onClick={(e) => e.stopPropagation()}>
+        <div className="flex shrink-0 items-center gap-2">
           <Switch
             checked={section.enabled}
             onCheckedChange={(enabled) => onChange({ enabled })}
@@ -200,97 +221,95 @@ export function SectionEditor({
             <Trash2 className="h-4 w-4" />
           </button>
         </div>
-      </button>
+      </div>
 
-      {open && (
-        <div className="space-y-4 border-t border-[var(--border-subtle)] px-4 py-4">
-          <div>
-            <Label>Section Label</Label>
-            <Input
-              value={section.label}
-              onChange={(e) => onChange({ label: e.target.value })}
-              placeholder="e.g. 01 — Brand Profile"
-            />
-          </div>
-          <div>
-            <Label>Heading</Label>
-            <Input
-              value={section.heading}
-              onChange={(e) => onChange({ heading: e.target.value })}
-              placeholder="Section heading"
-            />
-          </div>
-          <ArrayInput
-            label="Body Paragraphs"
-            values={section.body}
-            onChange={(body) => onChange({ body })}
-            placeholder="Paragraph text"
+      <div className="space-y-4 border-t border-[var(--border-subtle)] px-4 py-4">
+        <div>
+          <Label>Section Label</Label>
+          <Input
+            value={section.label}
+            onChange={(e) => onChange({ label: e.target.value })}
+            placeholder="e.g. 01 — Brand Profile"
           />
-          <div>
-            <Label>Images</Label>
-            <div className="flex flex-wrap items-center gap-2">
-              {section.images.map((img, i) =>
-                img.trim() ? (
-                  <div key={i} className="relative">
-                    <img
-                      src={img}
-                      alt=""
-                      className="h-12 w-12 rounded object-cover bg-[var(--bg-subtle)]"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => onChange({ images: section.images.filter((_, j) => j !== i) })}
-                      aria-label={`Remove image ${i + 1}`}
-                      className="absolute -right-1.5 -top-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-[var(--bg-base)] text-[var(--fg-muted)] shadow-[var(--borders-base)] hover:text-[var(--tag-red-text)]"
-                    >
-                      <X className="h-3 w-3" />
-                    </button>
-                  </div>
-                ) : null
-              )}
-              <UploadButton
-                multiple
-                onUploaded={(url) =>
-                  onChange({ images: [...section.images.filter((img) => img.trim()), url] })
-                }
-                label={section.images.some((img) => img.trim()) ? "Add Image" : "Upload"}
-              />
-            </div>
-          </div>
-          <CardListInput
-            label="Feature / Step Cards"
-            cards={section.cards}
-            onChange={(cards) => onChange({ cards })}
+        </div>
+        <div>
+          <Label>Heading</Label>
+          <Input
+            value={section.heading}
+            onChange={(e) => onChange({ heading: e.target.value })}
+            placeholder="Section heading"
           />
-          <div>
-            <Label>Closing Text</Label>
-            <Textarea
-              value={section.closingText}
-              onChange={(e) => onChange({ closingText: e.target.value })}
-              placeholder="Optional closing paragraph"
-              rows={3}
+        </div>
+        <ArrayInput
+          label="Body Paragraphs"
+          values={section.body}
+          onChange={(body) => onChange({ body })}
+          placeholder="Paragraph text"
+        />
+        <div>
+          <Label>Images</Label>
+          <div className="flex flex-wrap items-center gap-2">
+            {section.images.map((img, i) =>
+              img.trim() ? (
+                <div key={i} className="relative">
+                  <img
+                    src={img}
+                    alt=""
+                    className="h-12 w-12 rounded object-cover bg-[var(--bg-subtle)]"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => onChange({ images: section.images.filter((_, j) => j !== i) })}
+                    aria-label={`Remove image ${i + 1}`}
+                    className="absolute -right-1.5 -top-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-[var(--bg-base)] text-[var(--fg-muted)] shadow-[var(--borders-base)] hover:text-[var(--tag-red-text)]"
+                  >
+                    <X className="h-3 w-3" />
+                  </button>
+                </div>
+              ) : null
+            )}
+            <UploadButton
+              multiple
+              onUploaded={(url) =>
+                onChange({ images: [...section.images.filter((img) => img.trim()), url] })
+              }
+              label={section.images.some((img) => img.trim()) ? "Add Image" : "Upload"}
             />
-          </div>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <div>
-              <Label>CTA Button Label</Label>
-              <Input
-                value={section.ctaLabel}
-                onChange={(e) => onChange({ ctaLabel: e.target.value })}
-                placeholder="e.g. Join Our Program"
-              />
-            </div>
-            <div>
-              <Label>CTA Button URL</Label>
-              <Input
-                value={section.ctaUrl}
-                onChange={(e) => onChange({ ctaUrl: e.target.value })}
-                placeholder="https://..."
-              />
-            </div>
           </div>
         </div>
-      )}
+        <CardListInput
+          label="Feature / Step Cards"
+          cards={section.cards}
+          onChange={(cards) => onChange({ cards })}
+        />
+        <div>
+          <Label>Closing Text</Label>
+          <Textarea
+            value={section.closingText}
+            onChange={(e) => onChange({ closingText: e.target.value })}
+            placeholder="Optional closing paragraph"
+            rows={3}
+          />
+        </div>
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <div>
+            <Label>CTA Button Label</Label>
+            <Input
+              value={section.ctaLabel}
+              onChange={(e) => onChange({ ctaLabel: e.target.value })}
+              placeholder="e.g. Join Our Program"
+            />
+          </div>
+          <div>
+            <Label>CTA Button URL</Label>
+            <Input
+              value={section.ctaUrl}
+              onChange={(e) => onChange({ ctaUrl: e.target.value })}
+              placeholder="https://..."
+            />
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
