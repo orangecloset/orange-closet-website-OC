@@ -1,6 +1,6 @@
 import { Plus, Trash2, X } from "lucide-react";
 import type { AboutPageConfig } from "../../data/store-types";
-import { Button, Input, Label, Switch, Textarea } from "./ui";
+import { Button, Input, Label, Select, Switch, Textarea } from "./ui";
 import { ReorderButtons } from "./ReorderButtons";
 import { UploadButton } from "./UploadButton";
 
@@ -63,6 +63,15 @@ function CardListInput({
   cards: { title: string; description: string; image?: string }[];
   onChange: (v: { title: string; description: string; image?: string }[]) => void;
 }) {
+  const moveCard = (index: number, direction: -1 | 1) => {
+    const target = index + direction;
+    if (target < 0 || target >= cards.length) return;
+    const next = [...cards];
+    const [moved] = next.splice(index, 1);
+    next.splice(target, 0, moved);
+    onChange(next);
+  };
+
   return (
     <div>
       <Label>{label}</Label>
@@ -70,7 +79,16 @@ function CardListInput({
         {cards.map((c, i) => (
           <div key={i} className="rounded-md border border-[var(--border-subtle)] p-3 space-y-2">
             <div className="flex items-center justify-between">
-              <span className="text-sm font-medium text-[var(--fg-muted)]">Card {i + 1}</span>
+              <div className="flex items-center gap-2">
+                <ReorderButtons
+                  label={`card ${i + 1}`}
+                  canMoveUp={i > 0}
+                  canMoveDown={i < cards.length - 1}
+                  onMoveUp={() => moveCard(i, -1)}
+                  onMoveDown={() => moveCard(i, 1)}
+                />
+                <span className="text-sm font-medium text-[var(--fg-muted)]">Card {i + 1}</span>
+              </div>
               <button
                 type="button"
                 onClick={() => onChange(cards.filter((_, idx) => idx !== i))}
@@ -260,8 +278,24 @@ export function SectionEditor({
             />
           </div>
         </div>
+        <div>
+          <Label htmlFor={`card-style-${section.id}`}>Card Style</Label>
+          <Select
+            id={`card-style-${section.id}`}
+            value={section.cardStyle}
+            onChange={(e) =>
+              onChange({ cardStyle: e.target.value as "feature" | "step" })
+            }
+          >
+            <option value="feature">Feature cards</option>
+            <option value="step">Step cards (Step 1, Step 2, …)</option>
+          </Select>
+          <p className="mt-1 text-xs text-[var(--fg-muted)]">
+            Step cards add a numbered label above each card. Feature cards show only the icon, title, and description.
+          </p>
+        </div>
         <CardListInput
-          label="Feature / Step Cards"
+          label="Cards"
           cards={section.cards}
           onChange={(cards) => onChange({ cards })}
         />

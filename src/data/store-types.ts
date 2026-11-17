@@ -161,6 +161,7 @@ export type AboutPageConfig = {
     body: string[];
     images: string[];
     cards: { title: string; description: string; image?: string }[];
+    cardStyle: "feature" | "step";
     closingText: string;
     ctaLabel: string;
     ctaUrl: string;

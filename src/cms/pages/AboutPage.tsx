@@ -57,6 +57,7 @@ export default function AboutPage() {
           body: [],
           images: [],
           cards: [],
+          cardStyle: "feature",
           closingText: "",
           ctaLabel: "",
           ctaUrl: "",
