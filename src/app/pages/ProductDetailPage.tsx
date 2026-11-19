@@ -10,7 +10,13 @@ import ProductCard from "../components/ProductCard";
 import RichText from "../components/RichText";
 import { isEmptyHtml } from "../../lib/richText";
 import { usePageTitle } from "../hooks/usePageTitle";
-import type { ReactNode } from "react";
+import type {
+  MouseEvent as ReactMouseEvent,
+  PointerEvent as ReactPointerEvent,
+  ReactNode,
+} from "react";
+
+const MAX_LIGHTBOX_ZOOM = 4;
 
 function GalleryImage({
   src,
@@ -134,6 +140,14 @@ export default function ProductDetailPage() {
   const lightboxCloseRef = useRef<HTMLButtonElement>(null);
   const [lightboxFade, setLightboxFade] = useState<string | null>(null);
   const lightboxFadeKeyRef = useRef(0);
+  const [lightboxZoomed, setLightboxZoomed] = useState(false);
+  const lightboxZoomedRef = useRef(false);
+  const lightboxZoomRef = useRef({ scale: 1, x: 0, y: 0 });
+  const lightboxImageRef = useRef<HTMLDivElement>(null);
+  const lightboxPointersRef = useRef(new Map<number, { x: number; y: number }>());
+  const lightboxGestureRef = useRef<{ dist: number; midX: number; midY: number } | null>(null);
+  const lightboxPanRef = useRef<{ x: number; y: number } | null>(null);
+  const lightboxDraggedRef = useRef(false);
   const [, setAdded] = useState(false);
   const [failedImages, setFailedImages] = useState<string[]>([]);
 
@@ -199,6 +213,7 @@ export default function ProductDetailPage() {
     if (lightboxDebounceRef.current) return;
     lightboxDebounceRef.current = true;
     window.setTimeout(() => { lightboxDebounceRef.current = false; }, 400);
+    commitLightboxZoom({ scale: 1, x: 0, y: 0 });
     setLightboxIndex((prev) => {
       if (prev === null) return prev;
       const next = (prev + direction + activeImages.length) % activeImages.length;
@@ -483,6 +498,160 @@ export default function ProductDetailPage() {
       window.scrollTo(0, scrollY);
     };
   }, [lightboxIndex]);
+
+  const commitLightboxZoom = useCallback((next: { scale: number; x: number; y: number }) => {
+    lightboxZoomRef.current = next;
+    const el = lightboxImageRef.current;
+    if (el) {
+      el.style.transform =
+        next.scale === 1 && next.x === 0 && next.y === 0
+          ? ""
+          : `translate3d(${next.x}px, ${next.y}px, 0) scale(${next.scale})`;
+    }
+    const zoomed = next.scale > 1;
+    if (lightboxZoomedRef.current !== zoomed) {
+      lightboxZoomedRef.current = zoomed;
+      setLightboxZoomed(zoomed);
+    }
+  }, []);
+
+  const applyLightboxZoom = useCallback(
+    (targetScale: number, clientX: number, clientY: number, panX = 0, panY = 0) => {
+      const el = lightboxImageRef.current;
+      const current = lightboxZoomRef.current;
+      const scale = Math.min(MAX_LIGHTBOX_ZOOM, Math.max(1, targetScale));
+      if (!el) {
+        commitLightboxZoom({ scale, x: 0, y: 0 });
+        return;
+      }
+      const rect = el.getBoundingClientRect();
+      const cx = rect.left + rect.width / 2;
+      const cy = rect.top + rect.height / 2;
+      const ratio = scale / current.scale;
+      let x = current.x + (clientX - cx) * (1 - ratio) + panX;
+      let y = current.y + (clientY - cy) * (1 - ratio) + panY;
+      if (scale <= 1) {
+        x = 0;
+        y = 0;
+      } else {
+        const maxX = (el.offsetWidth * (scale - 1)) / 2;
+        const maxY = (el.offsetHeight * (scale - 1)) / 2;
+        x = Math.max(-maxX, Math.min(maxX, x));
+        y = Math.max(-maxY, Math.min(maxY, y));
+      }
+      commitLightboxZoom({ scale, x, y });
+    },
+    [commitLightboxZoom]
+  );
+
+  useEffect(() => {
+    lightboxPointersRef.current.clear();
+    lightboxGestureRef.current = null;
+    lightboxPanRef.current = null;
+    commitLightboxZoom({ scale: 1, x: 0, y: 0 });
+  }, [lightboxIndex, commitLightboxZoom]);
+
+  useEffect(() => {
+    const el = lightboxImageRef.current;
+    if (!el || lightboxIndex === null) return;
+    const handleWheel = (e: WheelEvent) => {
+      e.preventDefault();
+      applyLightboxZoom(
+        lightboxZoomRef.current.scale * Math.exp(-e.deltaY * 0.0015),
+        e.clientX,
+        e.clientY
+      );
+    };
+    el.addEventListener("wheel", handleWheel, { passive: false });
+    return () => el.removeEventListener("wheel", handleWheel);
+  }, [lightboxIndex, applyLightboxZoom]);
+
+  const handleLightboxPointerDown = (e: ReactPointerEvent<HTMLDivElement>) => {
+    if (e.pointerType === "mouse" && e.button !== 0) return;
+    lightboxDraggedRef.current = false;
+    e.currentTarget.setPointerCapture?.(e.pointerId);
+    const pointers = lightboxPointersRef.current;
+    pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    if (pointers.size === 1) {
+      lightboxPanRef.current = { x: e.clientX, y: e.clientY };
+      lightboxGestureRef.current = null;
+    } else if (pointers.size === 2) {
+      const [a, b] = Array.from(pointers.values());
+      lightboxGestureRef.current = {
+        dist: Math.hypot(a.x - b.x, a.y - b.y),
+        midX: (a.x + b.x) / 2,
+        midY: (a.y + b.y) / 2,
+      };
+      lightboxPanRef.current = null;
+    }
+  };
+
+  const handleLightboxPointerMove = (e: ReactPointerEvent<HTMLDivElement>) => {
+    const pointers = lightboxPointersRef.current;
+    if (!pointers.has(e.pointerId)) return;
+    pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+
+    if (pointers.size >= 2) {
+      lightboxDraggedRef.current = true;
+      const [a, b] = Array.from(pointers.values());
+      const dist = Math.hypot(a.x - b.x, a.y - b.y);
+      const midX = (a.x + b.x) / 2;
+      const midY = (a.y + b.y) / 2;
+      const gesture = lightboxGestureRef.current;
+      if (gesture) {
+        const ratio = gesture.dist > 0 ? dist / gesture.dist : 1;
+        applyLightboxZoom(
+          lightboxZoomRef.current.scale * ratio,
+          midX,
+          midY,
+          midX - gesture.midX,
+          midY - gesture.midY
+        );
+      }
+      lightboxGestureRef.current = { dist, midX, midY };
+      return;
+    }
+
+    const el = lightboxImageRef.current;
+    const pan = lightboxPanRef.current;
+    const current = lightboxZoomRef.current;
+    if (!el || !pan || current.scale <= 1) return;
+    const dx = e.clientX - pan.x;
+    const dy = e.clientY - pan.y;
+    if (dx === 0 && dy === 0) return;
+    lightboxDraggedRef.current = true;
+    lightboxPanRef.current = { x: e.clientX, y: e.clientY };
+    const maxX = (el.offsetWidth * (current.scale - 1)) / 2;
+    const maxY = (el.offsetHeight * (current.scale - 1)) / 2;
+    commitLightboxZoom({
+      scale: current.scale,
+      x: Math.max(-maxX, Math.min(maxX, current.x + dx)),
+      y: Math.max(-maxY, Math.min(maxY, current.y + dy)),
+    });
+  };
+
+  const handleLightboxPointerEnd = (e: ReactPointerEvent<HTMLDivElement>) => {
+    const pointers = lightboxPointersRef.current;
+    pointers.delete(e.pointerId);
+    if (e.currentTarget.hasPointerCapture?.(e.pointerId)) {
+      e.currentTarget.releasePointerCapture(e.pointerId);
+    }
+    lightboxGestureRef.current = null;
+    if (pointers.size === 1) {
+      const remaining = Array.from(pointers.values())[0];
+      lightboxPanRef.current = { x: remaining.x, y: remaining.y };
+    } else if (pointers.size === 0) {
+      lightboxPanRef.current = null;
+    }
+  };
+
+  const handleLightboxDoubleClick = (e: ReactMouseEvent<HTMLDivElement>) => {
+    if (lightboxZoomRef.current.scale > 1) {
+      commitLightboxZoom({ scale: 1, x: 0, y: 0 });
+    } else {
+      applyLightboxZoom(2.5, e.clientX, e.clientY);
+    }
+  };
 
   if (!product) {
     return (
@@ -780,8 +949,15 @@ export default function ProductDetailPage() {
       {lightboxIndex !== null && activeImages[lightboxIndex] && (
         <div
           data-lightbox
-          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/90"
-          onClick={(e) => { if (e.target === e.currentTarget) setLightboxIndex(null); }}
+          className="fixed inset-0 z-[100] flex items-center justify-center overflow-hidden bg-black/90"
+          onClick={(e) => {
+            if (e.target !== e.currentTarget) return;
+            if (lightboxDraggedRef.current) { lightboxDraggedRef.current = false; return; }
+            setLightboxIndex(null);
+          }}
+          onPointerDown={(e) => {
+            if (e.target === e.currentTarget) lightboxDraggedRef.current = false;
+          }}
         >
           <button
             ref={lightboxCloseRef}
@@ -792,7 +968,7 @@ export default function ProductDetailPage() {
             <X className="w-8 h-8" />
           </button>
 
-          {activeImages.length > 1 && (
+          {activeImages.length > 1 && !lightboxZoomed && (
             <button
               onClick={(e) => { e.stopPropagation(); navigateLightboxRef.current(-1); }}
               className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white transition-colors z-10"
@@ -802,7 +978,7 @@ export default function ProductDetailPage() {
             </button>
           )}
 
-          {activeImages.length > 1 && (
+          {activeImages.length > 1 && !lightboxZoomed && (
             <button
               onClick={(e) => { e.stopPropagation(); navigateLightboxRef.current(1); }}
               className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white transition-colors z-10"
@@ -812,7 +988,18 @@ export default function ProductDetailPage() {
             </button>
           )}
 
-          <div className="relative max-h-[90vh] max-w-[90vw]">
+          <div
+            ref={lightboxImageRef}
+            className={`relative max-h-[90vh] max-w-[90vw] touch-none select-none ${
+              lightboxZoomed ? "cursor-grab" : "cursor-zoom-in"
+            }`}
+            style={{ transformOrigin: "center center" }}
+            onPointerDown={handleLightboxPointerDown}
+            onPointerMove={handleLightboxPointerMove}
+            onPointerUp={handleLightboxPointerEnd}
+            onPointerCancel={handleLightboxPointerEnd}
+            onDoubleClick={handleLightboxDoubleClick}
+          >
             <img
               src={activeImages[lightboxIndex]}
               alt={`${product.name} - ${color.name}`}
@@ -820,7 +1007,7 @@ export default function ProductDetailPage() {
               className="max-h-[90vh] max-w-[90vw] object-contain select-none"
               draggable={false}
             />
-            {lightboxFade && (
+            {lightboxFade && !lightboxZoomed && (
               <img
                 key={lightboxFadeKeyRef.current}
                 src={lightboxFade}
