@@ -102,16 +102,16 @@ export default function SalesHistoryPage() {
 
       <Container>
         <div className="hidden overflow-x-auto md:block">
-          <table className="w-full min-w-[860px] table-fixed text-left">
+          <table className="w-full min-w-[960px] table-fixed text-left">
             <thead>
               <tr className="border-b border-[var(--border-subtle)] text-xs text-[var(--fg-muted)]">
-                <th className="w-[14%] py-2.5 pl-6 pr-3 font-medium">Receipt #</th>
-                <th className="w-[25%] px-3 py-2.5 font-medium">Product</th>
-                <th className="w-[11%] px-3 py-2.5 font-medium">Variant</th>
+                <th className="w-[13%] py-2.5 pl-6 pr-2 font-medium">Receipt #</th>
+                <th className="w-[29%] px-3 py-2.5 font-medium">Product</th>
+                <th className="w-[9%] px-3 py-2.5 font-medium">Variant</th>
                 <th className="w-[7%] px-3 py-2.5 text-right font-medium">Qty</th>
-                <th className="w-[13%] px-3 py-2.5 text-right font-medium">Total</th>
-                <th className="w-[13%] px-3 py-2.5 font-medium">Date Sold</th>
-                <th className="w-[11%] px-3 py-2.5 font-medium">Sold By</th>
+                <th className="w-[12%] px-3 py-2.5 text-right font-medium">Total</th>
+                <th className="w-[11%] px-3 py-2.5 font-medium">Date Sold</th>
+                <th className="w-[13%] px-3 py-2.5 font-medium">Sold By</th>
                 <th className="w-[6%] px-3 py-2.5 font-medium"></th>
               </tr>
             </thead>
@@ -137,7 +137,7 @@ export default function SalesHistoryPage() {
                       onClick={() => handleOpenReceipt(s)}
                       className="cursor-pointer border-b border-[var(--border-subtle)] transition-colors last:border-b-0 hover:bg-[var(--bg-subtle-hover)]"
                     >
-                      <td className="whitespace-nowrap py-3 pl-6 pr-3 text-sm">
+                      <td className="whitespace-nowrap py-3 pl-6 pr-2 text-sm">
                         {s.receiptNo ? <Badge color="grey">{s.receiptNo}</Badge> : <span className="text-[var(--fg-muted)]">—</span>}
                       </td>
                       <td className="px-3 py-3">

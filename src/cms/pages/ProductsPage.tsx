@@ -405,17 +405,17 @@ export default function ProductsPage() {
         )}
 
         <div className="hidden overflow-x-auto md:block">
-          <table className="w-full min-w-[740px] text-left">
+          <table className="w-full min-w-[860px] text-left">
             <thead>
               <tr className="border-b border-[var(--border-subtle)] text-xs text-[var(--fg-muted)]">
-                <th className="w-10 px-4 py-2.5"><Checkbox checked={allPageSelected} onChange={toggleSelectAll} disabled={pageItems.length === 0} /></th>
-                <th className="px-6 py-2.5 font-medium">Product</th>
-                <th className="w-32 px-6 py-2.5 font-medium">Type</th>
-                <th className="w-28 px-6 py-2.5 font-medium">Price</th>
-                <th className="w-32 px-6 py-2.5 font-medium">Availability</th>
-                <th className="w-24 px-6 py-2.5 font-medium">Stocks</th>
-                <th className="w-32 px-6 py-2.5 font-medium">Updated</th>
-                <th className="w-16 px-6 py-2.5 text-right font-medium">Actions</th>
+                <th className="w-10 px-3 py-2.5"><Checkbox checked={allPageSelected} onChange={toggleSelectAll} disabled={pageItems.length === 0} /></th>
+                <th className="px-3 py-2.5 font-medium">Product</th>
+                <th className="w-28 px-3 py-2.5 font-medium">Type</th>
+                <th className="w-28 px-3 py-2.5 font-medium">Price</th>
+                <th className="w-28 px-3 py-2.5 font-medium">Availability</th>
+                <th className="w-28 px-3 py-2.5 font-medium">Stocks</th>
+                <th className="w-28 px-3 py-2.5 font-medium">Updated</th>
+                <th className="w-16 px-3 py-2.5 text-right font-medium">Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -436,23 +436,25 @@ export default function ProductsPage() {
               {pageItems.map((p) => {
                 return (
                   <tr key={p.id} className={`border-b border-[var(--border-subtle)] transition-colors last:border-b-0 hover:bg-[var(--bg-subtle-hover)] ${selectedIds.has(p.id) ? "bg-[var(--bg-subtle)]" : ""}`}>
-                    <td className="w-10 px-4 py-3"><Checkbox checked={selectedIds.has(p.id)} onChange={() => toggleSelect(p.id)} /></td>
-                    <td className="px-6 py-3">
+                    <td className="w-10 px-3 py-3"><Checkbox checked={selectedIds.has(p.id)} onChange={() => toggleSelect(p.id)} /></td>
+                    <td className="px-3 py-3">
                       <div className="flex items-center gap-3">
                         <img src={p.colors[0]?.images[0]} alt="" className="h-10 w-10 shrink-0 rounded object-cover bg-[var(--bg-subtle)]" />
-                        <div className="min-w-0">
-                          <Link to={`/cms-admin/products/${p.id}/edit`} className="block max-w-[260px] truncate text-sm text-[var(--fg-base)] hover:underline">{p.name}</Link>
-                          <p className="truncate text-xs whitespace-nowrap text-[var(--fg-muted)]">{p.brand ?? "Store"}</p>
+                        <div className="min-w-0 flex-1">
+                          <Link to={`/cms-admin/products/${p.id}/edit`} className="block truncate text-sm text-[var(--fg-base)] hover:underline" title={p.name}>{p.name}</Link>
+                          <p className="truncate text-xs text-[var(--fg-muted)]" title={p.brand ?? "Store"}>{p.brand ?? "Store"}</p>
                         </div>
                       </div>
                     </td>
-                    <td className="whitespace-nowrap px-6 py-3 text-sm text-[var(--fg-muted)]">{typeLabel(p.type)}</td>
-                    <td className="whitespace-nowrap px-6 py-3 text-sm text-[var(--fg-base)]">
+                    <td className="whitespace-nowrap px-3 py-3 text-sm text-[var(--fg-muted)]">
+                      <span className="block truncate" title={typeLabel(p.type)}>{typeLabel(p.type)}</span>
+                    </td>
+                    <td className="whitespace-nowrap px-3 py-3 text-sm text-[var(--fg-base)]">
                       {p.compareAtPrice && (<span className="mr-1 text-xs text-[var(--fg-muted)] line-through">{p.compareAtPrice}</span>)}
                       {p.price}
                     </td>
-                    <td className="whitespace-nowrap px-6 py-3">{statusBadge(p, isNewProduct(p, settings.newArrivalDays))}</td>
-                    <td className="whitespace-nowrap px-6 py-3">
+                    <td className="whitespace-nowrap px-3 py-3">{statusBadge(p, isNewProduct(p, settings.newArrivalDays))}</td>
+                    <td className="whitespace-nowrap px-3 py-3">
                       <button
                         type="button"
                         onClick={() => openStocks(p)}
@@ -463,8 +465,8 @@ export default function ProductsPage() {
                         {totalStock(p)}
                       </button>
                     </td>
-                    <td className="whitespace-nowrap px-6 py-3 text-sm text-[var(--fg-muted)]">{formatDate(p.updatedAt)}</td>
-                    <td className="px-6 py-3 text-right">
+                    <td className="whitespace-nowrap px-3 py-3 text-[13px] text-[var(--fg-muted)]">{formatDate(p.updatedAt)}</td>
+                    <td className="px-3 py-3 text-right">
                       <ActionMenu items={[
                         { label: "Edit", icon: <Pencil className="h-4 w-4" />, to: `/cms-admin/products/${p.id}/edit` },
                         { label: "Adjust Stock", icon: <SwatchBook className="h-4 w-4" />, onClick: () => openStocks(p) },
