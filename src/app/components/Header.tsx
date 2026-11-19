@@ -501,7 +501,7 @@ export default function Header({ onShare, showShare = true }: HeaderProps) {
                             <div className="min-w-0">
                               <p className="text-sm text-gray-900 truncate">{p.name}</p>
                               <p className="text-xs text-gray-500 capitalize">
-                                {p.categoryLabel} · {TYPE_LABELS[p.type] ?? p.type}
+                                {p.categoryLabel} ï¿½ {TYPE_LABELS[p.type] ?? p.type}
                               </p>
                             </div>
                             <span className="ml-auto text-sm text-gray-900 shrink-0">
@@ -575,7 +575,7 @@ export default function Header({ onShare, showShare = true }: HeaderProps) {
                       to={item.href}
                       onMouseEnter={() => handleMoreTypeEnter(slug)}
                       onClick={() => { setMoreOpen(false); setMoreActiveType(null); setMoreCategory(""); window.scrollTo(0, 0); }}
-                      className={`block py-1.5 text-sm cursor-pointer transition-colors ${isActive ? 'text-black font-medium' : 'text-gray-500 hover:text-black'}`}
+                      className={`block py-1.5 text-sm uppercase cursor-pointer transition-colors ${isActive ? 'text-black font-medium' : 'text-gray-500 hover:text-black'}`}
                     >
                       {item.label}
                     </Link>

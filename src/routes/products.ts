@@ -38,7 +38,7 @@ app.get("/", async (c) => {
   }
   const db = getDb(c.env);
 
-  const pagingParams = ["page", "limit", "search", "type", "status", "availability", "ids", "stats"];
+  const pagingParams = ["page", "limit", "search", "type", "category", "status", "availability", "ids", "stats"];
   const paginated = pagingParams.some((k) => c.req.query(k) !== undefined);
 
   if (!paginated) {
@@ -58,6 +58,7 @@ app.get("/", async (c) => {
   );
   const search = typeof c.req.query("search") === "string" ? c.req.query("search")!.trim() : "";
   const type = typeof c.req.query("type") === "string" ? c.req.query("type")! : "";
+  const category = typeof c.req.query("category") === "string" ? c.req.query("category")! : "";
   const status = typeof c.req.query("status") === "string" ? c.req.query("status")! : "";
   const availability = typeof c.req.query("availability") === "string" ? c.req.query("availability")! : "";
 
@@ -99,6 +100,7 @@ app.get("/", async (c) => {
     );
   }
   if (type && type !== "all") conditions.push(eq(schema.products.type, type));
+  if (category && category !== "all") conditions.push(eq(schema.products.category, category));
   if (status && status !== "all") conditions.push(eq(schema.products.status, status));
   if (availability === "available") conditions.push(sql`${stockTotal} > 0`);
   if (availability === "soldout") conditions.push(sql`${stockTotal} <= 0`);

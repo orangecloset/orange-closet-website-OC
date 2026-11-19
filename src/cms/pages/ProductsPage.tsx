@@ -49,6 +49,7 @@ export default function ProductsPage() {
   const [query, setQuery] = useState("");
   const [debouncedQuery, setDebouncedQuery] = useState("");
   const [typeFilter, setTypeFilter] = useState<string>("all");
+  const [categoryFilter, setCategoryFilter] = useState<string>("all");
   const [statusFilter, setStatusFilter] = useState("all");
   const [availabilityFilter, setAvailabilityFilter] = useState("all");
 
@@ -61,12 +62,24 @@ export default function ProductsPage() {
   const suggestions = suggestionsQuery.data?.data ?? [];
 
   useEffect(() => {
+    setCategoryFilter("all");
     setPage(1);
   }, [typeFilter]);
+
+  const categoryOptions = useMemo(() => {
+    const source = typeFilter === "all" ? types : types.filter((t) => t.slug === typeFilter);
+    return source
+      .map((t) => ({
+        typeLabel: t.label,
+        categories: t.categories ?? [],
+      }))
+      .filter((group) => group.categories.length > 0);
+  }, [types, typeFilter]);
 
   const productsQuery = usePagedProducts({
     page,
     type: typeFilter,
+    category: categoryFilter,
     status: statusFilter,
     availability: availabilityFilter,
     limit: PAGE_SIZE,
@@ -222,6 +235,28 @@ export default function ProductsPage() {
             <Select value={typeFilter} onChange={(e) => setTypeFilter(e.target.value)}>
               <option value="all">All types</option>
               {types.map((t) => (<option key={t.slug} value={t.slug}>{t.label}</option>))}
+            </Select>
+          </div>
+          <div className="w-full shrink-0 lg:w-44">
+            <Select
+              value={categoryFilter}
+              onChange={(e) => { setCategoryFilter(e.target.value); setPage(1); }}
+              disabled={categoryOptions.length === 0}
+            >
+              <option value="all">All subcategories</option>
+              {categoryOptions.map((group) => (
+                typeFilter === "all" ? (
+                  <optgroup key={group.typeLabel} label={group.typeLabel}>
+                    {group.categories.map((c) => (
+                      <option key={`${group.typeLabel}:${c.slug}`} value={c.slug}>{c.label}</option>
+                    ))}
+                  </optgroup>
+                ) : (
+                  group.categories.map((c) => (
+                    <option key={c.slug} value={c.slug}>{c.label}</option>
+                  ))
+                )
+              ))}
             </Select>
           </div>
         </div>
