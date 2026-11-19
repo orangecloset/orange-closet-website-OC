@@ -29,6 +29,15 @@ function formatDateTime(iso: string): string {
   });
 }
 
+function formatDateParts(iso: string): { date: string; time: string } {
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return { date: "—", time: "" };
+  return {
+    date: d.toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" }),
+    time: d.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" }),
+  };
+}
+
 function formatMoney(value: number): string {
   return value.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
@@ -158,29 +167,28 @@ export default function InventoryPage() {
         </div>
 
         <div className="hidden overflow-x-auto md:block">
-          <table className="w-full min-w-[860px] text-left">
+          <table className="w-full min-w-[860px] table-fixed text-left">
             <thead>
               <tr className="border-b border-[var(--border-subtle)] text-xs text-[var(--fg-muted)]">
-                <th className="w-[15%] px-6 py-2.5 font-medium">Date</th>
-                <th className="w-[21%] px-6 py-2.5 font-medium">Product</th>
-                <th className="w-[12%] px-6 py-2.5 font-medium">Variant</th>
-                <th className="w-[8%] px-6 py-2.5 font-medium">Change</th>
-                <th className="w-[8%] px-6 py-2.5 font-medium">Type</th>
-                <th className="w-[13%] px-6 py-2.5 font-medium">Reason</th>
-                <th className="w-[14%] px-6 py-2.5 font-medium">By</th>
-                <th className="w-[9%] px-6 py-2.5 font-medium">Receipt #</th>
+                <th className="w-[13%] py-2.5 pl-6 pr-3 font-medium">Date</th>
+                <th className="w-[21%] px-3 py-2.5 font-medium">Product</th>
+                <th className="w-[12%] px-3 py-2.5 font-medium">Variant</th>
+                <th className="w-[13%] px-3 py-2.5 font-medium">Change</th>
+                <th className="w-[13%] px-3 py-2.5 font-medium">Type</th>
+                <th className="w-[15%] px-3 py-2.5 font-medium">Reason / By</th>
+                <th className="w-[13%] py-2.5 pl-3 pr-6 font-medium">Receipt #</th>
               </tr>
             </thead>
             <tbody>
               {loading ? (
                 <tr>
-                  <td colSpan={8} className="px-6 py-12 text-center">
+                  <td colSpan={7} className="px-6 py-12 text-center">
                     <Loader2 className="mx-auto h-5 w-5 animate-spin text-[var(--fg-muted)]" />
                   </td>
                 </tr>
               ) : items.length === 0 ? (
                 <tr>
-                  <td colSpan={8} className="px-6 py-12 text-center text-sm text-[var(--fg-muted)]">
+                  <td colSpan={7} className="px-6 py-12 text-center text-sm text-[var(--fg-muted)]">
                     <Boxes className="mx-auto mb-2 h-6 w-6" />
                     No stock changes recorded yet.
                   </td>
@@ -188,33 +196,57 @@ export default function InventoryPage() {
               ) : (
                 items.map((m) => {
                   const kind = KIND_BADGES[m.kind] ?? KIND_BADGES.edit;
+                  const { date, time } = formatDateParts(m.createdAt);
                   return (
                     <tr
                       key={m.id}
                       className="border-b border-[var(--border-subtle)] transition-colors last:border-b-0 hover:bg-[var(--bg-subtle-hover)]"
                     >
-                      <td className="whitespace-nowrap px-6 py-3 text-sm text-[var(--fg-muted)]">
-                        {formatDateTime(m.createdAt)}
+                      <td className="py-3 pl-6 pr-3">
+                        <span className="block whitespace-nowrap text-[13px] leading-5 text-[var(--fg-base)]">
+                          {date}
+                        </span>
+                        <span className="block whitespace-nowrap text-[11px] leading-4 text-[var(--fg-muted)]">
+                          {time}
+                        </span>
                       </td>
-                      <td className="px-6 py-3 text-sm text-[var(--fg-base)]">
-                        <span className="block max-w-[240px] truncate">{m.productName}</span>
+                      <td className="px-3 py-3">
+                        <span className="block truncate text-sm text-[var(--fg-base)]" title={m.productName}>
+                          {m.productName}
+                        </span>
                       </td>
-                      <td className="whitespace-nowrap px-6 py-3 text-sm text-[var(--fg-muted)]">
-                        {m.colorName} · {m.size}
+                      <td className="px-3 py-3">
+                        <span
+                          className="block truncate text-sm text-[var(--fg-base)]"
+                          title={m.colorName}
+                        >
+                          {m.colorName}
+                        </span>
+                        <span
+                          className="block truncate text-xs text-[var(--fg-muted)]"
+                          title={m.size}
+                        >
+                          {m.size}
+                        </span>
                       </td>
-                      <td className="whitespace-nowrap px-6 py-3 text-sm text-[var(--fg-base)]">
+                      <td className="whitespace-nowrap px-3 py-3 text-sm tabular-nums text-[var(--fg-base)]">
                         {m.prevStock} → {m.newStock}
                       </td>
-                      <td className="whitespace-nowrap px-6 py-3">
+                      <td className="px-3 py-3">
                         <Badge color={kind.color}>{kind.label}</Badge>
                       </td>
-                      <td className="px-6 py-3 text-sm text-[var(--fg-base)]">
-                        <span className="block max-w-[180px] truncate">{m.reason || "—"}</span>
+                      <td className="px-3 py-3">
+                        <span
+                          className="block truncate text-sm text-[var(--fg-base)]"
+                          title={m.reason || undefined}
+                        >
+                          {m.reason || "—"}
+                        </span>
+                        <span className="block truncate text-xs text-[var(--fg-muted)]">
+                          {m.changedBy ? `by ${m.changedBy}` : "—"}
+                        </span>
                       </td>
-                      <td className="px-6 py-3 text-sm text-[var(--fg-muted)]">
-                        {m.changedBy || "—"}
-                      </td>
-                      <td className="whitespace-nowrap px-6 py-3 text-sm text-[var(--fg-muted)]">
+                      <td className="whitespace-nowrap py-3 pl-3 pr-6 text-sm text-[var(--fg-muted)]">
                         {m.ref ? (
                           m.kind === "sale" ? (
                             <button
