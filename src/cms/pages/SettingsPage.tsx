@@ -20,7 +20,6 @@ import { formatDateTime, randomString } from "../lib/utils";
 import { SortableList, DragHandle } from "../components/SortableList";
 import { LegalSection } from "../components/LegalSection";
 import { RichTextEditor } from "../components/RichTextEditor";
-import { ReorderButtons } from "../components/ReorderButtons";
 
 function LinkSection({
   title,
@@ -116,15 +115,6 @@ export default function SettingsPage() {
         (message) => message.id !== id
       ),
     });
-  };
-
-  const moveAnnouncement = (index: number, direction: -1 | 1) => {
-    const target = index + direction;
-    if (target < 0 || target >= settings.announcementMessages.length) return;
-    const announcementMessages = [...settings.announcementMessages];
-    const [moved] = announcementMessages.splice(index, 1);
-    announcementMessages.splice(target, 0, moved);
-    set({ announcementMessages });
   };
 
   const [copied, setCopied] = useState<string | null>(null);
@@ -395,20 +385,14 @@ export default function SettingsPage() {
                 </p>
               )}
 
-              <div className="flex flex-col gap-2">
-                {settings.announcementMessages.map((message, index) => (
-                  <div
-                    key={message.id}
-                    className="flex flex-col gap-2 rounded-md border border-[var(--border-subtle)] p-2"
-                  >
+              <SortableList
+                items={settings.announcementMessages}
+                onReorder={(announcementMessages) => set({ announcementMessages })}
+                keyExtractor={(message) => message.id}
+                renderItem={(message, index, dragHandleProps) => (
+                  <div className="flex flex-col gap-2 rounded-md border border-[var(--border-subtle)] p-2">
                     <div className="flex items-start gap-2">
-                      <ReorderButtons
-                        label={`announcement message ${index + 1}`}
-                        canMoveUp={index > 0}
-                        canMoveDown={index < settings.announcementMessages.length - 1}
-                        onMoveUp={() => moveAnnouncement(index, -1)}
-                        onMoveDown={() => moveAnnouncement(index, 1)}
-                      />
+                      <DragHandle handleProps={dragHandleProps} />
                       <div className="min-w-0 flex-1">
                         <RichTextEditor
                           variant="inline"
@@ -426,11 +410,12 @@ export default function SettingsPage() {
                         type="button"
                         onClick={() => removeAnnouncement(message.id)}
                         aria-label={`Remove message ${index + 1}`}
+                        className="px-[9px] py-1.5 sm:px-[7px] sm:py-1"
                       >
                         <X className="h-4 w-4" />
                       </Button>
                     </div>
-                    <div className="flex flex-col gap-1.5 pl-14 sm:flex-row sm:items-center">
+                    <div className="flex flex-col gap-1.5 pl-8 pr-[42px] sm:flex-row sm:items-center sm:pr-[38px]">
                       <Input
                         value={message.link ?? ""}
                         onChange={(e) =>
@@ -441,8 +426,8 @@ export default function SettingsPage() {
                       />
                     </div>
                   </div>
-                ))}
-              </div>
+                )}
+              />
             </div>
           </div>
         </Container>
