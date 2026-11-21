@@ -124,9 +124,18 @@ export type FooterSocial = {
   url: string;
 };
 
+export type AnnouncementMessage = {
+  id: string;
+  html: string;
+  link?: string;
+};
+
 export type SettingsConfig = {
   storeName: string;
   headerSubtitle: string;
+  announcementEnabled: boolean;
+  announcementMessages: AnnouncementMessage[];
+  announcementIntervalSeconds: number;
   tagline: string;
   faviconUrl: string;
   ogImageUrl: string;

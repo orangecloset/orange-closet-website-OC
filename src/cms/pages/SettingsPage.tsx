@@ -2,7 +2,7 @@ import { useState, type FormEvent } from "react";
 import { Plus, X, Ban, Copy, Check, Eye, EyeOff, Trash2, TriangleAlert, Facebook, Instagram, Youtube, Twitter } from "lucide-react";
 import { useCms } from "../store/cmsContext";
 import { authHeaders } from "../store/auth";
-import type { FooterLink } from "../../data/store-types";
+import type { AnnouncementMessage, FooterLink } from "../../data/store-types";
 import {
   ActionMenu,
   Badge,
@@ -16,9 +16,10 @@ import {
 } from "../components/ui";
 import { useToast } from "../store/toastContext";
 import { UploadButton } from "../components/UploadButton";
-import { formatDateTime } from "../lib/utils";
+import { formatDateTime, randomString } from "../lib/utils";
 import { SortableList, DragHandle } from "../components/SortableList";
 import { LegalSection } from "../components/LegalSection";
+import { RichTextEditor } from "../components/RichTextEditor";
 
 function LinkSection({
   title,
@@ -91,6 +92,31 @@ export default function SettingsPage() {
 
   const set = (patch: Partial<typeof settings>) => updateSettings(patch);
 
+  const addAnnouncement = () => {
+    set({
+      announcementMessages: [
+        ...settings.announcementMessages,
+        { id: randomString(8), html: "", link: "" },
+      ],
+    });
+  };
+
+  const updateAnnouncement = (id: string, patch: Partial<AnnouncementMessage>) => {
+    set({
+      announcementMessages: settings.announcementMessages.map((message) =>
+        message.id === id ? { ...message, ...patch } : message
+      ),
+    });
+  };
+
+  const removeAnnouncement = (id: string) => {
+    set({
+      announcementMessages: settings.announcementMessages.filter(
+        (message) => message.id !== id
+      ),
+    });
+  };
+
   const [copied, setCopied] = useState<string | null>(null);
   const [pinVisibleId, setPinVisibleId] = useState<string | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
@@ -151,6 +177,7 @@ export default function SettingsPage() {
       ...settings.aboutLinks.map((l) => l.url),
       ...settings.branchLinks.map((l) => l.url),
       ...settings.socials.map((s) => s.url),
+      ...settings.announcementMessages.map((message) => message.link),
     ];
     if (urlFields.some(hasUnsafeUrl)) {
       showToast("URLs starting with javascript: are not allowed.");
@@ -276,6 +303,133 @@ export default function SettingsPage() {
                 Shown when the site link is shared on social media. Landscape
                 image, 1200×630 px (.jpg or .png).
               </p>
+            </div>
+          </div>
+        </Container>
+
+        <Container>
+          <Header
+            title="Announcement Bar"
+            subtitle="Promo messages shown at the top of the homepage"
+          />
+          <div className="flex flex-col gap-4 px-4 py-4 sm:px-6">
+            <div className="flex items-center justify-between gap-4">
+              <div>
+                <Label>Enable announcement bar</Label>
+                <p className="text-xs text-[var(--fg-muted)]">
+                  Shows rotating messages above the navbar on the homepage.
+                </p>
+              </div>
+              <Switch
+                checked={settings.announcementEnabled}
+                onCheckedChange={(value) => set({ announcementEnabled: value })}
+              />
+            </div>
+
+            <div className="flex flex-col gap-2 border-t border-[var(--border-subtle)] pt-4 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <Label htmlFor="announcement-interval">Rotation interval</Label>
+                <p className="text-xs text-[var(--fg-muted)]">
+                  How long each message stays visible before the next one slides up.
+                </p>
+              </div>
+              <div className="flex items-center gap-2">
+                <Input
+                  id="announcement-interval"
+                  type="number"
+                  min={2}
+                  max={30}
+                  value={settings.announcementIntervalSeconds || ""}
+                  onChange={(e) =>
+                    set({
+                      announcementIntervalSeconds: Number(e.target.value) || 0,
+                    })
+                  }
+                  onBlur={() =>
+                    set({
+                      announcementIntervalSeconds: Math.min(
+                        30,
+                        Math.max(2, Number(settings.announcementIntervalSeconds) || 5)
+                      ),
+                    })
+                  }
+                  className="w-24"
+                />
+                <span className="text-xs text-[var(--fg-muted)]">seconds</span>
+              </div>
+            </div>
+
+            <div className="flex flex-col gap-3 border-t border-[var(--border-subtle)] pt-4">
+              <div className="flex items-center justify-between gap-3">
+                <div>
+                  <h3 className="text-sm font-medium text-[var(--fg-base)]">Messages</h3>
+                  <p className="text-xs text-[var(--fg-muted)]">
+                    Use the toolbar to bold or underline part of a message. Keep each
+                    message short.
+                  </p>
+                </div>
+                <Button
+                  variant="secondary"
+                  size="small"
+                  type="button"
+                  onClick={addAnnouncement}
+                >
+                  <Plus className="h-4 w-4" />
+                  Add message
+                </Button>
+              </div>
+
+              {settings.announcementMessages.length === 0 && (
+                <p className="text-sm text-[var(--fg-muted)]">
+                  No messages yet. Add at least one message for the bar to appear.
+                </p>
+              )}
+
+              <SortableList
+                items={settings.announcementMessages}
+                onReorder={(announcementMessages) => set({ announcementMessages })}
+                keyExtractor={(message) => message.id}
+                renderItem={(message, index, dragHandleProps) => (
+                  <div className="flex flex-col gap-2 rounded-md border border-[var(--border-subtle)] p-2">
+                    <div className="flex items-start gap-2">
+                      <DragHandle handleProps={dragHandleProps} />
+                      <div className="min-w-0 flex-1">
+                        <RichTextEditor
+                          variant="inline"
+                          value={message.html}
+                          onChange={(html) =>
+                            updateAnnouncement(message.id, { html })
+                          }
+                          ariaLabel={`Announcement message ${index + 1}`}
+                          placeholder="Write a short message…"
+                        />
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="small"
+                        type="button"
+                        onClick={() => removeAnnouncement(message.id)}
+                        aria-label={`Remove message ${index + 1}`}
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
+                    <div className="flex flex-col gap-1.5 pl-7 sm:flex-row sm:items-center">
+                      <span className="w-auto shrink-0 text-xs text-[var(--fg-muted)] sm:w-10">
+                        Link
+                      </span>
+                      <Input
+                        value={message.link ?? ""}
+                        onChange={(e) =>
+                          updateAnnouncement(message.id, { link: e.target.value })
+                        }
+                        placeholder="https://... or /sale"
+                        className="flex-1"
+                      />
+                    </div>
+                  </div>
+                )}
+              />
             </div>
           </div>
         </Container>

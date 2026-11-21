@@ -11,6 +11,7 @@ import {
   ListOrdered,
   Redo2,
   Table2,
+  Underline,
   Undo2,
 } from "lucide-react";
 import { cn } from "../lib/utils";
@@ -81,21 +82,34 @@ function MenuItem({
   );
 }
 
+function toInlineHtml(html: string): string {
+  return html
+    .replace(/<\/p>\s*<p[^>]*>/gi, " ")
+    .replace(/^<p[^>]*>/i, "")
+    .replace(/<\/p>$/i, "")
+    .trim();
+}
+
 export function RichTextEditor({
   value,
   onChange,
   ariaLabel = "Section content",
   className,
   headingLevels = [2, 3],
+  variant = "full",
+  placeholder = "Write a short message…",
 }: {
   value: string;
   onChange: (html: string) => void;
   ariaLabel?: string;
   className?: string;
   headingLevels?: (1 | 2 | 3 | 4 | 5 | 6)[];
+  variant?: "full" | "inline";
+  placeholder?: string;
 }) {
   const onChangeRef = useRef(onChange);
   const lastHtml = useRef(value);
+  const isInline = variant === "inline";
   const [openMenu, setOpenMenu] = useState<"heading" | "table" | null>(null);
   const headingMenuRef = useRef<HTMLDivElement>(null);
   const tableMenuRef = useRef<HTMLDivElement>(null);
@@ -105,22 +119,38 @@ export function RichTextEditor({
   }, [onChange]);
 
   const editor = useEditor({
-    extensions: [
-      StarterKit.configure({
-        heading: { levels: headingLevels },
-        link: { openOnClick: false, autolink: true, linkOnPaste: true },
-      }),
-      TableKit.configure({
-        table: {
-          resizable: false,
-          lastColumnResizable: false,
-          allowTableNodeSelection: true,
-        },
-      }),
-    ],
+    extensions: isInline
+      ? [
+          StarterKit.configure({
+            heading: false,
+            bulletList: false,
+            orderedList: false,
+            listItem: false,
+            blockquote: false,
+            code: false,
+            codeBlock: false,
+            horizontalRule: false,
+            hardBreak: false,
+            strike: false,
+            link: false,
+          }),
+        ]
+      : [
+          StarterKit.configure({
+            heading: { levels: headingLevels },
+            link: { openOnClick: false, autolink: true, linkOnPaste: true },
+          }),
+          TableKit.configure({
+            table: {
+              resizable: false,
+              lastColumnResizable: false,
+              allowTableNodeSelection: true,
+            },
+          }),
+        ],
     content: value,
     onUpdate: ({ editor: current }) => {
-      const html = current.getHTML();
+      const html = isInline ? toInlineHtml(current.getHTML()) : current.getHTML();
       lastHtml.current = html;
       onChangeRef.current(html);
     },
@@ -129,6 +159,12 @@ export function RichTextEditor({
         class: "focus:outline-none",
         "aria-label": ariaLabel,
       },
+      handleKeyDown: isInline
+        ? (_view, event) => {
+            if (event.key === "Enter") return true;
+            return false;
+          }
+        : undefined,
     },
   });
 
@@ -155,6 +191,7 @@ export function RichTextEditor({
     selector: ({ editor: current }) => ({
       bold: current.isActive("bold"),
       italic: current.isActive("italic"),
+      underline: current.isActive("underline"),
       bulletList: current.isActive("bulletList"),
       orderedList: current.isActive("orderedList"),
       activeHeading: current.isActive("heading"),
@@ -173,6 +210,7 @@ export function RichTextEditor({
     <div
       className={cn(
         "rounded-md bg-[var(--bg-field)] shadow-[var(--borders-base)] transition-shadow focus-within:shadow-[var(--borders-interactive-with-active)]",
+        isInline && "rte-inline",
         className
       )}
     >
@@ -191,134 +229,151 @@ export function RichTextEditor({
         >
           <Italic className="h-3.5 w-3.5" />
         </ToolbarButton>
-        <div ref={headingMenuRef} className="relative">
-          <button
-            type="button"
-            title="Text style"
-            aria-label="Text style"
-            aria-haspopup="menu"
-            aria-expanded={openMenu === "heading"}
-            onMouseDown={(event) => event.preventDefault()}
-            onClick={() => setOpenMenu(openMenu === "heading" ? null : "heading")}
-            className={cn(
-              "inline-flex h-7 items-center gap-1 rounded px-1.5 text-[13px] text-[var(--fg-subtle)] transition-colors hover:bg-[var(--bg-subtle-hover)] hover:text-[var(--fg-base)]",
-              state.activeHeading && "text-[var(--fg-base)]"
-            )}
+        {isInline && (
+          <ToolbarButton
+            label="Underline"
+            active={state.underline}
+            onClick={() => editor.chain().focus().toggleUnderline().run()}
           >
-            <Heading className="h-3.5 w-3.5" />
-            <ChevronDown className="h-3 w-3" />
-          </button>
+            <Underline className="h-3.5 w-3.5" />
+          </ToolbarButton>
+        )}
+        {isInline && <Separator />}
 
-          {openMenu === "heading" && (
-            <div
-              role="menu"
-              className="absolute left-0 top-full z-30 mt-1 w-40 rounded-md border border-[var(--border-subtle)] bg-[var(--bg-base)] p-1 shadow-[var(--elevation-flyout)]"
-            >
-              <MenuItem onClick={() => runCommand(() => editor.chain().focus().setParagraph().run())}>
-                Paragraph
-              </MenuItem>
-              {headingLevels.map((level) => (
-                <MenuItem
-                  key={level}
-                  onClick={() =>
-                    runCommand(() => editor.chain().focus().toggleHeading({ level }).run())
-                  }
+        {!isInline && (
+          <>
+            <div ref={headingMenuRef} className="relative">
+              <button
+                type="button"
+                title="Text style"
+                aria-label="Text style"
+                aria-haspopup="menu"
+                aria-expanded={openMenu === "heading"}
+                onMouseDown={(event) => event.preventDefault()}
+                onClick={() => setOpenMenu(openMenu === "heading" ? null : "heading")}
+                className={cn(
+                  "inline-flex h-7 items-center gap-1 rounded px-1.5 text-[13px] text-[var(--fg-subtle)] transition-colors hover:bg-[var(--bg-subtle-hover)] hover:text-[var(--fg-base)]",
+                  state.activeHeading && "text-[var(--fg-base)]"
+                )}
+              >
+                <Heading className="h-3.5 w-3.5" />
+                <ChevronDown className="h-3 w-3" />
+              </button>
+
+              {openMenu === "heading" && (
+                <div
+                  role="menu"
+                  className="absolute left-0 top-full z-30 mt-1 w-40 rounded-md border border-[var(--border-subtle)] bg-[var(--bg-base)] p-1 shadow-[var(--elevation-flyout)]"
                 >
-                  Heading {level}
-                </MenuItem>
-              ))}
+                  <MenuItem
+                    onClick={() => runCommand(() => editor.chain().focus().setParagraph().run())}
+                  >
+                    Paragraph
+                  </MenuItem>
+                  {headingLevels.map((level) => (
+                    <MenuItem
+                      key={level}
+                      onClick={() =>
+                        runCommand(() => editor.chain().focus().toggleHeading({ level }).run())
+                      }
+                    >
+                      Heading {level}
+                    </MenuItem>
+                  ))}
+                </div>
+              )}
             </div>
-          )}
-        </div>
 
-        <Separator />
+            <Separator />
 
-        <ToolbarButton
-          label="Bullet list"
-          active={state.bulletList}
-          onClick={() => editor.chain().focus().toggleBulletList().run()}
-        >
-          <List className="h-3.5 w-3.5" />
-        </ToolbarButton>
-        <ToolbarButton
-          label="Numbered list"
-          active={state.orderedList}
-          onClick={() => editor.chain().focus().toggleOrderedList().run()}
-        >
-          <ListOrdered className="h-3.5 w-3.5" />
-        </ToolbarButton>
-
-        <Separator />
-
-        <div ref={tableMenuRef} className="relative">
-          <button
-            type="button"
-            title="Table options"
-            aria-label="Table options"
-            aria-haspopup="menu"
-            aria-expanded={openMenu === "table"}
-            onMouseDown={(event) => event.preventDefault()}
-            onClick={() => setOpenMenu(openMenu === "table" ? null : "table")}
-            className={cn(
-              "inline-flex h-7 items-center gap-1 rounded px-1.5 text-[13px] text-[var(--fg-subtle)] transition-colors hover:bg-[var(--bg-subtle-hover)] hover:text-[var(--fg-base)]",
-              state.inTable && "text-[var(--fg-base)]"
-            )}
-          >
-            <Table2 className="h-3.5 w-3.5" />
-            <span>Table</span>
-            <ChevronDown className="h-3 w-3" />
-          </button>
-
-          {openMenu === "table" && (
-            <div
-              role="menu"
-              className="absolute left-0 top-full z-30 mt-1 w-52 rounded-md border border-[var(--border-subtle)] bg-[var(--bg-base)] p-1 shadow-[var(--elevation-flyout)]"
+            <ToolbarButton
+              label="Bullet list"
+              active={state.bulletList}
+              onClick={() => editor.chain().focus().toggleBulletList().run()}
             >
-              <MenuItem
-                onClick={() =>
-                  runCommand(() =>
-                    editor.chain().focus().insertTable({ rows: 3, cols: 2, withHeaderRow: false }).run()
-                  )
-                }
-              >
-                Insert 3 × 2 table
-              </MenuItem>
-              <MenuItem
-                disabled={!state.inTable}
-                onClick={() => runCommand(() => editor.chain().focus().addRowAfter().run())}
-              >
-                Add row below
-              </MenuItem>
-              <MenuItem
-                disabled={!state.inTable}
-                onClick={() => runCommand(() => editor.chain().focus().addColumnAfter().run())}
-              >
-                Add column to the right
-              </MenuItem>
-              <MenuItem
-                disabled={!state.inTable}
-                onClick={() => runCommand(() => editor.chain().focus().deleteRow().run())}
-              >
-                Delete row
-              </MenuItem>
-              <MenuItem
-                disabled={!state.inTable}
-                onClick={() => runCommand(() => editor.chain().focus().deleteColumn().run())}
-              >
-                Delete column
-              </MenuItem>
-              <MenuItem
-                danger
-                disabled={!state.inTable}
-                onClick={() => runCommand(() => editor.chain().focus().deleteTable().run())}
-              >
-                Delete table
-              </MenuItem>
-            </div>
-          )}
-        </div>
+              <List className="h-3.5 w-3.5" />
+            </ToolbarButton>
+            <ToolbarButton
+              label="Numbered list"
+              active={state.orderedList}
+              onClick={() => editor.chain().focus().toggleOrderedList().run()}
+            >
+              <ListOrdered className="h-3.5 w-3.5" />
+            </ToolbarButton>
 
-        <Separator />
+            <Separator />
+
+            <div ref={tableMenuRef} className="relative">
+              <button
+                type="button"
+                title="Table options"
+                aria-label="Table options"
+                aria-haspopup="menu"
+                aria-expanded={openMenu === "table"}
+                onMouseDown={(event) => event.preventDefault()}
+                onClick={() => setOpenMenu(openMenu === "table" ? null : "table")}
+                className={cn(
+                  "inline-flex h-7 items-center gap-1 rounded px-1.5 text-[13px] text-[var(--fg-subtle)] transition-colors hover:bg-[var(--bg-subtle-hover)] hover:text-[var(--fg-base)]",
+                  state.inTable && "text-[var(--fg-base)]"
+                )}
+              >
+                <Table2 className="h-3.5 w-3.5" />
+                <span>Table</span>
+                <ChevronDown className="h-3 w-3" />
+              </button>
+
+              {openMenu === "table" && (
+                <div
+                  role="menu"
+                  className="absolute left-0 top-full z-30 mt-1 w-52 rounded-md border border-[var(--border-subtle)] bg-[var(--bg-base)] p-1 shadow-[var(--elevation-flyout)]"
+                >
+                  <MenuItem
+                    onClick={() =>
+                      runCommand(() =>
+                        editor.chain().focus().insertTable({ rows: 3, cols: 2, withHeaderRow: false }).run()
+                      )
+                    }
+                  >
+                    Insert 3 × 2 table
+                  </MenuItem>
+                  <MenuItem
+                    disabled={!state.inTable}
+                    onClick={() => runCommand(() => editor.chain().focus().addRowAfter().run())}
+                  >
+                    Add row below
+                  </MenuItem>
+                  <MenuItem
+                    disabled={!state.inTable}
+                    onClick={() => runCommand(() => editor.chain().focus().addColumnAfter().run())}
+                  >
+                    Add column to the right
+                  </MenuItem>
+                  <MenuItem
+                    disabled={!state.inTable}
+                    onClick={() => runCommand(() => editor.chain().focus().deleteRow().run())}
+                  >
+                    Delete row
+                  </MenuItem>
+                  <MenuItem
+                    disabled={!state.inTable}
+                    onClick={() => runCommand(() => editor.chain().focus().deleteColumn().run())}
+                  >
+                    Delete column
+                  </MenuItem>
+                  <MenuItem
+                    danger
+                    disabled={!state.inTable}
+                    onClick={() => runCommand(() => editor.chain().focus().deleteTable().run())}
+                  >
+                    Delete table
+                  </MenuItem>
+                </div>
+              )}
+            </div>
+
+            <Separator />
+          </>
+        )}
 
         <ToolbarButton
           label="Undo"
@@ -336,7 +391,14 @@ export function RichTextEditor({
         </ToolbarButton>
       </div>
 
-      <EditorContent editor={editor} className="rte-editor" />
+      <div className="relative">
+        <EditorContent editor={editor} className="rte-editor" />
+        {isInline && !value && (
+          <span className="pointer-events-none absolute left-2.5 top-1.5 text-[13px] text-[var(--fg-muted)]">
+            {placeholder}
+          </span>
+        )}
+      </div>
     </div>
   );
 }

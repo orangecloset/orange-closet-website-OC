@@ -298,6 +298,17 @@ img { -webkit-user-drag: none; user-select: none; }
   background: rgba(96, 165, 250, 0.15);
 }
 
+.rte-inline .ProseMirror {
+  min-height: 34px;
+  max-height: none;
+  overflow: visible;
+  padding: 6px 10px;
+  font-size: 13px;
+  line-height: 1.5;
+}
+.rte-inline .ProseMirror p { margin: 0; }
+.rte-inline .ProseMirror strong { font-weight: 600; }
+
 .legal-editor {
   display: flex;
   flex: 1 1 auto;
