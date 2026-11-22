@@ -45,6 +45,17 @@ function parseStockValue(raw: string | undefined): number {
     : Math.min(MAX_STOCK, Math.max(0, Math.floor(parsed)));
 }
 
+function duplicateKeys(values: string[]): Set<string> {
+  const seen = new Set<string>();
+  const duplicates = new Set<string>();
+  values.forEach((value) => {
+    const key = value.trim().toLowerCase();
+    if (seen.has(key)) duplicates.add(key);
+    else seen.add(key);
+  });
+  return duplicates;
+}
+
 export function ProductFormInner({ editing }: { editing?: CmsProduct }) {
   const { productId } = useParams();
   const [searchParams] = useSearchParams();
@@ -56,6 +67,7 @@ export function ProductFormInner({ editing }: { editing?: CmsProduct }) {
 
   const [name, setName] = useState(editing?.name ?? "");
   const [brand, setBrand] = useState(editing?.brand ?? "BRAND X");
+  const [itemCode, setItemCode] = useState(editing?.itemCode ?? "");
   const [type, setType] = useState<string>(editing?.type ?? presetType ?? "bags");
   const [category, setCategory] = useState(editing?.category ?? "");
   const [price, setPrice] = useState(editing?.price ?? "₱");
@@ -95,24 +107,23 @@ export function ProductFormInner({ editing }: { editing?: CmsProduct }) {
   const isEditing = Boolean(editing);
   const hasSizes = sizes.length > 0;
 
+  const colorNameKeys = colors.map((c, i) =>
+    (c.name.trim() || (i === 0 ? "Default" : `Color ${i + 1}`)).toLowerCase()
+  );
+  const duplicateColorNames = duplicateKeys(colorNameKeys);
+  const duplicateSizes = duplicateKeys(sizes);
+  const newSizeKey = newSize.trim().toLowerCase();
+  const newSizeExists =
+    newSizeKey !== "" && sizes.some((s) => s.trim().toLowerCase() === newSizeKey);
+
   const stockGroups = useMemo(() => {
-    if (isEditing) {
-      return (stockProduct?.colors ?? []).map((color) => ({
-        name: color.name,
-        hexes: (color.hexes && color.hexes.length > 0
-          ? color.hexes
-          : [color.hex]
-        ).map(normalizeHex),
-        colorIndex: -1,
-        rows: (color.sizes ?? []).map((variant) => {
-          const stock = Number(variant.stock);
-          return {
-            size: variant.size,
-            value: Number.isFinite(stock) && stock !== 0 ? String(stock) : "",
-          };
-        }),
-      }));
-    }
+    const savedKeys = isEditing
+      ? new Set(
+          (editing?.colors ?? []).flatMap((color) =>
+            (color.sizes ?? []).map((variant) => `${color.name}::${variant.size}`)
+          )
+        )
+      : null;
 
     return colors.map((color, index) => ({
       name: color.name || `Color ${index + 1}`,
@@ -121,9 +132,10 @@ export function ProductFormInner({ editing }: { editing?: CmsProduct }) {
       rows: (hasSizes ? sizes : ["One Size"]).map((size) => ({
         size,
         value: color.stockBySize[size] ?? "",
+        editable: !savedKeys || !savedKeys.has(`${color.name}::${size}`),
       })),
     }));
-  }, [isEditing, stockProduct, colors, hasSizes, sizes]);
+  }, [isEditing, editing, colors, hasSizes, sizes]);
 
   const setColor = (index: number, patch: Partial<ColorInput>) => {
     setColors((prev) => prev.map((c, i) => (i === index ? { ...c, ...patch } : c)));
@@ -141,7 +153,7 @@ export function ProductFormInner({ editing }: { editing?: CmsProduct }) {
       prev.map((color) => {
         const fresh = updated.colors.find((item) => item.name === color.name);
         if (!fresh) return color;
-        const stockBySize: Record<string, string> = {};
+        const stockBySize: Record<string, string> = { ...color.stockBySize };
         (fresh.sizes ?? []).forEach((variant) => {
           const stock = Number(variant.stock);
           stockBySize[variant.size] =
@@ -195,7 +207,7 @@ export function ProductFormInner({ editing }: { editing?: CmsProduct }) {
 
   const addSize = () => {
     const trimmed = newSize.trim();
-    if (!trimmed || sizes.includes(trimmed)) return;
+    if (!trimmed || newSizeExists) return;
     if (sizes.length === 0) {
       setColors((cols) =>
         cols.map((c) => {
@@ -231,8 +243,19 @@ export function ProductFormInner({ editing }: { editing?: CmsProduct }) {
     if (!type) newErrors.type = "Type is required";
     if (!category) newErrors.category = "Category is required";
     setErrors(newErrors);
-    if (Object.keys(newErrors).length > 0) setActiveTab("general");
-    return Object.keys(newErrors).length === 0;
+    if (Object.keys(newErrors).length > 0) {
+      setActiveTab("general");
+      return false;
+    }
+    if (duplicateColorNames.size > 0) {
+      setActiveTab("colors");
+      return false;
+    }
+    if (duplicateSizes.size > 0) {
+      setActiveTab("sizes");
+      return false;
+    }
+    return true;
   };
 
   const handleSubmit = (e: FormEvent) => {
@@ -276,6 +299,7 @@ export function ProductFormInner({ editing }: { editing?: CmsProduct }) {
     const input = {
       name: name.trim(),
       brand: brand.trim() || undefined,
+      itemCode: itemCode.trim(),
       type,
       category,
       categoryLabel,
@@ -376,6 +400,19 @@ export function ProductFormInner({ editing }: { editing?: CmsProduct }) {
                 <Label htmlFor="compareAtPrice">Compare-at Price</Label>
                 <Input id="compareAtPrice" value={compareAtPrice} onChange={(e) => setCompareAtPrice(e.target.value)} placeholder="Optional" />
               </div>
+              <div className="flex flex-col gap-2">
+                <Label htmlFor="itemCode">Item Code</Label>
+                <Input
+                  id="itemCode"
+                  value={itemCode}
+                  maxLength={200}
+                  onChange={(e) => setItemCode(e.target.value)}
+                  placeholder="e.g. oc#213889798123"
+                />
+                <p className="text-xs text-[var(--fg-muted)]">
+                  Optional. Internal use only
+                </p>
+              </div>
               <div className="flex flex-col gap-2 lg:col-span-2">
                 <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                   <Label>Content Sections</Label>
@@ -443,7 +480,13 @@ export function ProductFormInner({ editing }: { editing?: CmsProduct }) {
                   keyExtractor={(s) => s}
                   layout="horizontal"
                   renderItem={(s, _index, dragHandleProps) => (
-                    <span className="inline-flex items-center gap-1 rounded-full border border-[var(--border-subtle)] bg-[var(--bg-subtle)] pl-1 pr-1.5 py-1 text-sm font-medium text-[var(--fg-base)]">
+                    <span
+                      className={`inline-flex items-center gap-1 rounded-full border bg-[var(--bg-subtle)] pl-1 pr-1.5 py-1 text-sm font-medium text-[var(--fg-base)] ${
+                        duplicateSizes.has(s.trim().toLowerCase())
+                          ? "border-[var(--tag-red-text)]"
+                          : "border-[var(--border-subtle)]"
+                      }`}
+                    >
                       <span className="cursor-grab touch-none text-[var(--fg-muted)] hover:text-[var(--fg-base)]" {...dragHandleProps}>
                         <GripVertical className="h-3 w-3" />
                       </span>
@@ -461,10 +504,15 @@ export function ProductFormInner({ editing }: { editing?: CmsProduct }) {
               <div className="flex items-center gap-2">
                 <Input value={newSize} onChange={(e) => setNewSize(e.target.value)} placeholder="e.g. 37, 40mm, M, L" className="min-w-0 flex-1 sm:w-48 sm:flex-none"
                   onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addSize(); } }} />
-                <Button variant="secondary" size="small" type="button" onClick={addSize} disabled={!newSize.trim() || sizes.includes(newSize.trim())}>
+                <Button variant="secondary" size="small" type="button" onClick={addSize} disabled={!newSize.trim() || newSizeExists}>
                   <Plus className="h-4 w-4" /> Add
                 </Button>
               </div>
+              {duplicateSizes.size > 0 && (
+                <p className="text-xs text-[var(--tag-red-text)]">
+                  Sizes must be unique within this product.
+                </p>
+              )}
             </div>
           )}
 
@@ -501,6 +549,11 @@ export function ProductFormInner({ editing }: { editing?: CmsProduct }) {
                         <div className="flex flex-col gap-2">
                           <Label htmlFor={`color-name-${index}`}>Name</Label>
                           <Input id={`color-name-${index}`} value={c.name} onChange={(e) => setColor(index, { name: e.target.value })} placeholder="e.g. Black" />
+                          {duplicateColorNames.has(colorNameKeys[index]) && (
+                            <p className="text-xs text-[var(--tag-red-text)]">
+                              Color names must be unique within this product.
+                            </p>
+                          )}
                         </div>
                         <div className="flex flex-col gap-2">
                           <div className="flex flex-wrap items-center justify-between gap-1">
@@ -651,7 +704,7 @@ export function ProductFormInner({ editing }: { editing?: CmsProduct }) {
                   <p className="text-sm font-medium text-[var(--fg-base)]">Inventory</p>
                   <p className="mt-0.5 text-xs text-[var(--fg-muted)]">
                     {isEditing
-                      ? "Stock is read-only here. Use Adjust Stock so every change is recorded in Inventory with a reason."
+                      ? "Existing stock is read-only. Use Adjust Stock so every change is recorded in Inventory with a reason. New colors and sizes can be given an initial stock here."
                       : "Enter the initial stock for each color and size. It will be recorded as Initial stock."}
                   </p>
                 </div>
@@ -707,11 +760,9 @@ export function ProductFormInner({ editing }: { editing?: CmsProduct }) {
                               max={MAX_STOCK}
                               aria-label={`${group.name} ${row.size} stock`}
                               value={row.value}
-                              disabled={isEditing}
+                              disabled={!row.editable}
                               onChange={(e) => {
-                                if (group.colorIndex >= 0) {
-                                  setStockBySize(group.colorIndex, row.size, e.target.value);
-                                }
+                                setStockBySize(group.colorIndex, row.size, e.target.value);
                               }}
                               placeholder="0"
                             />
@@ -725,8 +776,8 @@ export function ProductFormInner({ editing }: { editing?: CmsProduct }) {
 
               {isEditing && (
                 <p className="text-xs text-[var(--fg-muted)]">
-                  Newly added colors or sizes start at 0 stock when you save. Add them
-                  first, then use Adjust Stock.
+                  Initial stock entered for newly added colors or sizes is saved with the
+                  product and recorded as Initial stock.
                 </p>
               )}
             </div>

@@ -1,4 +1,4 @@
-﻿import { useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Menu, X, Search, Share2, ChevronDown, ShoppingBag } from "lucide-react";
 import { TYPE_LABELS, primaryColor } from "../../data/products";
@@ -47,6 +47,56 @@ function MobileDropdown({ open, children }: { open: boolean; children: ReactNode
       onTransitionEnd={() => { if (open) setHeight("auto"); }}
     >
       <div ref={contentRef}>{children}</div>
+    </div>
+  );
+}
+
+function MegaScrollList({
+  children,
+  resetKey,
+}: {
+  children: ReactNode;
+  resetKey?: string | null;
+}) {
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
+  const [hasMore, setHasMore] = useState(false);
+
+  const update = useCallback(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    setHasMore(el.scrollHeight - el.clientHeight - el.scrollTop > 4);
+  }, []);
+
+  useLayoutEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    el.scrollTop = 0;
+    update();
+    el.addEventListener("scroll", update, { passive: true });
+    const observer = new ResizeObserver(update);
+    observer.observe(el);
+    if (contentRef.current) observer.observe(contentRef.current);
+    return () => {
+      el.removeEventListener("scroll", update);
+      observer.disconnect();
+    };
+  }, [resetKey, update]);
+
+  return (
+    <div className="relative">
+      <div
+        ref={scrollRef}
+        className="slim-scrollbar max-h-[320px] overflow-y-auto overscroll-contain pr-8"
+      >
+        <div ref={contentRef}>{children}</div>
+      </div>
+      {hasMore && (
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-x-0 bottom-0 h-10 bg-gradient-to-t from-white to-transparent"
+        />
+      )}
     </div>
   );
 }
@@ -451,7 +501,7 @@ export default function Header({ onShare, showShare = true }: HeaderProps) {
                             <div className="min-w-0">
                               <p className="text-sm text-gray-900 truncate">{p.name}</p>
                               <p className="text-xs text-gray-500 capitalize">
-                                {p.categoryLabel} · {TYPE_LABELS[p.type] ?? p.type}
+                                {p.categoryLabel} � {TYPE_LABELS[p.type] ?? p.type}
                               </p>
                             </div>
                             <span className="ml-auto text-sm text-gray-900 shrink-0">
@@ -475,22 +525,23 @@ export default function Header({ onShare, showShare = true }: HeaderProps) {
         <div
           className="hidden lg:block absolute left-0 right-0 top-full bg-white border-t border-gray-100 shadow-lg z-50"
         >
-          <div className="h-3 w-full" />
           <div className="px-2.5 sm:px-3.5 lg:px-16.5 flex">
-            <div className="py-6 pl-0 pr-8 min-w-[200px]">
-              {megaCats.map((cat) => (
-                <Link
-                  key={cat.slug}
-                  to={cat.slug ? `/${megaType}/${cat.slug}` : `/${megaType}`}
-                  onMouseEnter={() => setMegaCategory(cat.slug)}
-                  onClick={() => { setMegaType(null); setMegaCategory(""); window.scrollTo(0, 0); }}
-                  className={`block py-1.5 text-sm transition-colors ${megaCategory === cat.slug || isCategoryActive(megaType, cat.slug) ? 'text-black font-medium' : 'text-gray-500 hover:text-black'}`}
-                >
-                  {renderCatLabel(cat)}
-                </Link>
-              ))}
+            <div className="py-6 min-w-[200px]">
+              <MegaScrollList resetKey={megaType}>
+                {megaCats.map((cat) => (
+                  <Link
+                    key={cat.slug}
+                    to={cat.slug ? `/${megaType}/${cat.slug}` : `/${megaType}`}
+                    onMouseEnter={() => setMegaCategory(cat.slug)}
+                    onClick={() => { setMegaType(null); setMegaCategory(""); window.scrollTo(0, 0); }}
+                    className={`block py-1.5 text-sm transition-colors ${megaCategory === cat.slug || isCategoryActive(megaType, cat.slug) ? 'text-black font-medium' : 'text-gray-500 hover:text-black'}`}
+                  >
+                    {renderCatLabel(cat)}
+                  </Link>
+                ))}
+              </MegaScrollList>
             </div>
-            <div className="w-px bg-gray-200 my-4 shrink-0" />
+            <div className="w-px bg-gray-200 my-6 shrink-0" />
             <div className="flex items-center justify-center py-6 pl-8">
               {megaPreviewImage ? (
                 <ImageWithFallback
@@ -512,44 +563,47 @@ export default function Header({ onShare, showShare = true }: HeaderProps) {
         <div
           className="hidden lg:block absolute left-0 right-0 top-full bg-white border-t border-gray-100 shadow-lg z-50"
         >
-          <div className="h-3 w-full" />
           <div className="px-2.5 sm:px-3.5 lg:px-16.5 flex">
-            <div className="py-6 pl-0 pr-8 min-w-[180px]">
-              {moreNavItems.map((item) => {
-                const slug = item.href.slice(1);
-                const isActive = moreActiveType === slug;
-                return (
-                  <Link
-                    key={item.label}
-                    to={item.href}
-                    onMouseEnter={() => handleMoreTypeEnter(slug)}
-                    onClick={() => { setMoreOpen(false); setMoreActiveType(null); setMoreCategory(""); window.scrollTo(0, 0); }}
-                    className={`block py-1.5 text-sm cursor-pointer transition-colors ${isActive ? 'text-black font-medium' : 'text-gray-500 hover:text-black'}`}
-                  >
-                    {item.label}
-                  </Link>
-                );
-              })}
+            <div className="py-6 min-w-[180px]">
+              <MegaScrollList>
+                {moreNavItems.map((item) => {
+                  const slug = item.href.slice(1);
+                  const isActive = moreActiveType === slug;
+                  return (
+                    <Link
+                      key={item.label}
+                      to={item.href}
+                      onMouseEnter={() => handleMoreTypeEnter(slug)}
+                      onClick={() => { setMoreOpen(false); setMoreActiveType(null); setMoreCategory(""); window.scrollTo(0, 0); }}
+                      className={`block py-1.5 text-sm uppercase cursor-pointer transition-colors ${isActive ? 'text-black font-medium' : 'text-gray-500 hover:text-black'}`}
+                    >
+                      {item.label}
+                    </Link>
+                  );
+                })}
+              </MegaScrollList>
             </div>
-            <div className="w-px bg-gray-200 my-4 shrink-0" />
-            <div className="py-6 px-8 min-w-[200px]">
-              {moreCats.length > 0 ? (
-                moreCats.map((cat) => (
-                  <Link
-                    key={cat.slug}
-                    to={cat.slug ? `/${moreActiveType}/${cat.slug}` : `/${moreActiveType}`}
-                    onMouseEnter={() => handleMoreSubCatEnter(cat.slug)}
-                    onClick={() => { setMoreOpen(false); setMoreActiveType(null); setMoreCategory(""); window.scrollTo(0, 0); }}
-                    className={`block py-1.5 text-sm transition-colors ${moreCategory === cat.slug || isCategoryActive(moreActiveType, cat.slug) ? 'text-black font-medium' : 'text-gray-500 hover:text-black'}`}
-                  >
-                    {renderCatLabel(cat)}
-                  </Link>
-                ))
-              ) : (
-                <div className="py-1.5 text-sm text-gray-400">No subcategories</div>
-              )}
+            <div className="w-px bg-gray-200 my-6 shrink-0" />
+            <div className="py-6 pl-8 min-w-[200px]">
+              <MegaScrollList resetKey={moreActiveType}>
+                {moreCats.length > 0 ? (
+                  moreCats.map((cat) => (
+                    <Link
+                      key={cat.slug}
+                      to={cat.slug ? `/${moreActiveType}/${cat.slug}` : `/${moreActiveType}`}
+                      onMouseEnter={() => handleMoreSubCatEnter(cat.slug)}
+                      onClick={() => { setMoreOpen(false); setMoreActiveType(null); setMoreCategory(""); window.scrollTo(0, 0); }}
+                      className={`block py-1.5 text-sm transition-colors ${moreCategory === cat.slug || isCategoryActive(moreActiveType, cat.slug) ? 'text-black font-medium' : 'text-gray-500 hover:text-black'}`}
+                    >
+                      {renderCatLabel(cat)}
+                    </Link>
+                  ))
+                ) : (
+                  <div className="py-1.5 text-sm text-gray-400">No subcategories</div>
+                )}
+              </MegaScrollList>
             </div>
-            <div className="w-px bg-gray-200 my-4 shrink-0" />
+            <div className="w-px bg-gray-200 my-6 shrink-0" />
             <div className="flex items-center justify-center py-6 pl-8">
               {morePreviewImage ? (
                 <ImageWithFallback

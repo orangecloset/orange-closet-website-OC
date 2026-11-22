@@ -23,6 +23,7 @@ export type ProductListParams = {
   limit?: number;
   search?: string;
   type?: string;
+  category?: string;
   status?: string;
   availability?: string;
 };

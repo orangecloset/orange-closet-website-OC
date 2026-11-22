@@ -14,6 +14,7 @@ export const products = pgTable(
     id: text("id").primaryKey(),
     name: text("name").notNull(),
     brand: text("brand"),
+    itemCode: text("item_code"),
     type: text("type").notNull(),
     category: text("category").notNull(),
     categoryLabel: text("category_label").notNull(),

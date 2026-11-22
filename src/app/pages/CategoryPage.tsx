@@ -376,13 +376,13 @@ export default function CategoryPage() {
           <div className="relative" ref={brandRef}>
             <button
               onClick={() => setBrandOpen(!brandOpen)}
-              className="w-[140px] sm:w-[180px] lg:w-[200px] bg-white border border-gray-300 px-3 py-2 text-xs uppercase tracking-widest font-medium text-gray-900 flex items-center justify-between gap-2 hover:border-black transition-colors"
+              className="w-[160px] sm:w-[180px] lg:w-[200px] bg-white border border-gray-300 px-3 py-2 text-xs uppercase tracking-widest font-medium text-gray-900 flex items-center justify-between gap-2 hover:border-black transition-colors"
             >
               <span className="truncate">{brand || "All Brands"}</span>
               <ChevronDown className={`w-3 h-3 shrink-0 transition-transform duration-200 ${brandOpen ? "rotate-180" : ""}`} />
             </button>
             {brandOpen && (
-              <div className="absolute left-0 top-full mt-1 bg-white border border-gray-200 shadow-md z-40 min-w-[140px] sm:min-w-[180px] lg:min-w-[200px] max-h-60 overflow-y-auto overscroll-contain thin-scrollbar">
+              <div className="absolute left-0 top-full mt-1 w-full bg-white border border-gray-200 shadow-md z-40 max-h-60 overflow-y-auto overscroll-contain thin-scrollbar">
                 <button
                   onClick={() => { setBrand(""); setBrandOpen(false); }}
                   className={`block w-full text-left px-4 py-2.5 text-xs uppercase tracking-widest hover:bg-gray-50 transition-colors ${brand === "" ? "text-black" : "text-gray-500"}`}

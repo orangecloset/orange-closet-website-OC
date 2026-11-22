@@ -37,17 +37,18 @@ function CardIcon({ src }: { src?: string }) {
 
 function IconCards({
   section,
-  stepStyle = false,
+  className = "mt-8",
 }: {
   section: Section;
-  stepStyle?: boolean;
+  className?: string;
 }) {
   if (section.cards.length === 0) return null;
+  const stepStyle = section.cardStyle === "step";
   return (
     <div
       className={`grid gap-6 ${
         section.cards.length >= 3 ? "sm:grid-cols-3" : "sm:grid-cols-2"
-      } ${stepStyle ? "" : "mt-8"}`}
+      } ${className}`}
     >
       {section.cards.map((card, i) => (
         <div key={i} className="border border-gray-100 p-4">
@@ -137,7 +138,7 @@ function SectionBody({ section }: { section: Section }) {
       return (
         <>
           <h2 className="text-xl sm:text-2xl font-semibold tracking-wide mb-6">{section.heading}</h2>
-          <IconCards section={section} stepStyle />
+          <IconCards section={section} className="" />
           {(section.body[0] || section.closingText) && (
             <p className="text-sm text-gray-600 leading-relaxed mt-8 max-w-2xl">
               {section.body[0] || section.closingText}

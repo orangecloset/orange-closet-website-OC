@@ -1,11 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { ChevronLeft, ChevronRight, Plus, Trash2, Search, Pencil, SwatchBook, ShoppingBag, Loader2 } from "lucide-react";
+import { ChevronDown, ChevronLeft, ChevronRight, Plus, Trash2, Search, Pencil, SwatchBook, ShoppingBag, Loader2, ListFilter, X } from "lucide-react";
 import { useToast } from "../store/toastContext";
 import { useCms } from "../store/cmsContext";
 import { invalidateProducts, usePagedProducts, useProductSuggestions } from "../lib/queries";
 import { isNewProduct, type CmsProduct, type ProductStatus } from "../../data/store-types";
-import { ActionMenu, Badge, Button, Checkbox, ConfirmDialog, Container, Header, Input, MobileList, Select, Tabs } from "../components/ui";
+import { ActionMenu, Badge, Button, Checkbox, ConfirmDialog, Container, Header, Input, Label, MobileList, Select, Tabs } from "../components/ui";
 import { StockAdjustModal } from "../components/StockAdjustModal";
 import { formatDate } from "../lib/utils";
 
@@ -17,6 +17,11 @@ const STATUS_FILTERS: { key: string; label: string }[] = [
   { key: "active", label: "Active" },
   { key: "draft", label: "Draft" },
 ];
+
+const AVAILABILITY_LABELS: Record<string, string> = {
+  available: "Available",
+  soldout: "Sold Out",
+};
 
 function isSoldOut(p: CmsProduct): boolean {
   return p.colors.every((c) =>
@@ -40,6 +45,20 @@ function statusBadge(p: CmsProduct, isNew: boolean) {
   }
 }
 
+function EmptyProducts({ filtered, onClear }: { filtered: boolean; onClear: () => void }) {
+  if (!filtered) {
+    return <p className="px-6 py-12 text-center text-sm text-[var(--fg-muted)]">No products found.</p>;
+  }
+  return (
+    <div className="flex flex-col items-center gap-3 px-6 py-12 text-center">
+      <p className="text-sm text-[var(--fg-muted)]">No products match these filters.</p>
+      <Button variant="secondary" size="small" onClick={onClear}>
+        Clear filters
+      </Button>
+    </div>
+  );
+}
+
 export default function ProductsPage() {
   const { types, settings, deleteProduct, bulkDeleteProducts, bulkUpdateStatus } = useCms();
   const { showToast } = useToast();
@@ -49,8 +68,10 @@ export default function ProductsPage() {
   const [query, setQuery] = useState("");
   const [debouncedQuery, setDebouncedQuery] = useState("");
   const [typeFilter, setTypeFilter] = useState<string>("all");
+  const [categoryFilter, setCategoryFilter] = useState<string>("all");
   const [statusFilter, setStatusFilter] = useState("all");
   const [availabilityFilter, setAvailabilityFilter] = useState("all");
+  const [filtersOpen, setFiltersOpen] = useState(false);
 
   useEffect(() => {
     const t = setTimeout(() => setDebouncedQuery(query), SEARCH_DEBOUNCE_MS);
@@ -61,12 +82,28 @@ export default function ProductsPage() {
   const suggestions = suggestionsQuery.data?.data ?? [];
 
   useEffect(() => {
+    setCategoryFilter("all");
     setPage(1);
   }, [typeFilter]);
+
+  useEffect(() => {
+    if (!filtersOpen) return;
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setFiltersOpen(false);
+    };
+    window.addEventListener("keydown", handleKey);
+    return () => window.removeEventListener("keydown", handleKey);
+  }, [filtersOpen]);
+
+  const categoryOptions = useMemo(
+    () => (typeFilter === "all" ? [] : types.find((t) => t.slug === typeFilter)?.categories ?? []),
+    [types, typeFilter]
+  );
 
   const productsQuery = usePagedProducts({
     page,
     type: typeFilter,
+    category: categoryFilter,
     status: statusFilter,
     availability: availabilityFilter,
     limit: PAGE_SIZE,
@@ -101,6 +138,40 @@ export default function ProductsPage() {
   const [confirmBulkDelete, setConfirmBulkDelete] = useState(false);
 
   const typeLabel = (slug: string) => types.find((t) => t.slug === slug)?.label ?? slug;
+
+  const clearAllFilters = () => {
+    setStatusFilter("all");
+    setAvailabilityFilter("all");
+    setTypeFilter("all");
+    setCategoryFilter("all");
+    setPage(1);
+  };
+
+  const activeChips: { key: string; label: string; onClear: () => void }[] = [];
+  if (typeFilter !== "all") {
+    activeChips.push({
+      key: "category",
+      label: `Category: ${typeLabel(typeFilter)}`,
+      onClear: () => { setTypeFilter("all"); setCategoryFilter("all"); setPage(1); },
+    });
+  }
+  if (categoryFilter !== "all") {
+    const label = categoryOptions.find((c) => c.slug === categoryFilter)?.label ?? categoryFilter;
+    activeChips.push({
+      key: "subcategory",
+      label: `Subcategory: ${label}`,
+      onClear: () => { setCategoryFilter("all"); setPage(1); },
+    });
+  }
+  if (availabilityFilter !== "all") {
+    activeChips.push({
+      key: "availability",
+      label: `Availability: ${AVAILABILITY_LABELS[availabilityFilter] ?? availabilityFilter}`,
+      onClear: () => { setAvailabilityFilter("all"); setPage(1); },
+    });
+  }
+  const activeFilterCount = activeChips.length;
+  const hasActiveFilters = activeFilterCount > 0 || statusFilter !== "all";
 
   const allPageSelected = pageItems.length > 0 && pageItems.every((p) => selectedIds.has(p.id));
 
@@ -150,80 +221,169 @@ export default function ProductsPage() {
       />
 
       <Container>
-        <div className="flex flex-col gap-3 px-4 pt-2 sm:px-6 lg:flex-row lg:items-center lg:justify-between">
-          <div className="min-w-0 overflow-x-auto sm:overflow-visible">
-            <Tabs items={STATUS_FILTERS} active={statusFilter} onChange={(key) => { setStatusFilter(key); setPage(1); }} />
-          </div>
-          <div className="w-full shrink-0 lg:w-44">
-            <Select
-              value={availabilityFilter}
-              onChange={(e) => { setAvailabilityFilter(e.target.value); setPage(1); }}
-            >
-              <option value="all">All</option>
-              <option value="available">Available</option>
-              <option value="soldout">Sold Out</option>
-            </Select>
-          </div>
-        </div>
-
-        <div className="flex flex-col gap-3 border-b border-[var(--border-subtle)] px-4 py-4 sm:px-6 lg:flex-row lg:items-center">
-          <div className="relative z-20 flex-1">
-            <Search className="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--fg-muted)]" />
-            <Input
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Escape") setQuery("");
-              }}
-              placeholder="Search products..."
-              className="pl-8"
-            />
-            {query.trim() && (
-              <div className="absolute left-0 right-0 top-full mt-1 overflow-hidden rounded-md border border-[var(--border-subtle)] bg-[var(--bg-base)] shadow-[var(--elevation-flyout)]">
-                {suggestions.length > 0 ? (
-                  suggestions.map((p) => {
-                    const thumb = p.colors[0]?.images[0];
-                    return (
-                      <button
-                        key={p.id}
-                        type="button"
-                        onClick={() => {
-                          setQuery("");
-                          navigate(`/cms-admin/products/${p.id}/edit`);
-                        }}
-                        className="flex w-full items-center gap-3 border-b border-[var(--border-subtle)] px-3 py-2 text-left transition-colors last:border-b-0 hover:bg-[var(--bg-subtle-hover)]"
-                      >
-                        {thumb ? (
-                          <img
-                            src={thumb}
-                            alt=""
-                            className="h-9 w-9 shrink-0 rounded object-cover bg-[var(--bg-subtle)]"
-                          />
-                        ) : (
-                          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded bg-[var(--bg-subtle)]">
-                            <ShoppingBag className="h-4 w-4 text-[var(--fg-disabled)]" />
-                          </div>
-                        )}
-                        <span className="min-w-0 flex-1">
-                          <span className="block truncate text-sm font-medium text-[var(--fg-base)]">{p.name}</span>
-                          <span className="block truncate text-xs text-[var(--fg-muted)]">{typeLabel(p.type)} · {p.price}</span>
-                        </span>
-                        {statusBadge(p, isNewProduct(p, settings.newArrivalDays))}
-                      </button>
-                    );
-                  })
-                ) : (
-                  <p className="px-3 py-2.5 text-sm text-[var(--fg-muted)]">No products found</p>
-                )}
+        <div className="flex flex-col">
+          <div className="flex flex-col gap-3 px-4 pt-2 pb-4 sm:px-6">
+            <div className="flex items-center justify-between gap-3">
+              <div className="min-w-0 flex-1 overflow-x-auto sm:overflow-visible">
+                <Tabs items={STATUS_FILTERS} active={statusFilter} onChange={(key) => { setStatusFilter(key); setPage(1); }} />
               </div>
-            )}
+              <Button
+                variant="secondary"
+                size="header"
+                onClick={() => setFiltersOpen((open) => !open)}
+                aria-expanded={filtersOpen}
+                aria-controls="products-filters"
+                className="shrink-0"
+              >
+                <ListFilter className="h-4 w-4 shrink-0" />
+                Filters
+                {activeFilterCount > 0 && (
+                  <span className="inline-flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-[var(--bg-interactive)] px-1 text-[10px] font-medium leading-none text-[var(--fg-on-color)]">
+                    {activeFilterCount}
+                  </span>
+                )}
+                <ChevronDown className={`h-3.5 w-3.5 shrink-0 transition-transform ${filtersOpen ? "rotate-180" : ""}`} />
+              </Button>
+            </div>
+
+            <div className="relative z-20">
+              <Search className="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--fg-muted)]" />
+              <Input
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Escape") setQuery("");
+                }}
+                placeholder="Search products..."
+                className="pl-8"
+              />
+              {query.trim() && (
+                <div className="absolute left-0 right-0 top-full mt-1 overflow-hidden rounded-md border border-[var(--border-subtle)] bg-[var(--bg-base)] shadow-[var(--elevation-flyout)]">
+                  {suggestions.length > 0 ? (
+                    suggestions.map((p) => {
+                      const thumb = p.colors[0]?.images[0];
+                      return (
+                        <button
+                          key={p.id}
+                          type="button"
+                          onClick={() => {
+                            setQuery("");
+                            navigate(`/cms-admin/products/${p.id}/edit`);
+                          }}
+                          className="flex w-full items-center gap-3 border-b border-[var(--border-subtle)] px-3 py-2 text-left transition-colors last:border-b-0 hover:bg-[var(--bg-subtle-hover)]"
+                        >
+                          {thumb ? (
+                            <img
+                              src={thumb}
+                              alt=""
+                              className="h-9 w-9 shrink-0 rounded object-cover bg-[var(--bg-subtle)]"
+                            />
+                          ) : (
+                            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded bg-[var(--bg-subtle)]">
+                              <ShoppingBag className="h-4 w-4 text-[var(--fg-disabled)]" />
+                            </div>
+                          )}
+                          <span className="min-w-0 flex-1">
+                            <span className="block truncate text-sm font-medium text-[var(--fg-base)]">{p.name}</span>
+                            <span className="block truncate text-xs text-[var(--fg-muted)]">{typeLabel(p.type)} · {p.price}</span>
+                          </span>
+                          {statusBadge(p, isNewProduct(p, settings.newArrivalDays))}
+                        </button>
+                      );
+                    })
+                  ) : (
+                    <p className="px-3 py-2.5 text-sm text-[var(--fg-muted)]">No products found</p>
+                  )}
+                </div>
+              )}
+            </div>
           </div>
-          <div className="w-full shrink-0 lg:w-44">
-            <Select value={typeFilter} onChange={(e) => setTypeFilter(e.target.value)}>
-              <option value="all">All types</option>
-              {types.map((t) => (<option key={t.slug} value={t.slug}>{t.label}</option>))}
-            </Select>
-          </div>
+
+          {filtersOpen ? (
+            <div
+              id="products-filters"
+              className="grid gap-3 border-t border-[var(--border-subtle)] px-4 py-4 sm:px-6 lg:grid-cols-[repeat(3,minmax(0,1fr))_auto] lg:items-end"
+            >
+              <div className="flex flex-col gap-1.5">
+                <Label htmlFor="products-availability">Availability</Label>
+                <Select
+                  id="products-availability"
+                  value={availabilityFilter}
+                  onChange={(e) => { setAvailabilityFilter(e.target.value); setPage(1); }}
+                >
+                  <option value="all">All</option>
+                  <option value="available">Available</option>
+                  <option value="soldout">Sold Out</option>
+                </Select>
+              </div>
+              <div className="flex flex-col gap-1.5">
+                <Label htmlFor="products-category">Category</Label>
+                <Select
+                  id="products-category"
+                  value={typeFilter}
+                  onChange={(e) => { setTypeFilter(e.target.value); setCategoryFilter("all"); setPage(1); }}
+                >
+                  <option value="all">All categories</option>
+                  {types.map((t) => (<option key={t.slug} value={t.slug}>{t.label}</option>))}
+                </Select>
+              </div>
+              <div className="flex flex-col gap-1.5">
+                <Label htmlFor="products-subcategory">Subcategory</Label>
+                <Select
+                  id="products-subcategory"
+                  value={categoryFilter}
+                  onChange={(e) => { setCategoryFilter(e.target.value); setPage(1); }}
+                  disabled={categoryOptions.length === 0}
+                >
+                  <option value="all">
+                    {typeFilter === "all"
+                      ? "Select a category first"
+                      : categoryOptions.length === 0
+                        ? "No subcategories"
+                        : "All subcategories"}
+                  </option>
+                  {categoryOptions.map((c) => (
+                    <option key={c.slug} value={c.slug}>{c.label}</option>
+                  ))}
+                </Select>
+              </div>
+              <Button
+                variant="ghost"
+                size="small"
+                onClick={clearAllFilters}
+                disabled={!hasActiveFilters}
+                className="justify-self-start"
+              >
+                Clear all
+              </Button>
+            </div>
+          ) : activeChips.length > 0 ? (
+            <div className="flex flex-wrap items-center gap-2 border-t border-[var(--border-subtle)] px-4 py-3 sm:px-6">
+              {activeChips.map((chip) => (
+                <span
+                  key={chip.key}
+                  className="inline-flex items-center gap-1 rounded-full bg-[var(--bg-subtle)] py-1 pl-2.5 pr-1 text-xs text-[var(--fg-base)]"
+                >
+                  {chip.label}
+                  <button
+                    type="button"
+                    onClick={chip.onClear}
+                    aria-label={`Remove ${chip.label} filter`}
+                    className="flex h-5 w-5 items-center justify-center rounded-full text-[var(--fg-muted)] transition-colors hover:bg-[var(--bg-subtle-hover)] hover:text-[var(--fg-base)]"
+                  >
+                    <X className="h-3 w-3" />
+                  </button>
+                </span>
+              ))}
+              <button
+                type="button"
+                onClick={clearAllFilters}
+                className="ml-auto text-xs text-[var(--fg-muted)] underline underline-offset-2 transition-colors hover:text-[var(--fg-base)]"
+              >
+                Clear all
+              </button>
+            </div>
+          ) : null}
         </div>
 
         {selectedIds.size > 0 && (
@@ -245,17 +405,17 @@ export default function ProductsPage() {
         )}
 
         <div className="hidden overflow-x-auto md:block">
-          <table className="w-full min-w-[740px] text-left">
+          <table className="w-full min-w-[860px] text-left">
             <thead>
               <tr className="border-b border-[var(--border-subtle)] text-xs text-[var(--fg-muted)]">
-                <th className="w-10 px-4 py-2.5"><Checkbox checked={allPageSelected} onChange={toggleSelectAll} disabled={pageItems.length === 0} /></th>
-                <th className="px-6 py-2.5 font-medium">Product</th>
-                <th className="w-32 px-6 py-2.5 font-medium">Type</th>
-                <th className="w-28 px-6 py-2.5 font-medium">Price</th>
-                <th className="w-32 px-6 py-2.5 font-medium">Availability</th>
-                <th className="w-24 px-6 py-2.5 font-medium">Stocks</th>
-                <th className="w-32 px-6 py-2.5 font-medium">Updated</th>
-                <th className="w-16 px-6 py-2.5 text-right font-medium">Actions</th>
+                <th className="w-10 px-3 py-2.5"><Checkbox checked={allPageSelected} onChange={toggleSelectAll} disabled={pageItems.length === 0} /></th>
+                <th className="px-3 py-2.5 font-medium">Product</th>
+                <th className="w-28 px-3 py-2.5 font-medium">Type</th>
+                <th className="w-28 px-3 py-2.5 font-medium">Price</th>
+                <th className="w-28 px-3 py-2.5 font-medium">Availability</th>
+                <th className="w-28 px-3 py-2.5 font-medium">Stocks</th>
+                <th className="w-28 px-3 py-2.5 font-medium">Updated</th>
+                <th className="w-16 px-3 py-2.5 text-right font-medium">Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -267,28 +427,34 @@ export default function ProductsPage() {
                 </tr>
               )}
               {!loading && pageItems.length === 0 && (
-                <tr><td colSpan={8} className="px-6 py-12 text-center text-sm text-[var(--fg-muted)]">No products found.</td></tr>
+                <tr>
+                  <td colSpan={8}>
+                    <EmptyProducts filtered={hasActiveFilters} onClear={clearAllFilters} />
+                  </td>
+                </tr>
               )}
               {pageItems.map((p) => {
                 return (
                   <tr key={p.id} className={`border-b border-[var(--border-subtle)] transition-colors last:border-b-0 hover:bg-[var(--bg-subtle-hover)] ${selectedIds.has(p.id) ? "bg-[var(--bg-subtle)]" : ""}`}>
-                    <td className="w-10 px-4 py-3"><Checkbox checked={selectedIds.has(p.id)} onChange={() => toggleSelect(p.id)} /></td>
-                    <td className="px-6 py-3">
+                    <td className="w-10 px-3 py-3"><Checkbox checked={selectedIds.has(p.id)} onChange={() => toggleSelect(p.id)} /></td>
+                    <td className="px-3 py-3">
                       <div className="flex items-center gap-3">
                         <img src={p.colors[0]?.images[0]} alt="" className="h-10 w-10 shrink-0 rounded object-cover bg-[var(--bg-subtle)]" />
-                        <div className="min-w-0">
-                          <Link to={`/cms-admin/products/${p.id}/edit`} className="block max-w-[260px] truncate text-sm text-[var(--fg-base)] hover:underline">{p.name}</Link>
-                          <p className="truncate text-xs whitespace-nowrap text-[var(--fg-muted)]">{p.brand ?? "Store"}</p>
+                        <div className="min-w-0 flex-1">
+                          <Link to={`/cms-admin/products/${p.id}/edit`} className="block truncate text-sm text-[var(--fg-base)] hover:underline" title={p.name}>{p.name}</Link>
+                          <p className="truncate text-xs text-[var(--fg-muted)]" title={p.brand ?? "Store"}>{p.brand ?? "Store"}</p>
                         </div>
                       </div>
                     </td>
-                    <td className="whitespace-nowrap px-6 py-3 text-sm text-[var(--fg-muted)]">{typeLabel(p.type)}</td>
-                    <td className="whitespace-nowrap px-6 py-3 text-sm text-[var(--fg-base)]">
+                    <td className="whitespace-nowrap px-3 py-3 text-sm text-[var(--fg-muted)]">
+                      <span className="block truncate" title={typeLabel(p.type)}>{typeLabel(p.type)}</span>
+                    </td>
+                    <td className="whitespace-nowrap px-3 py-3 text-sm text-[var(--fg-base)]">
                       {p.compareAtPrice && (<span className="mr-1 text-xs text-[var(--fg-muted)] line-through">{p.compareAtPrice}</span>)}
                       {p.price}
                     </td>
-                    <td className="whitespace-nowrap px-6 py-3">{statusBadge(p, isNewProduct(p, settings.newArrivalDays))}</td>
-                    <td className="whitespace-nowrap px-6 py-3">
+                    <td className="whitespace-nowrap px-3 py-3">{statusBadge(p, isNewProduct(p, settings.newArrivalDays))}</td>
+                    <td className="whitespace-nowrap px-3 py-3">
                       <button
                         type="button"
                         onClick={() => openStocks(p)}
@@ -299,8 +465,8 @@ export default function ProductsPage() {
                         {totalStock(p)}
                       </button>
                     </td>
-                    <td className="whitespace-nowrap px-6 py-3 text-sm text-[var(--fg-muted)]">{formatDate(p.updatedAt)}</td>
-                    <td className="px-6 py-3 text-right">
+                    <td className="whitespace-nowrap px-3 py-3 text-[13px] text-[var(--fg-muted)]">{formatDate(p.updatedAt)}</td>
+                    <td className="px-3 py-3 text-right">
                       <ActionMenu items={[
                         { label: "Edit", icon: <Pencil className="h-4 w-4" />, to: `/cms-admin/products/${p.id}/edit` },
                         { label: "Adjust Stock", icon: <SwatchBook className="h-4 w-4" />, onClick: () => openStocks(p) },
@@ -321,7 +487,7 @@ export default function ProductsPage() {
             </div>
           )}
           {!loading && pageItems.length === 0 && (
-            <p className="px-4 py-12 text-center text-sm text-[var(--fg-muted)]">No products found.</p>
+            <EmptyProducts filtered={hasActiveFilters} onClear={clearAllFilters} />
           )}
           {!loading && pageItems.length > 0 && (
             <div className="flex items-center justify-between px-4 py-2.5">

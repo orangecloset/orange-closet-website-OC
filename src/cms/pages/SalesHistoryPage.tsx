@@ -102,17 +102,17 @@ export default function SalesHistoryPage() {
 
       <Container>
         <div className="hidden overflow-x-auto md:block">
-          <table className="w-full min-w-[860px] text-left">
+          <table className="w-full min-w-[960px] table-fixed text-left">
             <thead>
               <tr className="border-b border-[var(--border-subtle)] text-xs text-[var(--fg-muted)]">
-                <th className="w-[11%] px-6 py-2.5 font-medium">Receipt #</th>
-                <th className="w-[26%] px-6 py-2.5 font-medium">Product</th>
-                <th className="w-[16%] px-6 py-2.5 font-medium">Variant</th>
-                <th className="w-[7%] px-6 py-2.5 font-medium">Qty</th>
-                <th className="w-[13%] px-6 py-2.5 font-medium">Total</th>
-                <th className="w-[15%] px-6 py-2.5 font-medium">Date Sold</th>
-                <th className="w-[9%] px-6 py-2.5 font-medium">Sold By</th>
-                <th className="w-[3%] px-6 py-2.5 font-medium"></th>
+                <th className="w-[13%] py-2.5 pl-6 pr-2 font-medium">Receipt #</th>
+                <th className="w-[29%] px-3 py-2.5 font-medium">Product</th>
+                <th className="w-[9%] px-3 py-2.5 font-medium">Variant</th>
+                <th className="w-[7%] px-3 py-2.5 text-right font-medium">Qty</th>
+                <th className="w-[12%] px-3 py-2.5 text-right font-medium">Total</th>
+                <th className="w-[11%] px-3 py-2.5 font-medium">Date Sold</th>
+                <th className="w-[13%] px-3 py-2.5 font-medium">Sold By</th>
+                <th className="w-[6%] px-3 py-2.5 font-medium"></th>
               </tr>
             </thead>
             <tbody>
@@ -137,10 +137,10 @@ export default function SalesHistoryPage() {
                       onClick={() => handleOpenReceipt(s)}
                       className="cursor-pointer border-b border-[var(--border-subtle)] transition-colors last:border-b-0 hover:bg-[var(--bg-subtle-hover)]"
                     >
-                      <td className="whitespace-nowrap px-6 py-3 text-sm">
+                      <td className="whitespace-nowrap py-3 pl-6 pr-2 text-sm">
                         {s.receiptNo ? <Badge color="grey">{s.receiptNo}</Badge> : <span className="text-[var(--fg-muted)]">—</span>}
                       </td>
-                      <td className="px-6 py-3">
+                      <td className="px-3 py-3">
                         <div className="flex items-center gap-3">
                           {s.productImage ? (
                             <img
@@ -153,17 +153,43 @@ export default function SalesHistoryPage() {
                               <ShoppingBag className="h-4 w-4 text-[var(--fg-disabled)]" />
                             </div>
                           )}
-                          <p className="truncate text-sm text-[var(--fg-base)]">{s.productName}</p>
+                          <p className="min-w-0 truncate text-sm text-[var(--fg-base)]" title={s.productName}>
+                            {s.productName}
+                          </p>
                         </div>
                       </td>
-                      <td className="whitespace-nowrap px-6 py-3 text-sm text-[var(--fg-base)]">
-                        {s.colorName} · {s.size}
+                      <td className="px-3 py-3">
+                        <span
+                          className="block truncate text-sm text-[var(--fg-base)]"
+                          title={s.colorName}
+                        >
+                          {s.colorName}
+                        </span>
+                        <span
+                          className="block truncate text-xs text-[var(--fg-muted)]"
+                          title={s.size}
+                        >
+                          {s.size}
+                        </span>
                       </td>
-                      <td className="whitespace-nowrap px-6 py-3 text-sm text-[var(--fg-base)]">{s.quantity}</td>
-                      <td className="whitespace-nowrap px-6 py-3 text-sm text-[var(--fg-base)]">{formatMoney(total)}</td>
-                      <td className="whitespace-nowrap px-6 py-3 text-sm text-[var(--fg-muted)]">{formatDate(s.soldAt ?? s.createdAt)}</td>
-                      <td className="max-w-[7rem] truncate px-6 py-3 text-sm text-[var(--fg-muted)]">{s.soldBy || "—"}</td>
-                      <td className="px-6 py-3">
+                      <td className="whitespace-nowrap px-3 py-3 text-right text-sm tabular-nums text-[var(--fg-base)]">
+                        {s.quantity}
+                      </td>
+                      <td className="whitespace-nowrap px-3 py-3 text-right text-sm tabular-nums text-[var(--fg-base)]">
+                        {formatMoney(total)}
+                      </td>
+                      <td className="whitespace-nowrap px-3 py-3 text-[13px] text-[var(--fg-muted)]">
+                        {formatDate(s.soldAt ?? s.createdAt)}
+                      </td>
+                      <td className="px-3 py-3">
+                        <span
+                          className="block truncate text-sm text-[var(--fg-muted)]"
+                          title={s.soldBy || undefined}
+                        >
+                          {s.soldBy || "—"}
+                        </span>
+                      </td>
+                      <td className="px-3 py-3">
                         <button
                           type="button"
                           onClick={(e) => {
@@ -173,7 +199,7 @@ export default function SalesHistoryPage() {
                           disabled={downloadingId === s.id}
                           title="Download PDF receipt"
                           aria-label={`Download PDF receipt ${s.receiptNo || s.id}`}
-                          className="flex h-7 w-7 items-center justify-center rounded-md text-[var(--fg-subtle)] transition-colors hover:bg-[var(--bg-subtle-hover)] hover:text-[var(--fg-base)] disabled:opacity-50"
+                          className="ml-auto flex h-7 w-7 items-center justify-center rounded-md text-[var(--fg-subtle)] transition-colors hover:bg-[var(--bg-subtle-hover)] hover:text-[var(--fg-base)] disabled:opacity-50"
                         >
                           {downloadingId === s.id ? (
                             <Loader2 className="h-4 w-4 animate-spin" />

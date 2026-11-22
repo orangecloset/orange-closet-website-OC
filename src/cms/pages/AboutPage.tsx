@@ -6,7 +6,6 @@ import { ABOUT_KEY } from "../../data/store-defaults";
 import { Button, Container, Header, Input, Label } from "../components/ui";
 import { useToast } from "../store/toastContext";
 import { UploadButton } from "../components/UploadButton";
-import { SortableList, DragHandle } from "../components/SortableList";
 import { SectionEditor } from "../components/AboutSectionEditor";
 import type { SectionData } from "../components/AboutSectionEditor";
 
@@ -37,7 +36,12 @@ export default function AboutPage() {
     updateAbout({ sections: next });
   };
 
-  const handleReorderSections = (next: SectionData[]) => {
+  const handleMoveSection = (index: number, direction: -1 | 1) => {
+    const target = index + direction;
+    if (target < 0 || target >= about.sections.length) return;
+    const next = [...about.sections];
+    const [moved] = next.splice(index, 1);
+    next.splice(target, 0, moved);
     updateAbout({ sections: next });
   };
 
@@ -53,6 +57,7 @@ export default function AboutPage() {
           body: [],
           images: [],
           cards: [],
+          cardStyle: "feature",
           closingText: "",
           ctaLabel: "",
           ctaUrl: "",
@@ -178,26 +183,19 @@ export default function AboutPage() {
           }
         />
         <div className="flex flex-col gap-3 px-4 py-4 sm:px-6">
-          <SortableList
-            items={about.sections}
-            onReorder={handleReorderSections}
-            keyExtractor={(s) => s.id}
-            renderItem={(section, i, dragHandleProps) => (
-              <div className="flex items-start gap-2">
-                <div className="mt-3">
-                  <DragHandle handleProps={dragHandleProps} />
-                </div>
-                <div className="flex-1">
-                  <SectionEditor
-                    section={section}
-                    index={i}
-                    onChange={(patch) => handleSection(i, patch)}
-                    onDelete={() => handleDeleteSection(i)}
-                  />
-                </div>
-              </div>
-            )}
-          />
+          {about.sections.map((section, i) => (
+            <SectionEditor
+              key={section.id}
+              section={section}
+              index={i}
+              canMoveUp={i > 0}
+              canMoveDown={i < about.sections.length - 1}
+              onMoveUp={() => handleMoveSection(i, -1)}
+              onMoveDown={() => handleMoveSection(i, 1)}
+              onChange={(patch) => handleSection(i, patch)}
+              onDelete={() => handleDeleteSection(i)}
+            />
+          ))}
           {about.sections.length === 0 && (
             <p className="text-sm text-[var(--fg-muted)]">No sections yet.</p>
           )}

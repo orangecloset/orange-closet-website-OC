@@ -1,7 +1,7 @@
-import { useState } from "react";
-import { ChevronDown, ChevronRight, Plus, Trash2, X } from "lucide-react";
+import { Plus, Trash2, X } from "lucide-react";
 import type { AboutPageConfig } from "../../data/store-types";
-import { Button, Input, Label, Switch, Textarea } from "./ui";
+import { Button, Input, Label, Select, Switch, Textarea } from "./ui";
+import { ReorderButtons } from "./ReorderButtons";
 import { UploadButton } from "./UploadButton";
 
 export type SectionData = AboutPageConfig["sections"][number];
@@ -63,6 +63,15 @@ function CardListInput({
   cards: { title: string; description: string; image?: string }[];
   onChange: (v: { title: string; description: string; image?: string }[]) => void;
 }) {
+  const moveCard = (index: number, direction: -1 | 1) => {
+    const target = index + direction;
+    if (target < 0 || target >= cards.length) return;
+    const next = [...cards];
+    const [moved] = next.splice(index, 1);
+    next.splice(target, 0, moved);
+    onChange(next);
+  };
+
   return (
     <div>
       <Label>{label}</Label>
@@ -70,7 +79,16 @@ function CardListInput({
         {cards.map((c, i) => (
           <div key={i} className="rounded-md border border-[var(--border-subtle)] p-3 space-y-2">
             <div className="flex items-center justify-between">
-              <span className="text-sm font-medium text-[var(--fg-muted)]">Card {i + 1}</span>
+              <div className="flex items-center gap-2">
+                <ReorderButtons
+                  label={`card ${i + 1}`}
+                  canMoveUp={i > 0}
+                  canMoveDown={i < cards.length - 1}
+                  onMoveUp={() => moveCard(i, -1)}
+                  onMoveDown={() => moveCard(i, 1)}
+                />
+                <span className="text-sm font-medium text-[var(--fg-muted)]">Card {i + 1}</span>
+              </div>
               <button
                 type="button"
                 onClick={() => onChange(cards.filter((_, idx) => idx !== i))}
@@ -148,28 +166,32 @@ function CardListInput({
 export function SectionEditor({
   section,
   index,
+  canMoveUp,
+  canMoveDown,
+  onMoveUp,
+  onMoveDown,
   onChange,
   onDelete,
 }: {
   section: SectionData;
   index: number;
+  canMoveUp: boolean;
+  canMoveDown: boolean;
+  onMoveUp: () => void;
+  onMoveDown: () => void;
   onChange: (patch: Partial<SectionData>) => void;
   onDelete: () => void;
 }) {
-  const [open, setOpen] = useState(true);
-
   return (
     <div className="rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-subtle)]">
-      <button
-        type="button"
-        onClick={() => setOpen(!open)}
-        className="flex w-full items-center gap-3 px-4 py-3 text-left"
-      >
-        {open ? (
-          <ChevronDown className="h-4 w-4 shrink-0 text-[var(--fg-muted)]" />
-        ) : (
-          <ChevronRight className="h-4 w-4 shrink-0 text-[var(--fg-muted)]" />
-        )}
+      <div className="flex items-center gap-3 px-4 py-3">
+        <ReorderButtons
+          label={`section ${index + 1}`}
+          canMoveUp={canMoveUp}
+          canMoveDown={canMoveDown}
+          onMoveUp={onMoveUp}
+          onMoveDown={onMoveDown}
+        />
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2">
             <span className="text-sm font-medium text-[var(--fg-base)]">
@@ -185,7 +207,7 @@ export function SectionEditor({
             {section.heading || "No heading"}
           </p>
         </div>
-        <div className="flex shrink-0 items-center gap-2" onClick={(e) => e.stopPropagation()}>
+        <div className="flex shrink-0 items-center gap-2">
           <Switch
             checked={section.enabled}
             onCheckedChange={(enabled) => onChange({ enabled })}
@@ -200,97 +222,111 @@ export function SectionEditor({
             <Trash2 className="h-4 w-4" />
           </button>
         </div>
-      </button>
+      </div>
 
-      {open && (
-        <div className="space-y-4 border-t border-[var(--border-subtle)] px-4 py-4">
-          <div>
-            <Label>Section Label</Label>
-            <Input
-              value={section.label}
-              onChange={(e) => onChange({ label: e.target.value })}
-              placeholder="e.g. 01 — Brand Profile"
-            />
-          </div>
-          <div>
-            <Label>Heading</Label>
-            <Input
-              value={section.heading}
-              onChange={(e) => onChange({ heading: e.target.value })}
-              placeholder="Section heading"
-            />
-          </div>
-          <ArrayInput
-            label="Body Paragraphs"
-            values={section.body}
-            onChange={(body) => onChange({ body })}
-            placeholder="Paragraph text"
+      <div className="space-y-4 border-t border-[var(--border-subtle)] px-4 py-4">
+        <div>
+          <Label>Section Label</Label>
+          <Input
+            value={section.label}
+            onChange={(e) => onChange({ label: e.target.value })}
+            placeholder="e.g. 01 — Brand Profile"
           />
-          <div>
-            <Label>Images</Label>
-            <div className="flex flex-wrap items-center gap-2">
-              {section.images.map((img, i) =>
-                img.trim() ? (
-                  <div key={i} className="relative">
-                    <img
-                      src={img}
-                      alt=""
-                      className="h-12 w-12 rounded object-cover bg-[var(--bg-subtle)]"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => onChange({ images: section.images.filter((_, j) => j !== i) })}
-                      aria-label={`Remove image ${i + 1}`}
-                      className="absolute -right-1.5 -top-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-[var(--bg-base)] text-[var(--fg-muted)] shadow-[var(--borders-base)] hover:text-[var(--tag-red-text)]"
-                    >
-                      <X className="h-3 w-3" />
-                    </button>
-                  </div>
-                ) : null
-              )}
-              <UploadButton
-                multiple
-                onUploaded={(url) =>
-                  onChange({ images: [...section.images.filter((img) => img.trim()), url] })
-                }
-                label={section.images.some((img) => img.trim()) ? "Add Image" : "Upload"}
-              />
-            </div>
-          </div>
-          <CardListInput
-            label="Feature / Step Cards"
-            cards={section.cards}
-            onChange={(cards) => onChange({ cards })}
+        </div>
+        <div>
+          <Label>Heading</Label>
+          <Input
+            value={section.heading}
+            onChange={(e) => onChange({ heading: e.target.value })}
+            placeholder="Section heading"
           />
-          <div>
-            <Label>Closing Text</Label>
-            <Textarea
-              value={section.closingText}
-              onChange={(e) => onChange({ closingText: e.target.value })}
-              placeholder="Optional closing paragraph"
-              rows={3}
+        </div>
+        <ArrayInput
+          label="Body Paragraphs"
+          values={section.body}
+          onChange={(body) => onChange({ body })}
+          placeholder="Paragraph text"
+        />
+        <div>
+          <Label>Images</Label>
+          <div className="flex flex-wrap items-center gap-2">
+            {section.images.map((img, i) =>
+              img.trim() ? (
+                <div key={i} className="relative">
+                  <img
+                    src={img}
+                    alt=""
+                    className="h-12 w-12 rounded object-cover bg-[var(--bg-subtle)]"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => onChange({ images: section.images.filter((_, j) => j !== i) })}
+                    aria-label={`Remove image ${i + 1}`}
+                    className="absolute -right-1.5 -top-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-[var(--bg-base)] text-[var(--fg-muted)] shadow-[var(--borders-base)] hover:text-[var(--tag-red-text)]"
+                  >
+                    <X className="h-3 w-3" />
+                  </button>
+                </div>
+              ) : null
+            )}
+            <UploadButton
+              multiple
+              onUploaded={(url) =>
+                onChange({ images: [...section.images.filter((img) => img.trim()), url] })
+              }
+              label={section.images.some((img) => img.trim()) ? "Add Image" : "Upload"}
             />
-          </div>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <div>
-              <Label>CTA Button Label</Label>
-              <Input
-                value={section.ctaLabel}
-                onChange={(e) => onChange({ ctaLabel: e.target.value })}
-                placeholder="e.g. Join Our Program"
-              />
-            </div>
-            <div>
-              <Label>CTA Button URL</Label>
-              <Input
-                value={section.ctaUrl}
-                onChange={(e) => onChange({ ctaUrl: e.target.value })}
-                placeholder="https://..."
-              />
-            </div>
           </div>
         </div>
-      )}
+        <div>
+          <Label htmlFor={`card-style-${section.id}`}>Card Style</Label>
+          <Select
+            id={`card-style-${section.id}`}
+            value={section.cardStyle}
+            onChange={(e) =>
+              onChange({ cardStyle: e.target.value as "feature" | "step" })
+            }
+          >
+            <option value="feature">Feature cards</option>
+            <option value="step">Step cards (Step 1, Step 2, …)</option>
+          </Select>
+          <p className="mt-1 text-xs text-[var(--fg-muted)]">
+            Step cards add a numbered label above each card. Feature cards show only the icon, title, and description.
+          </p>
+        </div>
+        <CardListInput
+          label="Cards"
+          cards={section.cards}
+          onChange={(cards) => onChange({ cards })}
+        />
+        <div>
+          <Label>Closing Text</Label>
+          <Textarea
+            value={section.closingText}
+            onChange={(e) => onChange({ closingText: e.target.value })}
+            placeholder="Optional closing paragraph"
+            rows={3}
+          />
+        </div>
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <div>
+            <Label>CTA Button Label</Label>
+            <Input
+              value={section.ctaLabel}
+              onChange={(e) => onChange({ ctaLabel: e.target.value })}
+              placeholder="e.g. Join Our Program"
+            />
+          </div>
+          <div>
+            <Label>CTA Button URL</Label>
+            <Input
+              value={section.ctaUrl}
+              onChange={(e) => onChange({ ctaUrl: e.target.value })}
+              placeholder="https://..."
+            />
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

@@ -38,7 +38,7 @@ app.get("/", async (c) => {
   }
   const db = getDb(c.env);
 
-  const pagingParams = ["page", "limit", "search", "type", "status", "availability", "ids", "stats"];
+  const pagingParams = ["page", "limit", "search", "type", "category", "status", "availability", "ids", "stats"];
   const paginated = pagingParams.some((k) => c.req.query(k) !== undefined);
 
   if (!paginated) {
@@ -58,6 +58,7 @@ app.get("/", async (c) => {
   );
   const search = typeof c.req.query("search") === "string" ? c.req.query("search")!.trim() : "";
   const type = typeof c.req.query("type") === "string" ? c.req.query("type")! : "";
+  const category = typeof c.req.query("category") === "string" ? c.req.query("category")! : "";
   const status = typeof c.req.query("status") === "string" ? c.req.query("status")! : "";
   const availability = typeof c.req.query("availability") === "string" ? c.req.query("availability")! : "";
 
@@ -99,6 +100,7 @@ app.get("/", async (c) => {
     );
   }
   if (type && type !== "all") conditions.push(eq(schema.products.type, type));
+  if (category && category !== "all") conditions.push(eq(schema.products.category, category));
   if (status && status !== "all") conditions.push(eq(schema.products.status, status));
   if (availability === "available") conditions.push(sql`${stockTotal} > 0`);
   if (availability === "soldout") conditions.push(sql`${stockTotal} <= 0`);
@@ -342,6 +344,7 @@ app.put("/:id", async (c) => {
 
   const body = await c.req.json<{
     name?: string;
+    itemCode?: string;
     stockReason?: string;
     colors?: unknown;
     sizes?: unknown;
@@ -352,6 +355,7 @@ app.put("/:id", async (c) => {
   const [oldRow] = await db
     .select({
       name: schema.products.name,
+      itemCode: schema.products.itemCode,
       colors: schema.products.colors,
       sizes: schema.products.sizes,
     })
@@ -361,6 +365,7 @@ app.put("/:id", async (c) => {
 
   const values = cmsProductToRow(body as never);
   delete values.createdAt;
+  if (body.itemCode === undefined) values.itemCode = oldRow.itemCode;
 
   const legacyReason =
     typeof body.stockReason === "string" && body.stockReason.trim()
@@ -382,6 +387,14 @@ app.put("/:id", async (c) => {
       );
     }
     values.colors = merged.colors;
+    if (hasInvalidStock(values.colors)) {
+      return c.json(
+        {
+          error: `Stock values must be whole numbers between 0 and ${MAX_STOCK.toLocaleString("en-US")}.`,
+        },
+        400
+      );
+    }
   }
 
   if (body.sizes === undefined && body.colors === undefined) {
@@ -404,14 +417,15 @@ app.put("/:id", async (c) => {
     .returning({ id: schema.products.id });
   if (updated.length === 0) return c.json({ error: "Product not found" }, 404);
 
-  if (legacyReason) {
+  const stockReason = legacyReason ?? (body.colors !== undefined ? "Initial stock" : null);
+  if (stockReason) {
     await logStockDiff(c.env, {
       productId: id,
       productName: values.name ?? oldRow.name,
       before: flattenStock(oldRow.colors),
       after: flattenStock(values.colors ?? []),
       kind: "edit",
-      reason: legacyReason,
+      reason: stockReason,
       changedBy: await resolveChangedBy(c.env, authUser.id),
     });
   }

@@ -5,7 +5,7 @@ import { useCms } from "../store/cmsContext";
 import type { CmsProduct } from "../../data/store-types";
 import { api } from "../lib/api";
 import { Badge, Button, Container, Header, Input } from "./ui";
-import { SortableList, DragHandle } from "./SortableList";
+import { ReorderButtons } from "./ReorderButtons";
 
 function isSoldOutProduct(p: CmsProduct): boolean {
   return p.colors.every((c) =>
@@ -62,20 +62,28 @@ export function ProductSection({
     };
   }, [open, debounced, ids]);
 
+  const idsRef = useRef(ids);
+  const idsKey = [...new Set(ids)].sort().join("|");
+
   useEffect(() => {
-    if (ids.length === 0) {
+    idsRef.current = ids;
+  }, [ids]);
+
+  useEffect(() => {
+    const currentIds = idsRef.current;
+    if (currentIds.length === 0) {
       setSelectedProducts([]);
       return;
     }
     let cancelled = false;
     api
-      .getProductsByIds(ids)
+      .getProductsByIds(currentIds)
       .then((res) => !cancelled && setSelectedProducts(res.data))
       .catch((err) => console.error("[cms] failed to load selected products", err));
     return () => {
       cancelled = true;
     };
-  }, [ids]);
+  }, [idsKey]);
 
   const updatePos = useCallback(() => {
     const el = inputWrapRef.current;
@@ -137,6 +145,15 @@ export function ProductSection({
 
   const remove = (id: string) => {
     updateHomepage({ [field]: ids.filter((x) => x !== id) });
+  };
+
+  const move = (index: number, direction: -1 | 1) => {
+    const target = index + direction;
+    if (target < 0 || target >= ids.length) return;
+    const next = [...ids];
+    const [moved] = next.splice(index, 1);
+    next.splice(target, 0, moved);
+    updateHomepage({ [field]: next });
   };
 
   return (
@@ -223,20 +240,23 @@ export function ProductSection({
             portalTarget
           )}
 
-        <div className="mt-4 flex flex-col divide-y divide-[var(--border-subtle)]">
-          {ids.length === 0 && (
-            <p className="py-3 text-sm text-[var(--fg-muted)]">No products selected.</p>
-          )}
-          <SortableList
-            items={ids}
-            onReorder={(next) => updateHomepage({ [field]: next })}
-            keyExtractor={(id) => id}
-            renderItem={(id, _index, dragHandleProps) => {
+        <div className="mt-4 max-h-[360px] overflow-y-auto overscroll-contain pr-2 slim-scrollbar">
+          <div className="flex flex-col divide-y divide-[var(--border-subtle)]">
+            {ids.length === 0 && (
+              <p className="py-3 text-sm text-[var(--fg-muted)]">No products selected.</p>
+            )}
+            {ids.map((id, index) => {
               const product = selectedProducts.find((p) => p.id === id);
               const soldOut = product ? isSoldOutProduct(product) : false;
               return (
-                <div className="flex items-center gap-3 py-2">
-                  <DragHandle handleProps={dragHandleProps} />
+                <div key={id} className="flex items-center gap-3 py-2">
+                  <ReorderButtons
+                    label={product?.name ?? "product"}
+                    canMoveUp={index > 0}
+                    canMoveDown={index < ids.length - 1}
+                    onMoveUp={() => move(index, -1)}
+                    onMoveDown={() => move(index, 1)}
+                  />
                   <img
                     src={product?.colors[0]?.images[0]}
                     alt=""
@@ -257,8 +277,8 @@ export function ProductSection({
                   </button>
                 </div>
               );
-            }}
-          />
+            })}
+          </div>
         </div>
       </div>
     </Container>

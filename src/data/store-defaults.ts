@@ -20,7 +20,6 @@ export function seedHomepage(): HomepageConfig {
   return { heroes: [], brands: [], featuredIds: [], bestSellerIds: [], heroImageClickable: false, showOnSale: true, showNewArrivals: true };
 }
 
-/** Merge raw homepage config with defaults and drop duplicate/blank brand names. */
 export function normalizeHomepage(raw: unknown): HomepageConfig {
   const merged: Partial<HomepageConfig> =
     typeof raw === "object" && raw !== null ? (raw as Partial<HomepageConfig>) : {};
@@ -43,6 +42,9 @@ export function seedSettings(): SettingsConfig {
   return {
     storeName: "",
     headerSubtitle: "",
+    announcementEnabled: false,
+    announcementMessages: [],
+    announcementIntervalSeconds: 5,
     tagline: "",
     facebookUrl: "",
     messengerUrl: "",
@@ -89,8 +91,13 @@ export function normalizeAbout(raw: unknown): AboutPageConfig {
       const sec = (typeof s === "object" && s !== null ? s : {}) as Partial<
         AboutPageConfig["sections"][number]
       >;
+      const id = typeof sec.id === "string" && sec.id.trim() ? sec.id : `section-${i}`;
+      const cardStyle =
+        sec.cardStyle === "step" || sec.cardStyle === "feature"
+          ? sec.cardStyle
+          : "feature";
       return {
-        id: typeof sec.id === "string" && sec.id.trim() ? sec.id : `section-${i}`,
+        id,
         label: sec.label ?? "",
         enabled: sec.enabled ?? true,
         heading: sec.heading ?? "",
@@ -103,6 +110,7 @@ export function normalizeAbout(raw: unknown): AboutPageConfig {
           description: c?.description ?? "",
           image: c?.image ?? "",
         })),
+        cardStyle,
         closingText: sec.closingText ?? "",
         ctaLabel: sec.ctaLabel ?? "",
         ctaUrl: sec.ctaUrl ?? "",

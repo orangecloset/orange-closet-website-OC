@@ -154,6 +154,7 @@ export const api = {
     page: number;
     search?: string;
     type?: string;
+    category?: string;
     status?: string;
     availability?: string;
     limit?: number;
@@ -164,6 +165,7 @@ export const api = {
     });
     if (params.search?.trim()) q.set("search", params.search.trim());
     if (params.type && params.type !== "all") q.set("type", params.type);
+    if (params.category && params.category !== "all") q.set("category", params.category);
     if (params.status && params.status !== "all") q.set("status", params.status);
     if (params.availability && params.availability !== "all") {
       q.set("availability", params.availability);

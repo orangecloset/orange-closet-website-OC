@@ -7,6 +7,7 @@ export type CmsProduct = Omit<Product, "type"> & {
   status: ProductStatus;
   createdAt: string;
   updatedAt: string;
+  itemCode?: string;
   stock?: number;
 };
 
@@ -61,6 +62,7 @@ export type CmsColorInput = {
 export type CmsProductInput = {
   name: string;
   brand?: string;
+  itemCode?: string;
   type: string;
   category: string;
   categoryLabel: string;
@@ -122,9 +124,18 @@ export type FooterSocial = {
   url: string;
 };
 
+export type AnnouncementMessage = {
+  id: string;
+  html: string;
+  link?: string;
+};
+
 export type SettingsConfig = {
   storeName: string;
   headerSubtitle: string;
+  announcementEnabled: boolean;
+  announcementMessages: AnnouncementMessage[];
+  announcementIntervalSeconds: number;
   tagline: string;
   faviconUrl: string;
   ogImageUrl: string;
@@ -159,6 +170,7 @@ export type AboutPageConfig = {
     body: string[];
     images: string[];
     cards: { title: string; description: string; image?: string }[];
+    cardStyle: "feature" | "step";
     closingText: string;
     ctaLabel: string;
     ctaUrl: string;

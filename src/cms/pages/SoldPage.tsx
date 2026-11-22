@@ -128,7 +128,7 @@ export default function SoldPage() {
     setCustomerName("");
     setCustomerPhone("");
     setCustomerEmail("");
-    setItemCode("");
+    setItemCode(p.itemCode ?? "");
   };
 
   const handleBack = () => {
@@ -608,12 +608,13 @@ export default function SoldPage() {
                   <Input
                     id="sell-item-code"
                     value={itemCode}
+                    maxLength={200}
                     onChange={(e) => setItemCode(e.target.value)}
                     placeholder="oc#213889798123"
                     className="mt-1.5"
                   />
                   <p className="mt-1.5 text-xs text-[var(--fg-muted)]">
-                    From the product tag — shown on the receipt.
+                    Auto-filled from the product record when available. Shown on the receipt.
                   </p>
                 </div>
               </div>

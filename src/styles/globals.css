@@ -101,6 +101,32 @@ src: url('https://storage.googleapis.com/download/storage/v1/b/prd-storytodesign
   scrollbar-color: #c4c4c4 transparent;
 }
 
+.slim-scrollbar::-webkit-scrollbar {
+  width: 3px;
+}
+.slim-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.slim-scrollbar::-webkit-scrollbar-thumb {
+  background: #cfcfcf;
+  border-radius: 9999px;
+}
+.slim-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #9ca3af;
+}
+.slim-scrollbar::-webkit-scrollbar-button {
+  display: none;
+}
+.slim-scrollbar::-webkit-scrollbar-corner {
+  background: transparent;
+}
+@supports not selector(::-webkit-scrollbar) {
+  .slim-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: #cfcfcf transparent;
+  }
+}
+
 .ln-l {
   display: block;
   width: 26px;
@@ -271,6 +297,17 @@ img { -webkit-user-drag: none; user-select: none; }
   pointer-events: none;
   background: rgba(96, 165, 250, 0.15);
 }
+
+.rte-inline .ProseMirror {
+  min-height: 34px;
+  max-height: none;
+  overflow: visible;
+  padding: 6px 10px;
+  font-size: 13px;
+  line-height: 1.5;
+}
+.rte-inline .ProseMirror p { margin: 0; }
+.rte-inline .ProseMirror strong { font-weight: 600; }
 
 .legal-editor {
   display: flex;

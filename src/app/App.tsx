@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, useLocation } from "react-router-dom";
+import AnnouncementBar from "./components/AnnouncementBar";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
 import ShareModal from "./components/ShareModal";
@@ -20,6 +21,7 @@ import { getCatalogToken, getCatalogMode } from "./lib/access";
 export default function App() {
   const [shareOpen, setShareOpen] = useState(false);
   const { newArrivals, bestSellerProducts, onSaleProducts, settings, locked } = useCatalog();
+  const { pathname } = useLocation();
   useScrollRestoration();
 
   if (locked || !getCatalogToken()) {
@@ -28,6 +30,12 @@ export default function App() {
 
   return (
     <div className="min-h-screen flex flex-col bg-white text-black">
+      {pathname === "/" && settings.announcementEnabled && (
+        <AnnouncementBar
+          messages={settings.announcementMessages}
+          intervalSeconds={settings.announcementIntervalSeconds}
+        />
+      )}
       <Header
         onShare={() => setShareOpen(true)}
         showShare={settings.showShareButton && getCatalogMode() === "grant"}
