@@ -148,11 +148,8 @@ app.post("/share", async (c) => {
   if (!link?.active) {
     return c.json({ error: "This catalog link is no longer active." }, 403);
   }
-  if (!link.shareId) {
-    return c.json({ error: "Recreate this catalog link to enable sharing." }, 409);
-  }
 
-  const token = signCatalogToken(c.env, "share", link.shareId, SHARE_TTL_MS);
+  const token = signCatalogToken(c.env, "share", link.shareId!, SHARE_TTL_MS);
   return c.json({ ok: true, token, expiresInMs: SHARE_TTL_MS });
 });
 
