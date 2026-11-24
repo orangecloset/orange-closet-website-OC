@@ -1,7 +1,7 @@
 import { FormEvent, useEffect, useState } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
-import { Clock, Lock, ShieldAlert } from "lucide-react";
 import { setCatalogAccess } from "../lib/access";
+import StatusMark from "../components/StatusMark";
 
 type PageState = "checking" | "pin" | "expired" | "revoked" | "error";
 
@@ -10,7 +10,7 @@ export default function CatalogAccessPage() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const [state, setState] = useState<PageState>(
-    searchParams.get("t") ? "checking" : "pin"
+    searchParams.get("t") ? "checking" : uid ? "pin" : "expired"
   );
   const [pin, setPin] = useState("");
   const [busy, setBusy] = useState(false);
@@ -25,7 +25,7 @@ export default function CatalogAccessPage() {
       .then((r) => r.json())
       .then((data: { valid: boolean; reason?: string; uid?: string }) => {
         if (cancelled) return;
-        if (data.valid && data.uid) {
+        if (data.valid) {
           setCatalogAccess({ mode: "share", token: shareToken, uid: data.uid });
           navigate(searchParams.get("p") || "/", { replace: true });
           return;
@@ -82,7 +82,8 @@ export default function CatalogAccessPage() {
 
   if (state === "checking") {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-white">
+      <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-white px-6 text-center">
+        <StatusMark />
         <p className="text-xs uppercase tracking-widest text-gray-400">Checking link…</p>
       </div>
     );
@@ -91,7 +92,6 @@ export default function CatalogAccessPage() {
   if (state === "expired") {
     return (
       <Frame
-        icon={<Clock className="h-6 w-6 text-gray-500" />}
         title="Link Expired"
         message="This share link has expired. Please contact the store for a new link."
       />
@@ -101,7 +101,6 @@ export default function CatalogAccessPage() {
   if (state === "revoked") {
     return (
       <Frame
-        icon={<ShieldAlert className="h-6 w-6 text-gray-500" />}
         title="Link Revoked"
         message="This access link is no longer active. Please contact the store for assistance."
       />
@@ -111,7 +110,6 @@ export default function CatalogAccessPage() {
   if (state === "error") {
     return (
       <Frame
-        icon={<ShieldAlert className="h-6 w-6 text-gray-500" />}
         title="Something went wrong"
         message="We couldn't verify your link. Please try opening it again."
       />
@@ -124,9 +122,7 @@ export default function CatalogAccessPage() {
         onSubmit={handleUnlock}
         className="flex w-full max-w-xs flex-col items-center gap-4 text-center"
       >
-        <div className="flex h-14 w-14 items-center justify-center rounded-full bg-gray-100">
-          <Lock className="h-6 w-6 text-gray-500" />
-        </div>
+        <StatusMark />
         <h1 className="text-sm font-semibold uppercase tracking-widest text-black">
           Access
         </h1>
@@ -157,19 +153,15 @@ export default function CatalogAccessPage() {
 }
 
 function Frame({
-  icon,
   title,
   message,
 }: {
-  icon: React.ReactNode;
   title: string;
   message: string;
 }) {
   return (
     <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-white px-6 text-center">
-      <div className="flex h-14 w-14 items-center justify-center rounded-full bg-gray-100">
-        {icon}
-      </div>
+      <StatusMark />
       <h1 className="text-sm font-semibold uppercase tracking-widest text-black">{title}</h1>
       <p className="max-w-xs text-xs leading-relaxed text-gray-500">{message}</p>
     </div>

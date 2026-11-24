@@ -11,6 +11,14 @@ function tokenSecret(env: Env): string {
   return env.CMS_API_SECRET ?? "";
 }
 
+export function generateShareId(): string {
+  return crypto.randomBytes(16).toString("base64url");
+}
+
+export function isValidPin(pin: unknown): pin is string {
+  return typeof pin === "string" && /^\d{8}$/.test(pin);
+}
+
 export function hashPin(pin: string): string {
   const salt = crypto.randomBytes(16).toString("hex");
   const hash = crypto.scryptSync(pin, salt, 32).toString("hex");
@@ -124,10 +132,26 @@ function sign(env: Env, payload: string): string {
   return hmacSha256Hex(tokenSecret(env), payload);
 }
 
-export function signCatalogToken(env: Env, kind: "grant" | "share", uid: string, ttlMs: number): string {
+export function signCatalogToken(env: Env, kind: "grant" | "share", id: string, ttlMs: number): string {
   const expiresAt = Date.now() + ttlMs;
-  const payload = `${uid}.${expiresAt}`;
+  const payload = `${id}.${expiresAt}`;
   return `${kind}.${payload}.${sign(env, `${kind}.${payload}`)}`;
+}
+
+function verifySignedId(env: Env, kind: "grant" | "share", token: string): string | null {
+  const secret = tokenSecret(env);
+  if (!secret || !token) return null;
+  const parts = token.split(".");
+  if (parts.length !== 4) return null;
+  const [tokenKind, id, expiresAt, signature] = parts;
+  if (tokenKind !== kind || !id || !expiresAt) return null;
+  const expires = Number(expiresAt);
+  if (!Number.isFinite(expires) || expires < Date.now()) return null;
+  const expected = sign(env, `${kind}.${id}.${expiresAt}`);
+  const a = new TextEncoder().encode(signature!);
+  const b = new TextEncoder().encode(expected);
+  if (a.length !== b.length || !constantTimeEqual(a, b)) return null;
+  return id;
 }
 
 export function verifyCatalogToken(
@@ -135,17 +159,28 @@ export function verifyCatalogToken(
   kind: "grant" | "share",
   token: string
 ): { uid: string } | null {
-  const secret = tokenSecret(env);
-  if (!secret || !token) return null;
-  const parts = token.split(".");
-  if (parts.length !== 4) return null;
-  const [tokenKind, uid, expiresAt, signature] = parts;
-  if (tokenKind !== kind || !uid || !expiresAt || Number(expiresAt) < Date.now()) return null;
-  const expected = sign(env, `${kind}.${uid}.${expiresAt}`);
-  const a = new TextEncoder().encode(signature!);
-  const b = new TextEncoder().encode(expected);
-  if (a.length !== b.length || !constantTimeEqual(a, b)) return null;
-  return { uid };
+  const id = verifySignedId(env, kind, token);
+  return id ? { uid: id } : null;
+}
+
+export function verifyShareToken(env: Env, token: string): { shareId: string } | null {
+  const id = verifySignedId(env, "share", token);
+  return id ? { shareId: id } : null;
+}
+
+async function linkByShareId(
+  env: Env,
+  shareId: string
+): Promise<{ uid: string; active: boolean } | null> {
+  try {
+    const [row] = await getDb(env)
+      .select({ uid: schema.catalogLinks.uid, active: schema.catalogLinks.active })
+      .from(schema.catalogLinks)
+      .where(eq(schema.catalogLinks.shareId, shareId));
+    return row ?? null;
+  } catch {
+    return null;
+  }
 }
 
 async function isLinkActive(env: Env, uid: string): Promise<boolean> {
@@ -176,8 +211,11 @@ export async function getCatalogAccess(
   const grant = verifyCatalogToken(env, "grant", catalogToken);
   if (grant && (await isLinkActive(env, grant.uid))) return { uid: grant.uid, via: "grant" };
 
-  const share = verifyCatalogToken(env, "share", catalogToken);
-  if (share && (await isLinkActive(env, share.uid))) return { uid: share.uid, via: "share" };
+  const share = verifyShareToken(env, catalogToken);
+  if (share) {
+    const link = await linkByShareId(env, share.shareId);
+    if (link?.active) return { uid: link.uid, via: "share" };
+  }
 
   return null;
 }

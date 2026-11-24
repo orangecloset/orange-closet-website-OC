@@ -1,59 +1,7 @@
-import { useEffect, useState } from "react";
-
-type Branding = {
-  storeName?: string;
-  headerSubtitle?: string;
-  tagline?: string;
-  messageButtonLabel?: string;
-  messengerUrl?: string;
-  locationText?: string;
-  locationUrl?: string;
-};
-
-type StatusPayload = {
-  faviconUrl?: string;
-  branding?: Branding;
-};
-
-const BRANDING_CACHE_KEY = "orange-lock-branding";
-
-function readBrandingCache(): StatusPayload | null {
-  try {
-    const raw = localStorage.getItem(BRANDING_CACHE_KEY);
-    return raw ? (JSON.parse(raw) as StatusPayload) : null;
-  } catch {
-    return null;
-  }
-}
-
-function writeBrandingCache(data: StatusPayload): void {
-  try {
-    localStorage.setItem(BRANDING_CACHE_KEY, JSON.stringify(data));
-  } catch {
-    /* ignore */
-  }
-}
+import { useStoreStatus } from "../hooks/useStoreStatus";
 
 export default function CatalogLockScreen() {
-  const [status, setStatus] = useState<StatusPayload | null>(() =>
-    readBrandingCache()
-  );
-
-  useEffect(() => {
-    let cancelled = false;
-    fetch("/api/account/status")
-      .then((r) => (r.ok ? r.json() : Promise.reject(new Error(String(r.status)))))
-      .then((data: StatusPayload) => {
-        if (!cancelled) {
-          setStatus(data);
-          writeBrandingCache(data);
-        }
-      })
-      .catch(() => {});
-    return () => {
-      cancelled = true;
-    };
-  }, []);
+  const status = useStoreStatus();
 
   if (!status) {
     return <div className="min-h-dvh bg-white" aria-busy="true" />;

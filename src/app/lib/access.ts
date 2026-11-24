@@ -3,7 +3,7 @@ const ACCESS_KEY = "orange-catalog-access";
 export type CatalogAccessStore = {
   mode: "grant" | "share";
   token: string;
-  uid: string;
+  uid?: string;
 };
 
 function getCatalogAccess(): CatalogAccessStore | null {

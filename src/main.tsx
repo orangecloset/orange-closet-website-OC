@@ -47,6 +47,7 @@ createRoot(document.getElementById("root")!).render(
         >
           <Routes>
             <Route path="/cms-admin/*" element={<AdminApp />} />
+            <Route path="/catalog/access" element={<CatalogAccessPage />} />
             <Route path="/catalog/:uid" element={<CatalogAccessPage />} />
             <Route
               path="/*"

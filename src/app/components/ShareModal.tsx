@@ -39,9 +39,8 @@ export default function ShareModal({ onClose }: ShareModalProps) {
           error?: string;
         } | null;
         if (!cancelled && res.ok && data?.ok && data.token) {
-          const uid = getCatalogUid();
           setShareUrl(
-            `${window.location.origin}/catalog/${uid}?t=${encodeURIComponent(data.token)}&p=%2F`
+            `${window.location.origin}/catalog/access?t=${encodeURIComponent(data.token)}&p=%2F`
           );
         } else if (!cancelled) {
           setError(data?.error ?? "Couldn't create a share link. Please try again.");

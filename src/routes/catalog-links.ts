@@ -5,10 +5,12 @@ import { isAuthorized } from "../lib/auth.js";
 import {
   decryptPin,
   encryptPin,
+  generateShareId,
   hashPin,
+  isValidPin,
   getCatalogAccess,
   signCatalogToken,
-  verifyCatalogToken,
+  verifyShareToken,
   pinLockRemainingSecs,
   recordPinFailure,
   clearPinFailures,
@@ -56,12 +58,13 @@ app.post("/", async (c) => {
     active?: boolean;
     createdAt?: string;
   }>();
-  if (!body?.uid || !body?.pin || typeof body.pin !== "string") {
-    return c.json({ error: "Missing uid or pin" }, 400);
+  if (!body?.uid || !isValidPin(body.pin)) {
+    return c.json({ error: "PIN must be exactly 8 digits" }, 400);
   }
   const db = getDb(c.env);
   await db.insert(schema.catalogLinks).values({
     uid: body.uid,
+    shareId: generateShareId(),
     pin: hashPin(body.pin),
     pinEnc: encryptPin(c.env, body.pin),
     active: body.active ?? true,
@@ -104,7 +107,7 @@ app.post("/unlock", async (c) => {
     );
   }
 
-  if (!verifyPin(body.pin, link.pin)) {
+  if (!isValidPin(body.pin) || !verifyPin(body.pin, link.pin)) {
     await recordPinFailure(c.env, body.uid);
     return c.json({ error: "Incorrect PIN.", code: "BAD_PIN" }, 401);
   }
@@ -139,14 +142,17 @@ app.post("/share", async (c) => {
   }
 
   const [link] = await db
-    .select({ active: schema.catalogLinks.active })
+    .select({ active: schema.catalogLinks.active, shareId: schema.catalogLinks.shareId })
     .from(schema.catalogLinks)
     .where(eq(schema.catalogLinks.uid, uid));
   if (!link?.active) {
     return c.json({ error: "This catalog link is no longer active." }, 403);
   }
+  if (!link.shareId) {
+    return c.json({ error: "Recreate this catalog link to enable sharing." }, 409);
+  }
 
-  const token = signCatalogToken(c.env, "share", uid, SHARE_TTL_MS);
+  const token = signCatalogToken(c.env, "share", link.shareId, SHARE_TTL_MS);
   return c.json({ ok: true, token, expiresInMs: SHARE_TTL_MS });
 });
 
@@ -165,18 +171,21 @@ app.get("/verify", async (c) => {
     return c.json({ valid: false, reason: "missing" }, 400);
   }
 
-  const shareToken = verifyCatalogToken(c.env, "share", token);
-  if (!shareToken) {
+  const share = verifyShareToken(c.env, token);
+  if (!share) {
     return c.json({ valid: false, reason: "expired" });
   }
   const [link] = await getDb(c.env)
     .select({ active: schema.catalogLinks.active })
     .from(schema.catalogLinks)
-    .where(eq(schema.catalogLinks.uid, shareToken.uid));
-  if (!link?.active) {
+    .where(eq(schema.catalogLinks.shareId, share.shareId));
+  if (!link) {
+    return c.json({ valid: false, reason: "expired" });
+  }
+  if (!link.active) {
     return c.json({ valid: false, reason: "revoked" });
   }
-  return c.json({ valid: true, uid: shareToken.uid });
+  return c.json({ valid: true });
 });
 
 app.patch("/:uid", async (c) => {

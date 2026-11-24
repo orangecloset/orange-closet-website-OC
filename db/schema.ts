@@ -101,6 +101,7 @@ export const settings = pgTable("settings", {
 
 export const catalogLinks = pgTable("catalog_links", {
   uid: text("uid").primaryKey(),
+  shareId: text("share_id").unique(),
   pin: text("pin").notNull(),
   pinEnc: text("pin_enc"),
   active: boolean("active").notNull().default(true),

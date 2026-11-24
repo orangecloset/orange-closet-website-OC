@@ -371,9 +371,8 @@ export default function ProductDetailPage() {
       });
       const data = (await res.json().catch(() => null)) as { ok?: boolean; token?: string } | null;
       if (!res.ok || !data?.ok || !data.token) return;
-      const uid = getCatalogUid();
       const path = window.location.pathname;
-      const url = `${window.location.origin}/catalog/${uid}?t=${encodeURIComponent(data.token)}&p=${encodeURIComponent(path)}`;
+      const url = `${window.location.origin}/catalog/access?t=${encodeURIComponent(data.token)}&p=${encodeURIComponent(path)}`;
       if (navigator.share && viewport !== "desktop") {
         await navigator.share({ title: product?.name, url });
       } else {
