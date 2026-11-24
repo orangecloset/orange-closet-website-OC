@@ -1,5 +1,4 @@
 import { useStoreStatus } from "../hooks/useStoreStatus";
-import StatusMark from "../components/StatusMark";
 
 export default function CatalogLockScreen() {
   const status = useStoreStatus();
@@ -9,6 +8,9 @@ export default function CatalogLockScreen() {
   }
 
   const b = status.branding ?? {};
+  const faviconUrl = status.faviconUrl?.trim();
+  const storeName = b.storeName?.trim();
+  const headerSubtitle = b.headerSubtitle?.trim();
   const tagline = b.tagline?.trim();
   const messageButtonLabel = b.messageButtonLabel?.trim();
   const messengerUrl = b.messengerUrl?.trim();
@@ -17,7 +19,33 @@ export default function CatalogLockScreen() {
 
   return (
     <div className="flex min-h-dvh flex-col items-center justify-center bg-white px-6 text-center font-sans text-black">
-      <StatusMark markClassName="mb-6" />
+      {faviconUrl && (
+        <img
+          src={faviconUrl}
+          alt=""
+          className="mb-6 h-16 w-16 object-contain"
+          draggable={false}
+          onError={(e) => {
+            (e.currentTarget as HTMLImageElement).style.display = "none";
+          }}
+        />
+      )}
+
+      {storeName && (
+        <h1 className="text-xl sm:text-2xl font-black uppercase tracking-[0.15em] whitespace-nowrap" style={{ fontFamily: "'Cinzel', serif", WebkitTextStroke: "0.5px" }}>
+          {storeName}
+        </h1>
+      )}
+      {headerSubtitle && (
+        <p
+          className="flex items-center gap-2 text-[10px] font-normal tracking-[0.25em] whitespace-nowrap"
+          style={{ fontFamily: "'Cinzel', serif" }}
+        >
+          <span aria-hidden="true" className="ln-l" />
+          {headerSubtitle}
+          <span aria-hidden="true" className="ln-r" />
+        </p>
+      )}
       {tagline && <p className="mt-3 text-sm text-gray-500">{tagline}</p>}
 
       {messengerUrl && (
