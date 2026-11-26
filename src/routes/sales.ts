@@ -146,8 +146,6 @@ app.get("/stats", async (c) => {
     buckets.set(key, bucket);
   }
 
-  // Zero-fill every calendar day in the requested range so the chart has a
-  // continuous x-axis even on days with no sales.
   const start = dayKey(from).split("-").map(Number);
   const end = dayKey(new Date(to.getTime() - 1)).split("-").map(Number);
   const startUtc = Date.UTC(start[0], start[1] - 1, start[2]);
