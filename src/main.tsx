@@ -40,7 +40,7 @@ createRoot(document.getElementById("root")!).render(
         <CatalogManifest />
         <Suspense
           fallback={
-            <div className="flex min-h-screen items-center justify-center bg-white">
+            <div className="flex min-h-dvh items-center justify-center bg-white">
               <p className="text-xs uppercase tracking-widest text-gray-400">Loading…</p>
             </div>
           }

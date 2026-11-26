@@ -72,7 +72,7 @@ export default function LoginPage({ onSuccess }: { onSuccess: () => void }) {
   };
 
   return (
-    <div className="cms-admin flex min-h-screen items-center justify-center bg-[var(--bg-subtle)] p-4 text-[var(--fg-base)]">
+    <div className="cms-admin flex min-h-dvh items-center justify-center bg-[var(--bg-subtle)] p-4 text-[var(--fg-base)]">
       <Container className="w-full max-w-sm p-8">
         <div className="flex flex-col items-center gap-2 py-4">
           {!faviconFailed && (

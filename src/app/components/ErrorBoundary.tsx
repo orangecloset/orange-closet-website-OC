@@ -17,7 +17,7 @@ export class ErrorBoundary extends Component<Props, State> {
   render() {
     if (this.state.hasError) {
       return (
-        <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-white px-4 text-center text-black">
+        <div className="flex min-h-dvh flex-col items-center justify-center gap-4 bg-white px-4 text-center text-black">
           <h1 className="text-xl font-semibold">Something went wrong</h1>
           <p className="max-w-md text-sm text-gray-500">
             An unexpected error occurred while rendering this page.

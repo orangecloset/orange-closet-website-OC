@@ -82,7 +82,7 @@ export default function CatalogAccessPage() {
 
   if (state === "checking") {
     return (
-      <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-white px-6 text-center">
+      <div className="flex min-h-dvh flex-col items-center justify-center gap-4 bg-white px-6 text-center">
         <StatusMark />
         <p className="text-xs uppercase tracking-widest text-gray-400">Checking link…</p>
       </div>
@@ -117,7 +117,7 @@ export default function CatalogAccessPage() {
   }
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-white px-6">
+    <div className="flex min-h-dvh flex-col items-center justify-center bg-white px-6">
       <form
         onSubmit={handleUnlock}
         className="flex w-full max-w-xs flex-col items-center gap-4 text-center"
@@ -160,7 +160,7 @@ function Frame({
   message: string;
 }) {
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-white px-6 text-center">
+    <div className="flex min-h-dvh flex-col items-center justify-center gap-4 bg-white px-6 text-center">
       <StatusMark />
       <h1 className="text-sm font-semibold uppercase tracking-widest text-black">{title}</h1>
       <p className="max-w-xs text-xs leading-relaxed text-gray-500">{message}</p>
