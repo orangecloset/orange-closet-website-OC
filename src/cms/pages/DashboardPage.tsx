@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Loader2 } from "lucide-react";
+import { ChevronDown, ChevronUp, Loader2 } from "lucide-react";
 import { useCms } from "../store/cmsContext";
 import type { CmsProduct } from "../../data/store-types";
 import { api, type ProductStats, type SalesStats } from "../lib/api";
@@ -27,6 +27,15 @@ export default function DashboardPage() {
   const [loadingSales, setLoadingSales] = useState(true);
   const [salesError, setSalesError] = useState("");
   const [range, setRange] = useState<7 | 30 | 90>(30);
+  const [statsExpanded, setStatsExpanded] = useState<boolean>(() =>
+    typeof window !== "undefined" ? window.innerWidth >= 768 : false
+  );
+
+  useEffect(() => {
+    const onResize = () => setStatsExpanded(window.innerWidth >= 768);
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -102,6 +111,75 @@ export default function DashboardPage() {
   const formatPeso = (value: number) =>
     `₱${value.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
+  const statCards = [
+    {
+      label: "Total Products",
+      value: stats.total,
+      hint: `${stats.draft} draft`,
+    },
+    {
+      label: "Active",
+      value: stats.active,
+      hint: `${stats.draft} draft`,
+    },
+    {
+      label: "Sold Out",
+      value: stats.soldOut,
+      hint: "All colours at 0 stock",
+    },
+    {
+      label: "Added This Week",
+      value: stats.addedThisWeek,
+    },
+    {
+      label: "Revenue Today",
+      value: loadingSales ? "—" : formatPeso(lastDay?.revenue ?? 0),
+      hint:
+        loadingSales
+          ? undefined
+          : lastDay && lastDay.count > 0
+            ? `${lastDay.count} sale${lastDay.count === 1 ? "" : "s"} · ${lastDay.units} unit${lastDay.units === 1 ? "" : "s"}`
+            : "No sales yet today",
+    },
+    {
+      label: "Sales Today",
+      value: loadingSales ? "—" : String(lastDay?.count ?? 0),
+      hint:
+        loadingSales
+          ? undefined
+          : `${lastDay?.units ?? 0} unit${(lastDay?.units ?? 0) === 1 ? "" : "s"} sold`,
+    },
+    {
+      label: "Revenue · Last 7 Days",
+      value: loadingSales ? "—" : formatPeso(revenue7),
+      hint:
+        loadingSales ? undefined : revenueDelta === null ? (
+          "No sales in the previous 7 days"
+        ) : (
+          <>
+            <span
+              className={
+                revenueDelta >= 0
+                  ? "font-medium text-green-600"
+                  : "font-medium text-rose-600"
+              }
+            >
+              {revenueDelta >= 0 ? "▲" : "▼"} {Math.abs(revenueDelta).toFixed(1)}%
+            </span>{" "}
+            vs previous 7 days
+          </>
+        ),
+    },
+    {
+      label: "Avg. Sale · Last 7 Days",
+      value: loadingSales ? "—" : formatPeso(avg7),
+      hint:
+        loadingSales
+          ? undefined
+          : `across ${sales7} sale${sales7 === 1 ? "" : "s"} · ${units7} units`,
+    },
+  ];
+
   const recentlySold = recentSales.slice(0, 6);
 
   const typeLabel = (slug: string) => types.find((t) => t.slug === slug)?.label ?? slug;
@@ -110,66 +188,34 @@ export default function DashboardPage() {
     <div className="flex flex-col gap-y-3">
       <Header title="Dashboard" subtitle="Overview of your catalog" />
 
-      <div className="grid grid-cols-2 gap-3 xl:grid-cols-4">
-        <StatCard label="Total Products" value={stats.total} />
-        <StatCard label="Active" value={stats.active} hint={`${stats.draft} draft`} />
-        <StatCard label="Sold Out" value={stats.soldOut} hint="All colours at 0 stock" />
-        <StatCard label="Added This Week" value={stats.addedThisWeek} />
+      <div className="grid grid-cols-2 gap-3 md:grid-cols-4 xl:grid-cols-4">
+        {statCards.slice(0, statsExpanded ? statCards.length : 4).map((card) => (
+          <StatCard
+            key={card.label}
+            label={card.label}
+            value={card.value}
+            hint={card.hint}
+          />
+        ))}
       </div>
-
-      <div className="grid grid-cols-2 gap-3 xl:grid-cols-4">
-        <StatCard
-          label="Revenue Today"
-          value={loadingSales ? "—" : formatPeso(lastDay?.revenue ?? 0)}
-          hint={
-            loadingSales
-              ? undefined
-              : lastDay && lastDay.count > 0
-                ? `${lastDay.count} sale${lastDay.count === 1 ? "" : "s"} · ${lastDay.units} unit${lastDay.units === 1 ? "" : "s"}`
-                : "No sales yet today"
-          }
-        />
-        <StatCard
-          label="Sales Today"
-          value={loadingSales ? "—" : String(lastDay?.count ?? 0)}
-          hint={
-            loadingSales
-              ? undefined
-              : `${lastDay?.units ?? 0} unit${(lastDay?.units ?? 0) === 1 ? "" : "s"} sold`
-          }
-        />
-        <StatCard
-          label="Revenue · Last 7 Days"
-          value={loadingSales ? "—" : formatPeso(revenue7)}
-          hint={
-            loadingSales ? undefined : revenueDelta === null ? (
-              "No sales in the previous 7 days"
-            ) : (
-              <>
-                <span
-                  className={
-                    revenueDelta >= 0
-                      ? "font-medium text-green-600"
-                      : "font-medium text-rose-600"
-                  }
-                >
-                  {revenueDelta >= 0 ? "▲" : "▼"} {Math.abs(revenueDelta).toFixed(1)}%
-                </span>{" "}
-                vs previous 7 days
-              </>
-            )
-          }
-        />
-        <StatCard
-          label="Avg. Sale · Last 7 Days"
-          value={loadingSales ? "—" : formatPeso(avg7)}
-          hint={
-            loadingSales
-              ? undefined
-              : `across ${sales7} sale${sales7 === 1 ? "" : "s"} · ${units7} units`
-          }
-        />
-      </div>
+      {!statsExpanded && (
+        <button
+          type="button"
+          onClick={() => setStatsExpanded(true)}
+          className="md:hidden mt-3 inline-flex items-center gap-1.5 rounded-lg border border-[var(--border-base)] bg-[var(--bg-subtle)] px-3 py-1.5 text-xs font-medium text-[var(--fg-muted)] hover:bg-[var(--bg-subtle-hover)] hover:text-[var(--fg-base)]"
+        >
+          <ChevronDown className="h-4 w-4" /> Show all {statCards.length - 4} more
+        </button>
+      )}
+      {statsExpanded && (
+        <button
+          type="button"
+          onClick={() => setStatsExpanded(false)}
+          className="md:hidden mt-3 inline-flex items-center gap-1.5 rounded-lg border border-[var(--border-base)] bg-[var(--bg-subtle)] px-3 py-1.5 text-xs font-medium text-[var(--fg-muted)] hover:bg-[var(--bg-subtle-hover)] hover:text-[var(--fg-base)]"
+        >
+          <ChevronUp className="h-4 w-4" /> Show less
+        </button>
+      )}
 
       <div className="w-full rounded-lg bg-[var(--bg-base)] shadow-[var(--elevation-card-rest)]">
         <Header

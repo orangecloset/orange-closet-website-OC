@@ -13,7 +13,12 @@ const PAGE_SIZE = 50;
 function formatDate(iso: string): string {
   const d = new Date(iso);
   if (Number.isNaN(d.getTime())) return "—";
-  return d.toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" });
+  const now = new Date();
+  return d.toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    ...(d.getFullYear() === now.getFullYear() ? {} : { year: "numeric" }),
+  });
 }
 
 function formatMoney(value: number): string {
@@ -106,12 +111,12 @@ export default function SalesHistoryPage() {
             <thead>
               <tr className="border-b border-[var(--border-subtle)] text-xs text-[var(--fg-muted)]">
                 <th className="w-[13%] py-2.5 pl-6 pr-2 font-medium">Receipt #</th>
-                <th className="w-[29%] px-3 py-2.5 font-medium">Product</th>
+                <th className="w-[27%] px-3 py-2.5 font-medium">Product</th>
                 <th className="w-[9%] px-3 py-2.5 font-medium">Variant</th>
                 <th className="w-[7%] px-3 py-2.5 text-right font-medium">Qty</th>
                 <th className="w-[12%] px-3 py-2.5 text-right font-medium">Total</th>
-                <th className="w-[11%] px-3 py-2.5 font-medium">Date Sold</th>
-                <th className="w-[13%] px-3 py-2.5 font-medium">Sold By</th>
+                <th className="w-[14%] px-3 py-2.5 font-medium">Date Sold</th>
+                <th className="w-[12%] px-3 py-2.5 font-medium">Sold By</th>
                 <th className="w-[6%] px-3 py-2.5 font-medium"></th>
               </tr>
             </thead>
