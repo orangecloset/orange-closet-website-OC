@@ -76,6 +76,18 @@ export type ProductStats = {
   soldOutProducts: CmsProduct[];
 };
 
+export type SalesDailyPoint = {
+  date: string;
+  revenue: number;
+  units: number;
+  count: number;
+};
+
+export type SalesStats = {
+  days: SalesDailyPoint[];
+  totals: { revenue: number; units: number; count: number };
+};
+
 export type PagedSales = {
   data: RecentSale[];
   page: number;
@@ -195,6 +207,10 @@ export const api = {
     request<{ ok: true }>(`/api/products/${id}`, { method: "DELETE" }),
 
   listSales: () => request<RecentSale[]>("/api/sales?limit=50"),
+  getSalesStats: (params: { from: string; to: string; tz: string }) =>
+    request<SalesStats>(
+      `/api/sales/stats?from=${encodeURIComponent(params.from)}&to=${encodeURIComponent(params.to)}&tz=${encodeURIComponent(params.tz)}`
+    ),
 
   listSalesPaged: (page: number, limit = 50) =>
     request<PagedSales>(`/api/sales?page=${page}&limit=${limit}`),

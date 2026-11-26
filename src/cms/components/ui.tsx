@@ -768,7 +768,7 @@ export function StatCard({
 }: {
   label: string;
   value: ReactNode;
-  hint?: string;
+  hint?: ReactNode;
 }) {
   return (
     <div className="rounded-lg bg-[var(--bg-base)] px-4 py-3 shadow-[var(--elevation-card-rest)] sm:px-6 sm:py-4">

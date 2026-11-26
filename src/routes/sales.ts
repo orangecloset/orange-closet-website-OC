@@ -83,6 +83,97 @@ app.get("/", async (c) => {
   });
 });
 
+app.get("/stats", async (c) => {
+  if (!(await isAuthorized(c.env, c.req.header("authorization")))) {
+    return c.json({ error: "Unauthorized" }, 401);
+  }
+
+  const from = new Date(c.req.query("from") ?? "");
+  const to = new Date(c.req.query("to") ?? "");
+  if (Number.isNaN(from.getTime()) || Number.isNaN(to.getTime()) || to.getTime() <= from.getTime()) {
+    return c.json({ error: "Invalid date range" }, 400);
+  }
+  const maxRangeMs = 92 * 24 * 60 * 60 * 1000;
+  if (to.getTime() - from.getTime() > maxRangeMs) {
+    return c.json({ error: "Date range must be 90 days or less" }, 400);
+  }
+
+  const requestedTz = (c.req.query("tz") ?? "").trim();
+  let tz = "UTC";
+  if (requestedTz) {
+    try {
+      new Intl.DateTimeFormat("en-US", { timeZone: requestedTz });
+      tz = requestedTz;
+    } catch {
+      tz = "UTC";
+    }
+  }
+
+  const formatter = new Intl.DateTimeFormat("en-US", {
+    timeZone: tz,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  });
+  const dayKey = (date: Date) => {
+    const parts = formatter.formatToParts(date);
+    const value = (type: string) => parts.find((p) => p.type === type)?.value ?? "00";
+    return `${value("year")}-${value("month")}-${value("day")}`;
+  };
+
+  const db = getDb(c.env);
+  const rows = await db
+    .select({
+      price: schema.sales.price,
+      quantity: schema.sales.quantity,
+      soldAt: schema.sales.soldAt,
+      createdAt: schema.sales.createdAt,
+    })
+    .from(schema.sales)
+    .where(
+      sql`coalesce(${schema.sales.soldAt}, ${schema.sales.createdAt}) >= ${from} and coalesce(${schema.sales.soldAt}, ${schema.sales.createdAt}) < ${to}`
+    );
+
+  const buckets = new Map<string, { date: string; revenue: number; units: number; count: number }>();
+  for (const row of rows) {
+    const key = dayKey(row.soldAt ?? row.createdAt);
+    const bucket = buckets.get(key) ?? { date: key, revenue: 0, units: 0, count: 0 };
+    const parsed = Number(String(row.price).replace(/[^0-9.]/g, ""));
+    const lineRevenue = (Number.isFinite(parsed) ? parsed : 0) * row.quantity;
+    bucket.revenue += lineRevenue;
+    bucket.units += row.quantity;
+    bucket.count += 1;
+    buckets.set(key, bucket);
+  }
+
+  // Zero-fill every calendar day in the requested range so the chart has a
+  // continuous x-axis even on days with no sales.
+  const start = dayKey(from).split("-").map(Number);
+  const end = dayKey(new Date(to.getTime() - 1)).split("-").map(Number);
+  const startUtc = Date.UTC(start[0], start[1] - 1, start[2]);
+  const endUtc = Date.UTC(end[0], end[1] - 1, end[2]);
+  const days: Array<{ date: string; revenue: number; units: number; count: number }> = [];
+  for (let t = startUtc; t <= endUtc; t += 24 * 60 * 60 * 1000) {
+    const d = new Date(t);
+    const key = `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, "0")}-${String(d.getUTCDate()).padStart(2, "0")}`;
+    const bucket = buckets.get(key);
+    days.push(
+      bucket
+        ? { ...bucket, revenue: Math.round(bucket.revenue * 100) / 100 }
+        : { date: key, revenue: 0, units: 0, count: 0 }
+    );
+  }
+
+  return c.json({
+    days,
+    totals: {
+      revenue: Math.round(days.reduce((sum, d) => sum + d.revenue, 0) * 100) / 100,
+      units: days.reduce((sum, d) => sum + d.units, 0),
+      count: days.reduce((sum, d) => sum + d.count, 0),
+    },
+  });
+});
+
 app.get("/by-receipt/:receiptNo", async (c) => {
   if (!(await isAuthorized(c.env, c.req.header("authorization")))) {
     return c.json({ error: "Unauthorized" }, 401);

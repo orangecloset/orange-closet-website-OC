@@ -1,10 +1,11 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Loader2 } from "lucide-react";
 import { useCms } from "../store/cmsContext";
 import type { CmsProduct } from "../../data/store-types";
-import { api, type ProductStats } from "../lib/api";
+import { api, type ProductStats, type SalesStats } from "../lib/api";
 import { Badge, Container, Header, StatCard } from "../components/ui";
+import SalesLineChart from "../components/SalesLineChart";
 import { timeAgo } from "../lib/utils";
 
 const CACHE_TTL_MS = 60_000;
@@ -22,6 +23,10 @@ export default function DashboardPage() {
   const [recentlyAdded, setRecentlyAdded] = useState<CmsProduct[]>(recentValid ? dashboardRecentCache.data! : []);
   const [loadingStats, setLoadingStats] = useState(!statsValid);
   const [loadingRecent, setLoadingRecent] = useState(!recentValid);
+  const [sales, setSales] = useState<SalesStats | null>(null);
+  const [loadingSales, setLoadingSales] = useState(true);
+  const [salesError, setSalesError] = useState("");
+  const [range, setRange] = useState<7 | 30 | 90>(30);
 
   useEffect(() => {
     let cancelled = false;
@@ -58,8 +63,44 @@ export default function DashboardPage() {
         .finally(() => { if (!cancelled) setLoadingRecent(false); });
     }
 
+    const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC";
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const from = new Date(today);
+    from.setDate(from.getDate() - 89);
+    const to = new Date(today);
+    to.setDate(to.getDate() + 1);
+    api
+      .getSalesStats({ from: from.toISOString(), to: to.toISOString(), tz })
+      .then((data) => {
+        if (!cancelled) setSales(data);
+      })
+      .catch((err) => {
+        console.error("[cms] failed to load sales stats", err);
+        if (!cancelled) setSalesError("Couldn't load sales data. Refresh to try again.");
+      })
+      .finally(() => {
+        if (!cancelled) setLoadingSales(false);
+      });
+
     return () => { cancelled = true; };
   }, []);
+
+  const salesDays = useMemo(() => sales?.days ?? [], [sales]);
+  const lastDay = salesDays[salesDays.length - 1];
+  const last7 = salesDays.slice(-7);
+  const prev7 = salesDays.slice(-14, -7);
+  const sumBy = (rows: SalesStats["days"], key: "revenue" | "units" | "count") =>
+    rows.reduce((total, row) => total + row[key], 0);
+  const revenue7 = sumBy(last7, "revenue");
+  const prevRevenue7 = sumBy(prev7, "revenue");
+  const sales7 = sumBy(last7, "count");
+  const units7 = sumBy(last7, "units");
+  const avg7 = sales7 > 0 ? revenue7 / sales7 : 0;
+  const revenueDelta = prevRevenue7 > 0 ? ((revenue7 - prevRevenue7) / prevRevenue7) * 100 : null;
+  const chartData = useMemo(() => salesDays.slice(-range), [salesDays, range]);
+  const formatPeso = (value: number) =>
+    `₱${value.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
   const recentlySold = recentSales.slice(0, 6);
 
@@ -74,6 +115,99 @@ export default function DashboardPage() {
         <StatCard label="Active" value={stats.active} hint={`${stats.draft} draft`} />
         <StatCard label="Sold Out" value={stats.soldOut} hint="All colours at 0 stock" />
         <StatCard label="Added This Week" value={stats.addedThisWeek} />
+      </div>
+
+      <div className="grid grid-cols-2 gap-3 xl:grid-cols-4">
+        <StatCard
+          label="Revenue Today"
+          value={loadingSales ? "—" : formatPeso(lastDay?.revenue ?? 0)}
+          hint={
+            loadingSales
+              ? undefined
+              : lastDay && lastDay.count > 0
+                ? `${lastDay.count} sale${lastDay.count === 1 ? "" : "s"} · ${lastDay.units} unit${lastDay.units === 1 ? "" : "s"}`
+                : "No sales yet today"
+          }
+        />
+        <StatCard
+          label="Sales Today"
+          value={loadingSales ? "—" : String(lastDay?.count ?? 0)}
+          hint={
+            loadingSales
+              ? undefined
+              : `${lastDay?.units ?? 0} unit${(lastDay?.units ?? 0) === 1 ? "" : "s"} sold`
+          }
+        />
+        <StatCard
+          label="Revenue · Last 7 Days"
+          value={loadingSales ? "—" : formatPeso(revenue7)}
+          hint={
+            loadingSales ? undefined : revenueDelta === null ? (
+              "No sales in the previous 7 days"
+            ) : (
+              <>
+                <span
+                  className={
+                    revenueDelta >= 0
+                      ? "font-medium text-green-600"
+                      : "font-medium text-rose-600"
+                  }
+                >
+                  {revenueDelta >= 0 ? "▲" : "▼"} {Math.abs(revenueDelta).toFixed(1)}%
+                </span>{" "}
+                vs previous 7 days
+              </>
+            )
+          }
+        />
+        <StatCard
+          label="Avg. Sale · Last 7 Days"
+          value={loadingSales ? "—" : formatPeso(avg7)}
+          hint={
+            loadingSales
+              ? undefined
+              : `across ${sales7} sale${sales7 === 1 ? "" : "s"} · ${units7} units`
+          }
+        />
+      </div>
+
+      <div className="w-full rounded-lg bg-[var(--bg-base)] shadow-[var(--elevation-card-rest)]">
+        <Header
+          title="Sales"
+          subtitle={`Revenue · last ${range} days`}
+          actions={
+            <div className="inline-flex items-center gap-0.5 rounded-md border border-[var(--border-base)] bg-[var(--bg-subtle)] p-0.5">
+              {([7, 30, 90] as const).map((value) => (
+                <button
+                  key={value}
+                  type="button"
+                  aria-pressed={range === value}
+                  onClick={() => setRange(value)}
+                  className={`rounded px-2.5 py-1 text-xs font-medium transition-colors ${
+                    range === value
+                      ? "bg-[var(--bg-base)] text-[var(--fg-base)] shadow-[var(--borders-base)]"
+                      : "text-[var(--fg-muted)] hover:text-[var(--fg-base)]"
+                  }`}
+                >
+                  {value}D
+                </button>
+              ))}
+            </div>
+          }
+        />
+        <div className="px-2 pb-3 sm:px-4">
+          {loadingSales ? (
+            <div className="flex h-[280px] items-center justify-center">
+              <Loader2 className="h-5 w-5 animate-spin text-[var(--fg-muted)]" />
+            </div>
+          ) : salesError ? (
+            <div className="flex h-[280px] items-center justify-center px-4 text-center text-sm text-[var(--fg-muted)]">
+              {salesError}
+            </div>
+          ) : (
+            <SalesLineChart data={chartData} />
+          )}
+        </div>
       </div>
 
       <div className="grid grid-cols-1 gap-3 xl:grid-cols-2 xl:items-start">
