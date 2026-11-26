@@ -1006,24 +1006,25 @@ export default function ProductDetailPage() {
               className="max-h-[90vh] max-w-[90vw] object-contain select-none"
               draggable={false}
             />
-            {lightboxFade && !lightboxZoomed && (
-              <img
-                key={lightboxFadeKeyRef.current}
-                src={lightboxFade}
-                alt={`${product.name} - ${color.name}`}
-                crossOrigin="anonymous"
-                className="absolute inset-0 max-h-[90vh] max-w-[90vw] object-contain select-none"
-                style={{ transition: "opacity 350ms ease-out", opacity: 1 }}
-                ref={(el) => {
-                  if (el) {
-                    requestAnimationFrame(() => { el.style.opacity = "0"; });
-                  }
-                }}
-                onTransitionEnd={() => setLightboxFade(null)}
-                draggable={false}
-              />
-            )}
           </div>
+
+          {lightboxFade && !lightboxZoomed && (
+            <img
+              key={lightboxFadeKeyRef.current}
+              src={lightboxFade}
+              alt={`${product.name} - ${color.name}`}
+              crossOrigin="anonymous"
+              className="pointer-events-none absolute left-1/2 top-1/2 z-[5] max-h-[90vh] max-w-[90vw] -translate-x-1/2 -translate-y-1/2 object-contain select-none"
+              style={{ transition: "opacity 350ms ease-out", opacity: 1 }}
+              ref={(el) => {
+                if (el) {
+                  requestAnimationFrame(() => { el.style.opacity = "0"; });
+                }
+              }}
+              onTransitionEnd={() => setLightboxFade(null)}
+              draggable={false}
+            />
+          )}
         </div>
       )}
     </>
