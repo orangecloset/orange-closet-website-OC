@@ -45,6 +45,14 @@ function parseStockValue(raw: string | undefined): number {
     : Math.min(MAX_STOCK, Math.max(0, Math.floor(parsed)));
 }
 
+function defaultStockBySize(sizes: string[]): Record<string, string> {
+  const stockBySize: Record<string, string> = {};
+  (sizes.length > 0 ? sizes : ["One Size"]).forEach((size) => {
+    stockBySize[size] = "1";
+  });
+  return stockBySize;
+}
+
 function duplicateKeys(values: string[]): Set<string> {
   const seen = new Set<string>();
   const duplicates = new Set<string>();
@@ -99,7 +107,7 @@ export function ProductFormInner({ editing }: { editing?: CmsProduct }) {
           const images = c.images.filter((img) => img.trim());
           return { id: makeColorId(), name: c.name, hexes, images: images.length > 0 ? images : [""], stockBySize };
         })
-      : [{ id: makeColorId(), name: "Default", hexes: ["#e5e7eb"], images: [""], stockBySize: {} }]
+      : [{ id: makeColorId(), name: "Default", hexes: ["#e5e7eb"], images: [""], stockBySize: defaultStockBySize([]) }]
   );
 
   const typeInfo = types.find((t) => t.slug === type);
@@ -165,7 +173,7 @@ export function ProductFormInner({ editing }: { editing?: CmsProduct }) {
   };
 
   const addColor = () => {
-    setColors((prev) => [...prev, { id: makeColorId(), name: "", hexes: ["#e5e7eb"], images: [""], stockBySize: {} }]);
+    setColors((prev) => [...prev, { id: makeColorId(), name: "", hexes: ["#e5e7eb"], images: [""], stockBySize: defaultStockBySize(sizes) }]);
   };
 
   const setVariantColor = (colorIndex: number, hexIndex: number, value: string) => {
