@@ -112,78 +112,82 @@ export default function DashboardPage() {
       <Header title="Dashboard" subtitle="Overview of your catalog" />
 
       <div className="flex flex-col gap-3">
-      <div className={`order-2 grid grid-cols-2 gap-3 md:order-1 xl:grid-cols-4 ${showAllStats ? "" : "hidden md:grid"}`}>
-        <StatCard label="Total Products" value={stats.total} />
-        <StatCard label="Active" value={stats.active} hint={`${stats.draft} draft`} />
-        <StatCard label="Sold Out" value={stats.soldOut} hint="All colours at 0 stock" />
-        <StatCard label="Added This Week" value={stats.addedThisWeek} />
-      </div>
+        <div
+          className={`order-2 grid grid-cols-2 gap-3 md:order-1 xl:grid-cols-4 ${
+            showAllStats ? "" : "hidden md:grid"
+          }`}
+        >
+          <StatCard label="Total Products" value={stats.total} />
+          <StatCard label="Active" value={stats.active} hint={`${stats.draft} draft`} />
+          <StatCard label="Sold Out" value={stats.soldOut} hint="All colours at 0 stock" />
+          <StatCard label="Added This Week" value={stats.addedThisWeek} />
+        </div>
 
-      <div className="order-1 grid grid-cols-2 gap-3 md:order-2 xl:grid-cols-4">
-        <StatCard
-          label="Revenue Today"
-          value={loadingSales ? "—" : formatPeso(lastDay?.revenue ?? 0)}
-          hint={
-            loadingSales
-              ? undefined
-              : lastDay && lastDay.count > 0
-                ? `${lastDay.count} sale${lastDay.count === 1 ? "" : "s"} · ${lastDay.units} unit${lastDay.units === 1 ? "" : "s"}`
-                : "No sales yet today"
-          }
-        />
-        <StatCard
-          label="Sales Today"
-          value={loadingSales ? "—" : String(lastDay?.count ?? 0)}
-          hint={
-            loadingSales
-              ? undefined
-              : `${lastDay?.units ?? 0} unit${(lastDay?.units ?? 0) === 1 ? "" : "s"} sold`
-          }
-        />
-        <StatCard
-          label="Revenue · Last 7 Days"
-          value={loadingSales ? "—" : formatPeso(revenue7)}
-          hint={
-            loadingSales ? undefined : revenueDelta === null ? (
-              "No sales in the previous 7 days"
-            ) : (
-              <>
-                <span
-                  className={
-                    revenueDelta >= 0
-                      ? "font-medium text-green-600"
-                      : "font-medium text-rose-600"
-                  }
-                >
-                  {revenueDelta >= 0 ? "▲" : "▼"} {Math.abs(revenueDelta).toFixed(1)}%
-                </span>{" "}
-                vs previous 7 days
-              </>
-            )
-          }
-        />
-        <StatCard
-          label="Avg. Sale · Last 7 Days"
-          value={loadingSales ? "—" : formatPeso(avg7)}
-          hint={
-            loadingSales
-              ? undefined
-              : `across ${sales7} sale${sales7 === 1 ? "" : "s"} · ${units7} units`
-          }
-        />
-      </div>
+        <div className="order-1 grid grid-cols-2 gap-3 md:order-2 xl:grid-cols-4">
+          <StatCard
+            label="Revenue Today"
+            value={loadingSales ? "—" : formatPeso(lastDay?.revenue ?? 0)}
+            hint={
+              loadingSales
+                ? undefined
+                : lastDay && lastDay.count > 0
+                  ? `${lastDay.count} sale${lastDay.count === 1 ? "" : "s"} · ${lastDay.units} unit${lastDay.units === 1 ? "" : "s"}`
+                  : "No sales yet today"
+            }
+          />
+          <StatCard
+            label="Sales Today"
+            value={loadingSales ? "—" : String(lastDay?.count ?? 0)}
+            hint={
+              loadingSales
+                ? undefined
+                : `${lastDay?.units ?? 0} unit${(lastDay?.units ?? 0) === 1 ? "" : "s"} sold`
+            }
+          />
+          <StatCard
+            label="Revenue · Last 7 Days"
+            value={loadingSales ? "—" : formatPeso(revenue7)}
+            hint={
+              loadingSales ? undefined : revenueDelta === null ? (
+                "No sales in the previous 7 days"
+              ) : (
+                <>
+                  <span
+                    className={
+                      revenueDelta >= 0
+                        ? "font-medium text-green-600"
+                        : "font-medium text-rose-600"
+                    }
+                  >
+                    {revenueDelta >= 0 ? "▲" : "▼"} {Math.abs(revenueDelta).toFixed(1)}%
+                  </span>{" "}
+                  vs previous 7 days
+                </>
+              )
+            }
+          />
+          <StatCard
+            label="Avg. Sale · Last 7 Days"
+            value={loadingSales ? "—" : formatPeso(avg7)}
+            hint={
+              loadingSales
+                ? undefined
+                : `across ${sales7} sale${sales7 === 1 ? "" : "s"} · ${units7} units`
+            }
+          />
+        </div>
 
-      <button
-        type="button"
-        onClick={() => setShowAllStats((value) => !value)}
-        aria-expanded={showAllStats}
-        className="order-3 flex items-center justify-center gap-1.5 py-0.5 text-xs font-medium text-[var(--fg-muted)] transition-colors hover:text-[var(--fg-base)] md:hidden"
-      >
-        {showAllStats ? "Show less" : "Show more"}
-        <ChevronDown
-          className={`h-4 w-4 transition-transform ${showAllStats ? "rotate-180" : ""}`}
-        />
-      </button>
+        <button
+          type="button"
+          onClick={() => setShowAllStats((value) => !value)}
+          aria-expanded={showAllStats}
+          className="order-3 flex items-center justify-center gap-1.5 py-1 text-xs font-medium text-[var(--fg-muted)] transition-colors hover:text-[var(--fg-base)] md:hidden"
+        >
+          {showAllStats ? "Hide product stats" : "Show product stats"}
+          <ChevronDown
+            className={`h-4 w-4 transition-transform ${showAllStats ? "rotate-180" : ""}`}
+          />
+        </button>
       </div>
 
       <div className="w-full rounded-lg bg-[var(--bg-base)] shadow-[var(--elevation-card-rest)]">

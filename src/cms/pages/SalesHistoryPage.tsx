@@ -10,10 +10,21 @@ import { Badge, Button, Container, Header, MobileList } from "../components/ui";
 
 const PAGE_SIZE = 50;
 
-function formatDate(iso: string): string {
+function formatDateFull(iso: string): string {
   const d = new Date(iso);
   if (Number.isNaN(d.getTime())) return "—";
   return d.toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" });
+}
+
+function formatDate(iso: string): string {
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return "—";
+  const now = new Date();
+  return d.toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    ...(d.getFullYear() === now.getFullYear() ? {} : { year: "numeric" }),
+  });
 }
 
 function formatMoney(value: number): string {
@@ -178,7 +189,10 @@ export default function SalesHistoryPage() {
                       <td className="whitespace-nowrap px-3 py-3 text-right text-sm tabular-nums text-[var(--fg-base)]">
                         {formatMoney(total)}
                       </td>
-                      <td className="whitespace-nowrap px-3 py-3 text-[13px] text-[var(--fg-muted)]">
+                      <td
+                        className="whitespace-nowrap px-3 py-3 text-[13px] text-[var(--fg-muted)]"
+                        title={formatDateFull(s.soldAt ?? s.createdAt)}
+                      >
                         {formatDate(s.soldAt ?? s.createdAt)}
                       </td>
                       <td className="px-3 py-3">
@@ -250,7 +264,10 @@ export default function SalesHistoryPage() {
                     <p className="truncate text-xs text-[var(--fg-muted)]">
                       {s.colorName} · {s.size} · ×{s.quantity}
                     </p>
-                    <p className="truncate text-xs text-[var(--fg-muted)]">
+                    <p
+                      className="truncate text-xs text-[var(--fg-muted)]"
+                      title={formatDateFull(s.soldAt ?? s.createdAt)}
+                    >
                       {formatDate(s.soldAt ?? s.createdAt)}
                       {s.soldBy ? ` · ${s.soldBy}` : ""}
                     </p>
