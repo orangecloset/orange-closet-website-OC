@@ -10,12 +10,6 @@ import { Badge, Button, Container, Header, MobileList } from "../components/ui";
 
 const PAGE_SIZE = 50;
 
-function formatDateFull(iso: string): string {
-  const d = new Date(iso);
-  if (Number.isNaN(d.getTime())) return "—";
-  return d.toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" });
-}
-
 function formatDate(iso: string): string {
   const d = new Date(iso);
   if (Number.isNaN(d.getTime())) return "—";
@@ -116,13 +110,13 @@ export default function SalesHistoryPage() {
           <table className="w-full min-w-[960px] table-fixed text-left">
             <thead>
               <tr className="border-b border-[var(--border-subtle)] text-xs text-[var(--fg-muted)]">
-                <th className="w-[12%] py-2.5 pl-6 pr-2 font-medium">Receipt #</th>
+                <th className="w-[13%] py-2.5 pl-6 pr-2 font-medium">Receipt #</th>
                 <th className="w-[27%] px-3 py-2.5 font-medium">Product</th>
-                <th className="w-[8%] px-3 py-2.5 font-medium">Variant</th>
-                <th className="w-[6%] px-3 py-2.5 text-right font-medium">Qty</th>
+                <th className="w-[9%] px-3 py-2.5 font-medium">Variant</th>
+                <th className="w-[7%] px-3 py-2.5 text-right font-medium">Qty</th>
                 <th className="w-[12%] px-3 py-2.5 text-right font-medium">Total</th>
                 <th className="w-[14%] px-3 py-2.5 font-medium">Date Sold</th>
-                <th className="w-[15%] px-3 py-2.5 font-medium">Sold By</th>
+                <th className="w-[12%] px-3 py-2.5 font-medium">Sold By</th>
                 <th className="w-[6%] px-3 py-2.5 font-medium"></th>
               </tr>
             </thead>
@@ -189,10 +183,7 @@ export default function SalesHistoryPage() {
                       <td className="whitespace-nowrap px-3 py-3 text-right text-sm tabular-nums text-[var(--fg-base)]">
                         {formatMoney(total)}
                       </td>
-                      <td
-                        className="whitespace-nowrap px-3 py-3 text-[13px] text-[var(--fg-muted)]"
-                        title={formatDateFull(s.soldAt ?? s.createdAt)}
-                      >
+                      <td className="whitespace-nowrap px-3 py-3 text-[13px] text-[var(--fg-muted)]">
                         {formatDate(s.soldAt ?? s.createdAt)}
                       </td>
                       <td className="px-3 py-3">
@@ -264,10 +255,7 @@ export default function SalesHistoryPage() {
                     <p className="truncate text-xs text-[var(--fg-muted)]">
                       {s.colorName} · {s.size} · ×{s.quantity}
                     </p>
-                    <p
-                      className="truncate text-xs text-[var(--fg-muted)]"
-                      title={formatDateFull(s.soldAt ?? s.createdAt)}
-                    >
+                    <p className="truncate text-xs text-[var(--fg-muted)]">
                       {formatDate(s.soldAt ?? s.createdAt)}
                       {s.soldBy ? ` · ${s.soldBy}` : ""}
                     </p>

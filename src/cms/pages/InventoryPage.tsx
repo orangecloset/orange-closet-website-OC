@@ -170,13 +170,13 @@ export default function InventoryPage() {
           <table className="w-full min-w-[860px] table-fixed text-left">
             <thead>
               <tr className="border-b border-[var(--border-subtle)] text-xs text-[var(--fg-muted)]">
-                <th className="w-[16%] py-2.5 pl-6 pr-3 font-medium">Date</th>
-                <th className="w-[20%] px-3 py-2.5 font-medium">Product</th>
-                <th className="w-[11%] px-3 py-2.5 font-medium">Variant</th>
-                <th className="w-[12%] px-3 py-2.5 font-medium">Change</th>
-                <th className="w-[12%] px-3 py-2.5 font-medium">Type</th>
-                <th className="w-[14%] px-3 py-2.5 font-medium">Reason / By</th>
-                <th className="w-[15%] py-2.5 pl-3 pr-6 font-medium">Receipt #</th>
+                <th className="w-[13%] py-2.5 pl-6 pr-3 font-medium">Date</th>
+                <th className="w-[21%] px-3 py-2.5 font-medium">Product</th>
+                <th className="w-[12%] px-3 py-2.5 font-medium">Variant</th>
+                <th className="w-[13%] px-3 py-2.5 font-medium">Change</th>
+                <th className="w-[13%] px-3 py-2.5 font-medium">Type</th>
+                <th className="w-[15%] px-3 py-2.5 font-medium">Reason / By</th>
+                <th className="w-[13%] py-2.5 pl-3 pr-6 font-medium">Receipt #</th>
               </tr>
             </thead>
             <tbody>
