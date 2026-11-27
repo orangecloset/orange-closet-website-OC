@@ -409,9 +409,6 @@ export function ProductFormInner({ editing }: { editing?: CmsProduct }) {
                   onChange={(e) => setItemCode(e.target.value)}
                   placeholder="e.g. oc#213889798123"
                 />
-                <p className="text-xs text-[var(--fg-muted)]">
-                  Optional. Internal use only
-                </p>
               </div>
               <div className="flex flex-col gap-2 lg:col-span-2">
                 <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">

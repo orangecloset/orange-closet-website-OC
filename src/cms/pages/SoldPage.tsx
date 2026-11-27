@@ -523,7 +523,7 @@ export default function SoldPage() {
 
             {activeVariant && (
               <div className="border-t border-[var(--border-subtle)] pt-4">
-                <Label htmlFor="sell-qty">Quantity Sold</Label>
+                <Label htmlFor="sell-qty">Quantity Sold </Label>
                 <Input
                   id="sell-qty"
                   type="number"
@@ -537,14 +537,14 @@ export default function SoldPage() {
                   className="mt-1.5 w-full sm:w-40"
                 />
                 <p className="mt-1.5 text-xs text-[var(--fg-muted)]">
-                  Current stock: {sizeStock} → After sale:{" "}
+                  Current stock: {sizeStock} → {" "}
                   {Math.max(0, sizeStock - qty)}
                 </p>
               </div>
             )}
 
             <div className="border-t border-[var(--border-subtle)] pt-4">
-              <Label htmlFor="sell-date">Date Sold</Label>
+              <Label htmlFor="sell-date">Date Sold </Label>
               <Input
                 id="sell-date"
                 type="date"
@@ -559,7 +559,7 @@ export default function SoldPage() {
             <div className="border-t border-[var(--border-subtle)] pt-4">
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div>
-                  <Label htmlFor="sell-payment">Payment Method</Label>
+                  <Label htmlFor="sell-payment">Payment Method *</Label>
                   <Select
                     id="sell-payment"
                     value={paymentMethod}
@@ -573,7 +573,7 @@ export default function SoldPage() {
                   </Select>
                 </div>
                 <div>
-                  <Label htmlFor="sell-customer-name">Customer Name (optional)</Label>
+                  <Label htmlFor="sell-customer-name">Customer Name</Label>
                   <Input
                     id="sell-customer-name"
                     value={customerName}
@@ -583,7 +583,7 @@ export default function SoldPage() {
                   />
                 </div>
                 <div>
-                  <Label htmlFor="sell-customer-phone">Contact Number (optional)</Label>
+                  <Label htmlFor="sell-customer-phone">Contact Number</Label>
                   <Input
                     id="sell-customer-phone"
                     value={customerPhone}
@@ -593,7 +593,7 @@ export default function SoldPage() {
                   />
                 </div>
                 <div>
-                  <Label htmlFor="sell-customer-email">Customer Email (optional)</Label>
+                  <Label htmlFor="sell-customer-email">Customer Email</Label>
                   <Input
                     id="sell-customer-email"
                     type="email"
@@ -604,7 +604,7 @@ export default function SoldPage() {
                   />
                 </div>
                 <div>
-                  <Label htmlFor="sell-item-code">Item Code (optional)</Label>
+                  <Label htmlFor="sell-item-code">Item Code</Label>
                   <Input
                     id="sell-item-code"
                     value={itemCode}

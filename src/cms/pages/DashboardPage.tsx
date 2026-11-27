@@ -1,69 +1,33 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ChevronDown, Loader2 } from "lucide-react";
 import { useCms } from "../store/cmsContext";
-import type { CmsProduct } from "../../data/store-types";
-import { api, type ProductStats, type SalesStats } from "../lib/api";
+import type { ProductStats, SalesStats } from "../lib/api";
+import {
+  useDashboardProductStats,
+  useDashboardRecentProducts,
+  useDashboardSalesStats,
+} from "../lib/queries";
 import { Badge, Container, Header, StatCard } from "../components/ui";
 import SalesLineChart from "../components/SalesLineChart";
 import { timeAgo } from "../lib/utils";
 
-const CACHE_TTL_MS = 60_000;
-const dashboardStatsCache = { data: null as ProductStats | null, ts: 0 };
-const dashboardRecentCache = { data: null as CmsProduct[] | null, ts: 0 };
+const EMPTY_STATS: ProductStats = {
+  total: 0,
+  active: 0,
+  draft: 0,
+  soldOut: 0,
+  addedThisWeek: 0,
+  soldOutProducts: [],
+};
 
 export default function DashboardPage() {
   const { types, recentSales } = useCms();
   const navigate = useNavigate();
 
-  const statsValid = dashboardStatsCache.data && Date.now() - dashboardStatsCache.ts < CACHE_TTL_MS;
-  const recentValid = dashboardRecentCache.data && Date.now() - dashboardRecentCache.ts < CACHE_TTL_MS;
-
-  const [stats, setStats] = useState({ total: 0, active: 0, draft: 0, soldOut: 0, addedThisWeek: 0, soldOutProducts: [] as CmsProduct[], ...(statsValid ? dashboardStatsCache.data! : {}) });
-  const [recentlyAdded, setRecentlyAdded] = useState<CmsProduct[]>(recentValid ? dashboardRecentCache.data! : []);
-  const [loadingStats, setLoadingStats] = useState(!statsValid);
-  const [loadingRecent, setLoadingRecent] = useState(!recentValid);
-  const [sales, setSales] = useState<SalesStats | null>(null);
-  const [loadingSales, setLoadingSales] = useState(true);
-  const [salesError, setSalesError] = useState("");
-  const [range, setRange] = useState<7 | 30 | 90>(30);
-  const [showAllStats, setShowAllStats] = useState(false);
-
-  useEffect(() => {
-    let cancelled = false;
-
-    if (dashboardStatsCache.data && Date.now() - dashboardStatsCache.ts < CACHE_TTL_MS) {
-      setStats((prev) => ({ ...prev, ...dashboardStatsCache.data! }));
-      setLoadingStats(false);
-    } else {
-      api
-        .getProductStats()
-        .then((s) => {
-          if (cancelled) return;
-          dashboardStatsCache.data = s;
-          dashboardStatsCache.ts = Date.now();
-          setStats((prev) => ({ ...prev, ...s }));
-        })
-        .catch((err) => console.error("[cms] failed to load product stats", err))
-        .finally(() => { if (!cancelled) setLoadingStats(false); });
-    }
-
-    if (dashboardRecentCache.data && Date.now() - dashboardRecentCache.ts < CACHE_TTL_MS) {
-      setRecentlyAdded(dashboardRecentCache.data!);
-      setLoadingRecent(false);
-    } else {
-      api
-        .listProductsPaged({ page: 1, limit: 6 })
-        .then((res) => {
-          if (cancelled) return;
-          dashboardRecentCache.data = res.data ?? [];
-          dashboardRecentCache.ts = Date.now();
-          setRecentlyAdded(res.data ?? []);
-        })
-        .catch((err) => console.error("[cms] failed to load recent products", err))
-        .finally(() => { if (!cancelled) setLoadingRecent(false); });
-    }
-
+  const statsQuery = useDashboardProductStats();
+  const recentQuery = useDashboardRecentProducts();
+  const salesParams = useMemo(() => {
     const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC";
     const today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -71,21 +35,21 @@ export default function DashboardPage() {
     from.setDate(from.getDate() - 89);
     const to = new Date(today);
     to.setDate(to.getDate() + 1);
-    api
-      .getSalesStats({ from: from.toISOString(), to: to.toISOString(), tz })
-      .then((data) => {
-        if (!cancelled) setSales(data);
-      })
-      .catch((err) => {
-        console.error("[cms] failed to load sales stats", err);
-        if (!cancelled) setSalesError("Couldn't load sales data. Refresh to try again.");
-      })
-      .finally(() => {
-        if (!cancelled) setLoadingSales(false);
-      });
-
-    return () => { cancelled = true; };
+    return { from: from.toISOString(), to: to.toISOString(), tz };
   }, []);
+  const salesQuery = useDashboardSalesStats(salesParams);
+
+  const stats = statsQuery.data ?? EMPTY_STATS;
+  const recentlyAdded = recentQuery.data?.data ?? [];
+  const loadingStats = statsQuery.isLoading;
+  const loadingRecent = recentQuery.isLoading;
+  const sales = salesQuery.data ?? null;
+  const loadingSales = salesQuery.isLoading;
+  const salesError = salesQuery.isError
+    ? "Couldn't load sales data. Refresh to try again."
+    : "";
+  const [range, setRange] = useState<7 | 30 | 90>(30);
+  const [showAllStats, setShowAllStats] = useState(false);
 
   const salesDays = useMemo(() => sales?.days ?? [], [sales]);
   const lastDay = salesDays[salesDays.length - 1];
@@ -113,8 +77,8 @@ export default function DashboardPage() {
 
       <div className="flex flex-col gap-3">
         <div
-          className={`order-2 grid grid-cols-2 gap-3 md:order-1 xl:grid-cols-4 ${
-            showAllStats ? "" : "hidden md:grid"
+          className={`order-2 grid grid-cols-2 gap-3 lg:order-1 xl:grid-cols-4 ${
+            showAllStats ? "" : "hidden lg:grid"
           }`}
         >
           <StatCard label="Total Products" value={stats.total} />
@@ -123,7 +87,7 @@ export default function DashboardPage() {
           <StatCard label="Added This Week" value={stats.addedThisWeek} />
         </div>
 
-        <div className="order-1 grid grid-cols-2 gap-3 md:order-2 xl:grid-cols-4">
+        <div className="order-1 grid grid-cols-2 gap-3 lg:order-2 xl:grid-cols-4">
           <StatCard
             label="Revenue Today"
             value={loadingSales ? "—" : formatPeso(lastDay?.revenue ?? 0)}
@@ -181,7 +145,7 @@ export default function DashboardPage() {
           type="button"
           onClick={() => setShowAllStats((value) => !value)}
           aria-expanded={showAllStats}
-          className="order-3 flex items-center justify-center gap-1.5 py-1 text-xs font-medium text-[var(--fg-muted)] transition-colors hover:text-[var(--fg-base)] md:hidden"
+          className="order-3 flex items-center justify-center gap-1.5 py-1 text-xs font-medium text-[var(--fg-muted)] transition-colors hover:text-[var(--fg-base)] lg:hidden"
         >
           {showAllStats ? "Hide product stats" : "Show product stats"}
           <ChevronDown

@@ -47,6 +47,7 @@ export function useProductSuggestions(query: string) {
 
 export function invalidateProducts() {
   void queryClient.invalidateQueries({ queryKey: productKeys.all });
+  invalidateDashboard();
 }
 
 export const inventoryKeys = {
@@ -79,4 +80,43 @@ export function useStockMovementsPaged(params: InventoryListParams) {
 
 export function invalidateInventory() {
   void queryClient.invalidateQueries({ queryKey: inventoryKeys.all });
+}
+
+export type SalesStatsParams = { from: string; to: string; tz: string };
+
+const DASHBOARD_STALE_MS = 60_000;
+
+export const dashboardKeys = {
+  all: ["dashboard"] as const,
+  productStats: ["dashboard", "product-stats"] as const,
+  recentProducts: ["dashboard", "recent-products"] as const,
+  sales: (params: SalesStatsParams) => ["dashboard", "sales", params] as const,
+};
+
+export function useDashboardProductStats() {
+  return useQuery({
+    queryKey: dashboardKeys.productStats,
+    queryFn: () => api.getProductStats(),
+    staleTime: DASHBOARD_STALE_MS,
+  });
+}
+
+export function useDashboardRecentProducts() {
+  return useQuery({
+    queryKey: dashboardKeys.recentProducts,
+    queryFn: () => api.listProductsPaged({ page: 1, limit: 6 }),
+    staleTime: DASHBOARD_STALE_MS,
+  });
+}
+
+export function useDashboardSalesStats(params: SalesStatsParams) {
+  return useQuery({
+    queryKey: dashboardKeys.sales(params),
+    queryFn: () => api.getSalesStats(params),
+    staleTime: DASHBOARD_STALE_MS,
+  });
+}
+
+export function invalidateDashboard() {
+  void queryClient.invalidateQueries({ queryKey: dashboardKeys.all });
 }
